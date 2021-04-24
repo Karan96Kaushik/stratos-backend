@@ -1,5 +1,23 @@
+const jwt = require('jsonwebtoken')
+
 const auth = (req, res, next) => {
-	next()
+	if(req.headers["x-authentication"]) {
+		jwt.verify(token, process.env.authSecret || 'authSecret', function(err, decoded) {
+			if(!err) {
+				req.user = decoded.user
+				next()
+			}
+			res.status(401).json({message:"Invalid Auth"})
+			// res.status(401).send()
+		});
+
+	} else {
+		res.status(401).json({message:"No Auth"})
+	}
 }
 
-module.exports = auth
+const generate = (data) => {
+	return jwt.sign(data, process.env.authSecret || 'authSecret', { expiresIn: 24 * 60 * 60 });
+}
+
+module.exports = {auth, generate}
