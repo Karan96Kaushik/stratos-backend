@@ -20,4 +20,8 @@ const generate = (data) => {
 	return jwt.sign(data, process.env.authSecret || 'authSecret', { expiresIn: 24 * 60 * 60 });
 }
 
-module.exports = {auth, generate}
+const decode = (token) => {
+	return jwt.verify(token, process.env.authSecret || 'authSecret');
+}
+
+module.exports = {auth, generate, decode}
