@@ -6,16 +6,22 @@ let Units = new Schema(
   {
     name: String,
     address: String,
-    payment: String,
+    // payment: String,
     isOccupied: String,
-    capacity: String,
-    primaryTenant: String,
-    tenantWhatsapp: String,
-    otherTenants:Array
+    ownerId: {
+      required:true,
+      type:mongoose.Schema.Types.ObjectId
+    },
+    rent: Number,
+    bedrooms: Number,
+    // capacity: String,
+    // primaryTenant: String,
+    // tenantWhatsapp: String,
+    // otherTenants:Array
   },
   {
     timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },
-    collection: "User"
+    collection: "Units"
   }
 );
 

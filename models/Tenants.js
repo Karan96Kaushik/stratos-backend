@@ -4,11 +4,16 @@ const Schema = mongoose.Schema;
 // Define collection and schema
 let Tenants = new Schema(
   {
-    tenantName: String,
+    firstName: String,
+    lastName: String,
+    email: String,
+    rent: Number,
     tenantWhatsapp: String,
-    isActive: Boolean,
-    // paymentAmount: Number,
-    // paymentDate: Date,
+    isActive: {type:Boolean, default:true},
+    propertyId: mongoose.Schema.Types.ObjectId,
+    ownerId: mongoose.Schema.Types.ObjectId,
+    bedrooms: Number,
+    dueDate:{type:Number, default:1},
   },
   {
     timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },

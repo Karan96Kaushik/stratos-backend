@@ -1,14 +1,16 @@
 const jwt = require('jsonwebtoken')
 
 const auth = (req, res, next) => {
-	if(req.headers["x-authentication"]) {
+	const token = req.headers["x-authentication"]
+	if(token) {
 		jwt.verify(token, process.env.authSecret || 'authSecret', function(err, decoded) {
-			if(!err) {
-				req.user = decoded.user
+			// console.log(decoded)
+			if(!err && decoded.exp*1000 > +new Date) {
+				req.user = decoded
 				next()
+			} else {
+				res.status(401).json({message:"Invalid Auth"})
 			}
-			res.status(401).json({message:"Invalid Auth"})
-			// res.status(401).send()
 		});
 
 	} else {

@@ -4,10 +4,13 @@ const Schema = mongoose.Schema;
 // Define collection and schema
 let Payments = new Schema(
   {
-    userID: String,
+    ownerId: {
+      required:true,
+      type:mongoose.Schema.Types.ObjectId
+    },
     tenantID: String,
-    paymentAmount: Number,
-    paymentDate: Date,
+    amount: Number,
+    date: Date,
   },
   {
     timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },
