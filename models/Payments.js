@@ -8,7 +8,10 @@ let Payments = new Schema(
       required:true,
       type:mongoose.Schema.Types.ObjectId
     },
-    tenantID: String,
+    tenantId: {
+      required:true,
+      type:mongoose.Schema.Types.ObjectId
+    },
     amount: Number,
     date: Date,
   },
