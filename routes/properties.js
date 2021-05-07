@@ -4,12 +4,12 @@ const {Units} = require("../models/Units");
 const {Tenants} = require("../models/Tenants");
 const {Payments} = require("../models/Payments");
 
-router.post("/properties/add", async (req, res) => {
+router.post("/api/properties/add", async (req, res) => {
 	const save = await Units.create({...req.body, ownerId: req.user.id});
 	res.send("OK")
 })
 
-router.get("/properties/", async (req, res) => {
+router.get("/api/properties/", async (req, res) => {
 	let units = Units.find({ownerId: req.user.id});
 	let tenants = Tenants.find({ownerId: req.user.id});
 	let payments = Payments.find({ownerId: req.user.id});

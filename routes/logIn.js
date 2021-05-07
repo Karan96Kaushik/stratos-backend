@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const {Users} = require("../models/Users");
 const {generate, decode} = require("../modules/auth");
 
-router.post('/login', async (req, res) => {
+router.post('/api/login', async (req, res) => {
 
 	// console.log(req.body.creds)
 	delete req.body.creds.email
@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
 
 })
 
-router.post('/forgot', async (req, res) => {
+router.post('/api/forgot', async (req, res) => {
 
 	let creds = req.body.creds
 	// console.log(req.body.creds)
@@ -55,7 +55,7 @@ router.post('/forgot', async (req, res) => {
 
 })
 
-router.get('/changepassowrd', async (req, res) => {
+router.get('/api/changepassword', async (req, res) => {
 
 	console.log(req.query.token)
 	console.log(deocde(req.query.token))

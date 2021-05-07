@@ -17,7 +17,7 @@ app.use(bodyParser.raw({limit: '5mb'}) );
 
 app.use(timings);
 
-app.get('/ping', (req, res) => {
+app.get('/api/ping', (req, res) => {
 	res.send("OK");
 })
 

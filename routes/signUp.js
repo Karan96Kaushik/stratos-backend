@@ -7,7 +7,7 @@ let crypto = require('crypto');
 /*
 * The Route GET /user is used for show the admin user.
 */
-router.post("/signup", async (req, res) => {
+router.post("/api/signup", async (req, res) => {
 	let _;
 
 	let data = await Users.findOne({email:req.body.info.email});
