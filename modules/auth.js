@@ -19,7 +19,7 @@ const auth = (req, res, next) => {
 }
 
 const generate = (data) => {
-	return jwt.sign(data, process.env.authSecret || 'authSecret', { expiresIn: 24 * 60 * 60 });
+	return jwt.sign(data, process.env.authSecret || 'authSecret', { expiresIn: 30 * 24 * 60 * 60 });
 }
 
 const decode = (token) => {

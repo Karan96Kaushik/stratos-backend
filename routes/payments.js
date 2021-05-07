@@ -16,6 +16,13 @@ router.get("/api/payments/", async (req, res) => {
 
 })
 
+router.get("/api/payments/month", async (req, res) => {
+
+	const payments = await Payments.find({ownerId: req.user.id, date: { $gte: new Date("2021-05-01") }});
+	res.json(payments)
+
+})
+
 router.get("/api/payments/tenant", async (req, res) => {
 	const payments = await Payments.find({ownerId: req.user.id, ...req.query});
 	res.json(payments)
