@@ -48,8 +48,16 @@ router.get("/api/tenants/dues", async (req, res) => {
 })
 
 router.get("/api/tenant/:id", async (req, res) => {
-	const tenants = await Tenants.findOne({ownerId: req.user.id, _id:req.params.id});
-	res.json(tenants)
+	// const tenants = await Tenants.findOne({});
+
+	let tenant = Tenants.findOne({ownerId: req.user.id, _id:req.params.id});
+	let units = Units.find({ownerId: req.user.id});
+
+	[tenant, units] = await Promise.all([tenant, units])
+
+	let unit = units.find(unit => String(unit._id) == String(tenant.propertyId))
+
+	res.json({...tenant._doc, property:unit._doc.name})
 })
 
 module.exports = router
