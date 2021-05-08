@@ -35,7 +35,7 @@ router.get("/api/properties/", async (req, res) => {
 				lastPmt = pmt.date
 		})
 
-		return {...unit._doc, lastPmt, history}
+		return {...unit._doc, lastPmt, history, isOccupied:true}
 	})
 
 	res.json(units)
