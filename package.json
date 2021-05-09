@@ -18,6 +18,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "expressjs": "^1.0.1",
+    "html-pdf-node": "^1.0.7",
     "install": "^0.13.0",
     "jsonwebtoken": "^8.5.1",
     "messagebird": "^3.6.1",

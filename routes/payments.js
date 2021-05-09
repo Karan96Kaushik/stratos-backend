@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const {Payments} = require("../models/Payments");
 
 router.post("/api/payment/add", async (req, res) => {
-	console.log(req.body, {...req.body, ownerId: req.user.id})
+	// console.log(req.body, {...req.body, ownerId: req.user.id})
 	const _ = await Payments.create({...req.body, ownerId: req.user.id});
 	res.send("OK")
 
