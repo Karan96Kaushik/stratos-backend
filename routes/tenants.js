@@ -4,6 +4,7 @@ const { payments } = require('.');
 const {Tenants} = require("../models/Tenants");
 const {Units} = require("../models/Units");
 const {Payments} = require("../models/Payments");
+const mailer = require("../modules/mailer");
 
 router.post("/api/tenants/add", async (req, res) => {
 	const _ = await Tenants.create({...req.body, ownerId: req.user.id});
@@ -58,6 +59,20 @@ router.get("/api/tenant/:id", async (req, res) => {
 	let unit = units.find(unit => String(unit._id) == String(tenant.propertyId))
 
 	res.json({...tenant._doc, property:unit._doc.name})
+})
+
+router.post("/api/tenant/reminder/", async (req, res, next) => {
+	try {
+		let tenant = Tenants.findOne({ownerId: req.user.id, _id:req.body.tenantId});
+		let units = Units.find({ownerId: req.user.id});
+		[tenant, units] = await Promise.all([tenant, units])
+		let unit = units.find(unit => String(unit._id) == String(tenant.propertyId))
+		await mailer.send(tenant.email, "reminder", {...tenant._doc, property:unit._doc.name})
+		res.send("OK")
+	}
+	catch (err) {
+		next(err)
+	}
 })
 
 module.exports = router

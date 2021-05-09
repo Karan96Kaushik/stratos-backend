@@ -8,6 +8,7 @@ let Units = new Schema(
     address: String,
     // payment: String,
     isOccupied: String,
+    propertyType: String,
     ownerId: {
       required:true,
       type:mongoose.Schema.Types.ObjectId

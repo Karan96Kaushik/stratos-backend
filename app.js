@@ -8,10 +8,15 @@ const timings = require('server-timings')
 const routes  = require('./routes');
 require('./scripts/db');
 
+function errorHandler (err, req, res, next) {
+	res.status(500)
+	res.render('error', { error: err })
+}
+
+  
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(bodyParser.raw({limit: '5mb'}) );
-
 
 // app.use(session({ secret: "cats" }));
 
@@ -35,13 +40,14 @@ app.use(routes.payments)
 
 /*****************  ***********************/
 
+const handleErrors = (err, req, res, next) => {
+	return res.status(500).json({
+		status: 'error',
+		message: err.message
+	});
+}
 
-app.use(function(req, res, next) {
-		let err = new Error('Not Found')
-		err.status = 404
-		next(err)
-})
-
+app.use(handleErrors);
 // module.exports = app
 
 app.listen(7878)
