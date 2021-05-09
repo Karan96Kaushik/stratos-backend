@@ -36,4 +36,37 @@ const send = (to, type, data) => (new Promise((resolve, reject) => {
     });
 }))
 
-module.exports = {send}
+const sendPdf = (to, type, data) => (new Promise((resolve, reject) => {
+
+    if(!templates[type])
+        throw new Error("Invalid mail template")
+    
+    templates[type](data)
+        .then(([ subject, html, pdfBuffer ]) => {
+
+            const mailOptions1 = {
+                from: 'rentikamailer@gmail.com', // sender address
+                to: to,
+                subject: subject,
+                html: html,
+                attachments: [
+                    {
+                        filename: 'RentInvoice.pdf',
+                        content: pdfBuffer
+                    }
+                ]
+            };
+
+            transporter.sendMail(mailOptions1, function (err, info) {
+                if (err) {
+                   reject(err)
+                } else {
+                    resolve()
+                }
+
+            });
+            
+        })
+}))
+
+module.exports = { send, sendPdf }

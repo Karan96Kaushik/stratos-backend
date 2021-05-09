@@ -67,7 +67,7 @@ router.post("/api/tenant/reminder/", async (req, res, next) => {
 		let units = Units.find({ownerId: req.user.id});
 		[tenant, units] = await Promise.all([tenant, units])
 		let unit = units.find(unit => String(unit._id) == String(tenant.propertyId))
-		await mailer.send(tenant.email, "reminder", {...tenant._doc, property:unit._doc.name})
+		await mailer.sendPdf(tenant.email, "invoice", {...tenant._doc, property:unit._doc.name})
 		res.send("OK")
 	}
 	catch (err) {
