@@ -4,7 +4,7 @@ var templates = require('../viewTemplates')
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'rentigoamailer@gmail.com',
+        user: 'rentikamailer@gmail.com',
         pass: 'karan1996'
     }
 });
@@ -17,7 +17,7 @@ const send = (to, type, data) => (new Promise((resolve, reject) => {
     const [subject, html] = templates[type](data)
 
     const mailOptions1 = {
-        from: 'kiraamailer@gmail.com', // sender address
+        from: 'rentikamailer@gmail.com', // sender address
         to: to,
         subject: subject,
         html: html
