@@ -1,5 +1,5 @@
 const invoiceHtml = (data) => {
-	
+	const today = (new Date)
 	return `
 
 		<div style="padding: 8px 0;
@@ -14,22 +14,22 @@ const invoiceHtml = (data) => {
 		<table style="width: 100%; border-collapse: collapse;" border="0">
 		   <tbody>
 		      <tr>
-		         <td style="width: 33.3333%;"><strong>Rentika</strong></td>
+		         <td style="width: 33.3333%;"><strong>${data.owner.buildingName}</strong></td>
 		         <td style="width: 33.3333%;">&nbsp;</td>
 		         <td style="width: 33.3333%;">&nbsp;</td>
 		      </tr>
 		      <tr>
-		         <td style="width: 33.3333%;">Street Address, City</td>
+		         <td style="width: 33.3333%;">${data.owner.userName}</td>
 		         <td style="width: 33.3333%;">&nbsp;</td>
-		         <td style="width: 33.3333%;"><strong>Date:</strong> 10 May 2021</td>
+		         <td style="width: 33.3333%;"><strong>Date:</strong> ${today.toISOString().split("T")[0]}</td>
 		      </tr>
 		      <tr>
-		         <td style="width: 33.3333%;">Kenya</td>
+		         <td style="width: 33.3333%;">${data.owner.email}</td>
 		         <td style="width: 33.3333%;">&nbsp;</td>
 		         <td style="width: 33.3333%;"><strong>Invoice No.</strong> INV1212323</td>
 		      </tr>
 		      <tr>
-		         <td style="width: 33.3333%;">rentikamailer@gmail.com</td>
+		         <td style="width: 33.3333%;">${data.owner.phone}</td>
 		         <td style="width: 33.3333%;">&nbsp;</td>
 		         <td style="width: 33.3333%;">&nbsp;</td>
 		      </tr>
@@ -118,8 +118,6 @@ const invoiceHtml = (data) => {
 		   border-top-style: solid;
 		   border-image: linear-gradient(139deg, #fb8817, #ff4b01, #c12127, #e02aff) 3;">
 		</div>
-
-
 	`
 }
 

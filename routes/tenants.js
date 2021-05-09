@@ -4,6 +4,7 @@ const { payments } = require('.');
 const {Tenants} = require("../models/Tenants");
 const {Units} = require("../models/Units");
 const {Payments} = require("../models/Payments");
+const {Users} = require('../models/Users');
 const mailer = require("../modules/mailer");
 
 router.post("/api/tenants/add", async (req, res) => {
@@ -65,9 +66,10 @@ router.post("/api/tenant/reminder/", async (req, res, next) => {
 	try {
 		let tenant = Tenants.findOne({ownerId: req.user.id, _id:req.body.tenantId});
 		let units = Units.find({ownerId: req.user.id});
-		[tenant, units] = await Promise.all([tenant, units])
+		let owner = Users.findOne({_id: req.user.id});
+		[tenant, units, owner] = await Promise.all([tenant, units, owner])
 		let unit = units.find(unit => String(unit._id) == String(tenant.propertyId))
-		await mailer.sendPdf(tenant.email, "invoice", {...tenant._doc, property:unit._doc.name})
+		await mailer.sendPdf(tenant.email, "invoice", {...tenant._doc, property:unit._doc.name, owner})
 		res.send("OK")
 	}
 	catch (err) {

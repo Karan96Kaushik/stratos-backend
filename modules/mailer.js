@@ -42,16 +42,16 @@ const sendPdf = (to, type, data) => (new Promise((resolve, reject) => {
         throw new Error("Invalid mail template")
     
     templates[type](data)
-        .then(([ subject, html, pdfBuffer ]) => {
+        .then(([ subject, html, pdfBuffer, pdfName ]) => {
 
             const mailOptions1 = {
-                from: 'rentikamailer@gmail.com', // sender address
+                from: 'Rentika Team<rentikamailer@gmail.com>', // sender address
                 to: to,
                 subject: subject,
                 html: html,
                 attachments: [
                     {
-                        filename: 'RentInvoice.pdf',
+                        filename: pdfName,
                         content: pdfBuffer
                     }
                 ]

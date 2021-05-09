@@ -1,10 +1,20 @@
 const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const {Payments} = require("../models/Payments");
+const {Users} = require('../models/Users');
+const {Tenants} = require('../models/Tenants');
+const {Units} = require('../models/Units');
+const mailer = require("../modules/mailer");
 
 router.post("/api/payment/add", async (req, res) => {
-	// console.log(req.body, {...req.body, ownerId: req.user.id})
-	const _ = await Payments.create({...req.body, ownerId: req.user.id});
+	// console.log(req.body)
+	const payment = await Payments.create({...req.body, ownerId: req.user.id});
+	const owner = await Users.findOne({_id: req.user.id});
+	const tenant = await Tenants.findOne({_id: req.body.tenantId});
+	const unit = await Units.findOne({_id: tenant.propertyId});
+	// console.log({...tenant._doc, ...unit._doc, owner})
+	await mailer.sendPdf(tenant.email, "receipt", {...tenant._doc, ...unit._doc, ...req.body, owner, payment})
+
 	res.send("OK")
 
 })
