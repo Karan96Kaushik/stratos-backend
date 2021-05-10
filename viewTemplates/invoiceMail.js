@@ -10,13 +10,8 @@ const invoiceMail = (data) => new Promise((resolve, reject) => {
 
     const pdfContent = invoiceHtml(data)
 
-    // const options = { format: 'A4' };
-    // const file = { content: pdfContent };
-
-    // let pdfBuffer = await html_to_pdf.generatePdf(file, options)
     const options = { 
         "format": 'A3',
-        // "height": '13.5in',
         "border": {
             "left": "0.5cm",
             "right": "0.5cm"

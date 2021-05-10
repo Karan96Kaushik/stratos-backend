@@ -9,6 +9,7 @@ let Tenants = new Schema(
     email: String,
     rent: Number,
     tenantWhatsapp: String,
+    idName: String,
     isActive: {type:Boolean, default:true},
     propertyId: mongoose.Schema.Types.ObjectId,
     ownerId: mongoose.Schema.Types.ObjectId,
