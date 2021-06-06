@@ -2,20 +2,16 @@ const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const passport = require("passport");
 const crypto = require("crypto");
-const {Users} = require("../models/Users");
+const {Members} = require("../models/Members");
 const {generate, decode} = require("../modules/auth");
 
 router.post('/api/login', async (req, res) => {
 
-	// console.log(req.body.creds)
-	delete req.body.creds.email
 	req.body.creds.password = crypto.createHmac('sha256', "someSalt")
     	.update(req.body.creds.password)
 		.digest('hex')
-		
-	let user = await Users.findOne(req.body.creds)
-
-	// console.log(user)
+	
+	let user = await Members.findOne(req.body.creds)
 
 	if(user) {
 		let token = generate({id:user._id})

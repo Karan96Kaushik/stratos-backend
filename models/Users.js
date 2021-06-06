@@ -6,11 +6,7 @@ let Users = new Schema(
     userName: String,
     isActive: Boolean,
     password: String,
-    email: String,
-    phone: String,
-    buildingName: String,
-    agentName: String,
-    units: Array,
+    email: String
   },
   {
     timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },

@@ -34,9 +34,10 @@ app.use(routes.signUp)
 /**************** Auth ************************/
 
 app.use(require('./modules/auth').auth)
-app.use(routes.properties)
-app.use(routes.tenants)
-app.use(routes.payments)
+// app.use(routes.properties)
+app.use(routes.clients)
+app.use(routes.members)
+// app.use(routes.payments)
 
 /*****************  ***********************/
 
