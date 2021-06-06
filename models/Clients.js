@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 // Define collection and schema
 let Clients = new Schema(
   {
+    name: String,
     type: String,
     clientType: String,
     phone: String,

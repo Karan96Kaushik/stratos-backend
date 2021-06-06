@@ -6,4 +6,5 @@ module.exports = {
 	// properties: require('./properties'),
 	clients: require('./clients'),
 	members: require('./members'),
+	tasks: require('./tasks'),
 }
