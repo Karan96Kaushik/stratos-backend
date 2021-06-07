@@ -4,11 +4,40 @@ const Schema = mongoose.Schema;
 // Define collection and schema
 let Clients = new Schema(
   {
-    name: String,
-    type: String,
-    clientType: String,
-    phone: String,
-    plotNum: String,
+    clientType:String,
+
+    name:String,
+    promoter:String,
+    location:String,
+    plotNum:String,
+    plotArea:String,
+    workStatus:String,
+    userID:String,
+    password:String,
+    certNum:String,
+    certDate:String,
+    mobile:String,
+    office:String,
+    email:String,
+    ca:String,
+    engineer:String,
+    architect:String,
+    reference:String,
+    remarks:String,
+    completionDate:String,
+
+    type:String,
+    dueDate:String,
+    
+    relatedProject:String,
+    reraNum:String,
+
+    totalUnits:Number,
+    bookedUnits:Number,
+
+    extension:Boolean,
+    proBono:Boolean,
+
     addedBy: {
       required:true,
       type:mongoose.Schema.Types.ObjectId

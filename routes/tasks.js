@@ -14,9 +14,9 @@ router.post("/api/tasks/add", async (req, res) => {
 })
 
 router.get("/api/tasks/", async (req, res) => {
-	console.log(req.query)
+	// console.log(req.query)
 	const tasks = await Tasks.find({...req.query});
-	console.log(tasks)
+	// console.log(tasks)
 	res.json(tasks)
 })
 

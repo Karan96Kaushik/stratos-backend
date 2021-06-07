@@ -8,10 +8,14 @@ router.post("/api/clients/add", async (req, res) => {
 })
 
 router.get("/api/clients/", async (req, res) => {
-	console.log(req.query)
-	const clients = await Clients.find({...req.query, addedBy: req.user.id});
-	console.log(clients)
-	res.json(clients)
+	try{
+		console.log(req.query)
+		const clients = await Clients.find({...req.query, addedBy: req.user.id});
+		console.log(clients)
+		res.json(clients)
+	} catch (err) {
+		res.status(500).send(err.message)
+	}
 })
 
 module.exports = router
