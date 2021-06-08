@@ -9,6 +9,8 @@ let Tasks = new Schema(
       type:mongoose.Schema.Types.ObjectId
     },
 
+    clientName:String,
+
     serviceType:String,
     remarks:String,
 

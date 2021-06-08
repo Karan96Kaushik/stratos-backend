@@ -20,4 +20,11 @@ router.get("/api/tasks/", async (req, res) => {
 	res.json(tasks)
 })
 
+router.get("/api/tasks/search", async (req, res) => {
+	console.log(req.query)
+	const tasks = await Tasks.find({...req.query});
+	// console.log(tasks)
+	res.json(tasks)
+})
+
 module.exports = router
