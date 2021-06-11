@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const {encodeAuth, decodeAuth} = require("./authCodec")
 
 const auth = (req, res, next) => {
 	const token = req.headers["x-authentication"]
@@ -7,6 +8,10 @@ const auth = (req, res, next) => {
 			// console.log(decoded)
 			if(!err && decoded.exp*1000 > +new Date) {
 				req.user = decoded
+				req.permissions = decodeAuth({
+					page: decoded.perm[0],
+					service: decoded.perm[1],
+				})
 				next()
 			} else {
 				res.status(401).json({message:"Invalid Auth"})

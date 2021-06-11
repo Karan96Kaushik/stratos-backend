@@ -7,4 +7,5 @@ module.exports = {
 	clients: require('./clients'),
 	members: require('./members'),
 	tasks: require('./tasks'),
+	leads: require('./leads'),
 }

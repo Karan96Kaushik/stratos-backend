@@ -4,25 +4,37 @@ const passport = require("passport");
 const crypto = require("crypto");
 const {Members} = require("../models/Members");
 const {generate, decode} = require("../modules/auth");
+const {encodeAuth, decodeAuth} = require("../modules/authCodec")
 
 router.post('/api/login', async (req, res) => {
+	try{
+		req.body.creds.password = crypto.createHmac('sha256', "someSalt")
+	    	.update(req.body.creds.password)
+			.digest('hex')
+		
+		let user = await Members.findOne(req.body.creds)
 
-	req.body.creds.password = crypto.createHmac('sha256', "someSalt")
-    	.update(req.body.creds.password)
-		.digest('hex')
-	
-	let user = await Members.findOne(req.body.creds)
+		if(user) {
+			let token = generate({
+				id:user._id, 
+				perm:[
+					user.permissions.page, 
+					user.permissions.service
+				]})
 
-	if(user) {
-		let token = generate({id:user._id})
+			delete user.password
+			delete user.createdTime
+			delete user.updateTime
 
-		delete user.password
-		delete user.createdTime
-		delete user.updateTime
+			let permissions = decodeAuth(user.permissions)
 
-		res.send({user, token})
-	} else {
-		res.status(401).send("Email or password Incorrect")
+			user._doc.permissions = permissions
+			res.send({user, token})
+		} else {
+			res.status(401).send("Email or password Incorrect")
+		}
+	} catch (err) {
+			res.status(500).send(err.message)
 	}
 
 

@@ -4,7 +4,10 @@ const Schema = mongoose.Schema;
 // Define collection and schema
 let Tasks = new Schema(
   {
-    clientID:{
+    taskID:String,
+    clientName:String,
+    
+    _clientID:{
       required:true,
       type:mongoose.Schema.Types.ObjectId
     },
@@ -21,6 +24,12 @@ let Tasks = new Schema(
     receiptFormat:Boolean,
     titleCertificate:Boolean,
     agreementDraft:Boolean,
+    
+    remarks:String,
+    status:String,
+    action:String,
+    notes:String,
+    deadline:String,
 
     addedBy: {
       required:true,
@@ -29,7 +38,8 @@ let Tasks = new Schema(
   },
   {
     timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },
-    collection: "Tasks"
+    collection: "Tasks",
+    strict:false
   }
 );
 

@@ -4,6 +4,8 @@ const Schema = mongoose.Schema;
 // Define collection and schema
 let Members = new Schema(
   {
+    memberID:String,
+
     userName:String,
     email:String,
     phone:String,
@@ -13,7 +15,17 @@ let Members = new Schema(
     emergencyContact:String,
     bloodGroup:String,
     startDate:String,
+    endDate:String,
+
     password:String,
+
+    permissions:{
+      page:Number,
+      service:Number,
+    },
+
+
+
     addedBy: {
       required:true,
       type:mongoose.Schema.Types.ObjectId
