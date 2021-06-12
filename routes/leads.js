@@ -19,10 +19,29 @@ router.post("/api/leads/add", async (req, res) => {
 router.get("/api/leads/search", async (req, res) => {
 	try{
 		let others = {}
+		const rowsPerPage = parseInt(req.query.rowsPerPage)
+		const page = parseInt(req.query.page)-1
+
+		console.log(page, rowsPerPage)
+
+
 		if(req.query.text)
 			others[req.query.type] = req.query.text;
-		
-		const leads = await Leads.find({ leadType: req.query.leadType, ...others});
+
+		const leads = await Leads.find({ leadType: req.query.leadType, ...others}).limit(rowsPerPage).skip(rowsPerPage * page);
+		// console.log(clients)
+		res.json(leads)
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.get("/api/leads/", async (req, res) => {
+	try{
+		const _id = req.query._id
+		delete req.query._id
+		const leads = await Leads.findOne({_id});
 		// console.log(clients)
 		res.json(leads)
 	} catch (err) {
