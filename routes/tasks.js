@@ -34,12 +34,17 @@ router.get("/api/tasks/", async (req, res) => {
 })
 
 router.get("/api/tasks/search", async (req, res) => {
+<<<<<<< HEAD
 	// console.log(req.query)
+=======
+	console.log(req.query)
+>>>>>>> 2eb8efd20e92cff5c7deacf90b41d6e676c96e80
 	const tasks = await Tasks.find({...req.query});
 	// console.log(tasks)
 	res.json(tasks)
 })
 
+<<<<<<< HEAD
 router.post("/api/tasks/update", async (req, res) => {
 	try {
 		let _id = req.body._id
@@ -66,4 +71,6 @@ router.post("/api/tasks/update", async (req, res) => {
 	}
 })
 
+=======
+>>>>>>> 2eb8efd20e92cff5c7deacf90b41d6e676c96e80
 module.exports = router

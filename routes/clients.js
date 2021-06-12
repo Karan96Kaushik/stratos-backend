@@ -24,4 +24,15 @@ router.get("/api/clients/search", async (req, res) => {
 	}
 })
 
+router.get("/api/clients/search", async (req, res) => {
+	try{
+		console.log(req.query)
+		const clients = await Clients.find({addedBy: req.user.id});
+		console.log(clients)
+		res.json(clients)
+	} catch (err) {
+		res.status(500).send(err.message)
+	}
+})
+
 module.exports = router
