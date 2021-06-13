@@ -12,15 +12,31 @@ let Leads = new Schema(
     name:String,
     mobile: String,
     email: String,
+    office: String,
+
     projectName: String,
     reraNum: String,
     location: String,
-    plotArea: String,
     serviceType: String,
+
+    breifService: String,
+    breifCase: String,
+
+    plotArea: String,
+    plotNum: String,
+    certNum: String,
 
     type: String,
     category: String,
     service: String,
+    status: String,
+
+    leadRating: Number,
+    leadSource: String,
+    leadResponsibility: String,
+    followUpDate: String,
+    remarks: String,
+    closureStatus: String,
 
     quoteAmount: Number,
 
