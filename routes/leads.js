@@ -4,7 +4,22 @@ const {Leads} = require("../models/Leads");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
 
-router.post("/api/leads/add", async (req, res) => {
+const checkLeadR = (req, res, next) => {
+	if(req.permissions.page.includes("leadsr"))
+		next()
+	else
+		res.status(401).send("Unauthorized")
+}
+
+const checkLeadW = (req, res, next) => {
+	// console.log(req.permissions)
+	if(req.permissions.page.includes("leadsw"))
+		next()
+	else
+		res.status(401).send("Unauthorized")
+}
+
+router.post("/api/leads/add", checkLeadW, async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
 	let _ = await Leads.create({
 		...req.body,
@@ -28,6 +43,11 @@ router.get("/api/leads/search", async (req, res) => {
 		if(req.query.text)
 			others[req.query.type] = req.query.text;
 
+		console.log(req.permissions.page)
+
+		if(!req.permissions.page.includes("leadsr"))
+			others.addedBy = req.user.id
+
 		const leads = await Leads.find({ leadType: req.query.leadType, ...others}).limit(rowsPerPage).skip(rowsPerPage * page);
 		// console.log(clients)
 		res.json(leads)
@@ -50,7 +70,7 @@ router.get("/api/leads/", async (req, res) => {
 	}
 })
 
-router.post("/api/leads/update", async (req, res) => {
+router.post("/api/leads/update", checkLeadW, async (req, res) => {
 	try {
 		let _id = req.body._id
 
