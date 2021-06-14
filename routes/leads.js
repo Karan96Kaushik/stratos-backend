@@ -76,7 +76,7 @@ router.post("/api/leads/update", checkLeadW, async (req, res) => {
 
 		delete req.body._id
 		delete req.body.leadID
-		delete req.body.teadType
+		delete req.body.leadType
 		delete req.body.memberID
 		delete req.body.addedBy
 
