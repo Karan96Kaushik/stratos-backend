@@ -15,14 +15,29 @@ router.post("/api/clients/add", async (req, res) => {
 
 router.get("/api/clients/search", async (req, res) => {
 	try{
-		// console.log(req.query)
-		const clients = await Clients.find({...req.query, addedBy: req.user.id});
-		// console.log(clients)
-		res.json(clients)
+		let others = {}
+		const rowsPerPage = parseInt(req.query.rowsPerPage)
+		const page = parseInt(req.query.page)-1
+
+		if(req.query.text)
+			others[req.query.type] = req.query.text;
+
+		// console.log(req.permissions.page)
+
+		// if(!req.permissions.page.includes("leadsr"))
+		// 	others.addedBy = req.user.id
+
+		const results = await Clients.find({ clientType: req.query.clientType, ...others})
+								.limit(rowsPerPage)
+								.skip(rowsPerPage * page);
+
+		res.json(results)
 	} catch (err) {
+		console.log(err)
 		res.status(500).send(err.message)
 	}
 })
+
 
 router.get("/api/clients/search", async (req, res) => {
 	try{

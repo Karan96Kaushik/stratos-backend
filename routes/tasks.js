@@ -5,8 +5,8 @@ const {getID, updateID} = require("../models/Utils");
 // const crypto = require("crypto");
 
 const serviceCodes = {
-	agentRegistration: "AR",
-	projectRegistration: "PR"
+	"Agent Registration": "AR",
+	"Project Registration": "PR",
 }
 
 router.post("/api/tasks/add", async (req, res) => {
@@ -34,10 +34,23 @@ router.get("/api/tasks/", async (req, res) => {
 })
 
 router.get("/api/tasks/search", async (req, res) => {
-	// console.log(req.query)
-	const tasks = await Tasks.find({...req.query});
-	// console.log(tasks)
-	res.json(tasks)
+	let others = {}
+	const rowsPerPage = parseInt(req.query.rowsPerPage)
+	const page = parseInt(req.query.page)-1
+
+	if(req.query.text)
+		others[req.query.type] = req.query.text;
+
+	// console.log(req.permissions.page)
+
+	// if(!req.permissions.page.includes("leadsr"))
+	// 	others.addedBy = req.user.id
+
+	const results = await Tasks.find({ serviceType: req.query.serviceType, ...others})
+									.limit(rowsPerPage)
+									.skip(rowsPerPage * page);
+	// console.log(clients)
+	res.json(results)
 })
 
 router.post("/api/tasks/update", async (req, res) => {
