@@ -37,13 +37,13 @@ router.get("/api/leads/search", async (req, res) => {
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
 		const page = parseInt(req.query.page)-1
 
-		console.log(page, rowsPerPage)
+		// console.log(page, rowsPerPage)
 
 
 		if(req.query.text)
 			others[req.query.type] = req.query.text;
 
-		console.log(req.permissions.page)
+		// console.log(req.permissions.page)
 
 		if(!req.permissions.page.includes("leadsr"))
 			others.addedBy = req.user.id

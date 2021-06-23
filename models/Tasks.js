@@ -5,7 +5,6 @@ const Schema = mongoose.Schema;
 let Tasks = new Schema(
   {
     taskID:String,
-    clientName:String,
     
     _clientID:{
       required:true,

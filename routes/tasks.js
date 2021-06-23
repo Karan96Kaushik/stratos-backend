@@ -7,6 +7,23 @@ const {getID, updateID} = require("../models/Utils");
 const serviceCodes = {
 	"Agent Registration": "AR",
 	"Project Registration": "PR",
+	"Extension": "EX",
+	"Correction": "CO",
+	"Form 5 - Audit": "F5",
+	"Form 2A": "FA",
+	"Updation": "UP",
+	"Form 1": "F1",
+	"Form 2": "F2",
+	"Form 3": "F3",
+	"Others - Tech": "OT",
+	"Title Certificate": "TC",
+	"Agreement for Sale Draft": "AF",
+	"Litigation": "LI",
+	"Hourly Package": "RC",
+	"Legal Notice": "LN",
+	"Registration": "RG",
+	"Drafting of Documents": "DD",
+	"Others - Legal": "OL",
 }
 
 router.post("/api/tasks/add", async (req, res) => {

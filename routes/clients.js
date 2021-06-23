@@ -15,7 +15,6 @@ router.post("/api/clients/add", async (req, res) => {
 
 router.get("/api/clients/search", async (req, res) => {
 	try{
-		console.log(req.query)
 
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage ?? 10)
@@ -29,9 +28,11 @@ router.get("/api/clients/search", async (req, res) => {
 			others.clientType = req.query.clientType;
 
 		// console.log(req.permissions.page)
+		console.log(page, rowsPerPage)
 
 		// if(!req.permissions.page.includes("leadsr"))
 		// 	others.addedBy = req.user.id
+
 		console.log(others)
 		const results = await Clients.find({...others})
 								.limit(rowsPerPage)

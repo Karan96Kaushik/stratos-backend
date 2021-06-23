@@ -18,7 +18,7 @@ router.post("/api/members/add", async (req, res) => {
 			.update(req.body.password)
 			.digest('hex')
 
-		let permissions = [...req.body.servicePermissions, ...req.body.pagePermissions]
+		let permissions = [...(req.body.servicePermissions ?? []), ...(req.body.pagePermissions ?? [])]
 		permissions = permissions.map(val => val.toLowerCase())
 		permissions = permissions.map(val => val.replace(" ", ""))
 		permissions = encodeAuth(permissions)
