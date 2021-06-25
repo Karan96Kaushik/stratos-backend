@@ -3,19 +3,40 @@
 */
 const pagePermissions = [
 	"-",			// "-" to preserve if there is a leading 0 ( eg. 01101 == 1101 == 13)
-	"leadsr",
-	"leadsw",
-	"clientsr",
-	"clientsw",
-	"membersr",
-	"membersw",
+	"Leads R",
+	"Leads W",
+	"Clients R",
+	"Clients W",
+	"Members R",
+	"Members W",
+	"Quotations R",
+	"Quotations W",
+	"Invoices R",
+	"Invoices W",
 ]
 
 let servicePermissions = [
 	"-",
-	"agentregistration",
-	"projectregistration",
-]
+	"Agent Registration",
+	"Project Registration",
+	"Extension",
+	"Correction",
+	"Form 5 - Audit",
+	"Form 2A",
+	"Updation",
+	"Form 1",
+	"Form 2",
+	"Form 3",
+	"Others - Tech",
+	"Title Certificate",
+	"Agreement for Sale Draft",
+	"Litigation",
+	"Hourly Package",
+	"Legal Notice",
+	"Registration",
+	"Drafting of Documents",
+	"Others - Legal"
+ ]
 
 /**
 	CAUTION: Add new permissions at the end of the array

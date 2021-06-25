@@ -19,8 +19,8 @@ router.post("/api/members/add", async (req, res) => {
 			.digest('hex')
 
 		let permissions = [...(req.body.servicePermissions ?? []), ...(req.body.pagePermissions ?? [])]
-		permissions = permissions.map(val => val.toLowerCase())
-		permissions = permissions.map(val => val.replace(" ", ""))
+		// permissions = permissions.map(val => val.toLowerCase())
+		// permissions = permissions.map(val => val.replace(" ", ""))
 		permissions = encodeAuth(permissions)
 
 		_ = await Members.create({
@@ -39,7 +39,6 @@ router.post("/api/members/add", async (req, res) => {
 
 router.get("/api/members/", async (req, res) => {
 	try {
-		console.time('Members')
 		let members = await Members.find({...req.query});
 
 		members = members.map((val) => {
@@ -49,7 +48,6 @@ router.get("/api/members/", async (req, res) => {
 			val._doc.permissions = decodeAuth(val.permissions)
 			return val._doc
 		})
-		console.timeEnd('Members')
 
 		res.json(members)
 
@@ -70,8 +68,8 @@ router.post("/api/members/update", async (req, res) => {
 		delete req.body.memberID
 
 		let permissions = [...req.body.servicePermissions, ...req.body.pagePermissions]
-		permissions = permissions.map(val => val.toLowerCase())
-		permissions = permissions.map(val => val.replace(" ", ""))
+		// permissions = permissions.map(val => val.toLowerCase())
+		// permissions = permissions.map(val => val.replace(" ", ""))
 		permissions = encodeAuth(permissions)
 
 		let _ = await Members.updateOne(
