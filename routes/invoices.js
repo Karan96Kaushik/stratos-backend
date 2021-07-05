@@ -44,7 +44,11 @@ router.get("/api/invoices/search", async (req, res) => {
 		if(!req.permissions.page.includes("Invoices R"))
 			others.addedBy = req.user.id
         // console.log(others)
-		const invoices = await Invoices.find({...others}).limit(rowsPerPage).skip(rowsPerPage * page);
+		const invoices = await Invoices.find({...others})
+			.limit(rowsPerPage)
+			.skip(rowsPerPage * page)
+			.sort({createdTime:-1});
+
 		res.json(invoices)
 	} catch (err) {
 		console.log(err)

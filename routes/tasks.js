@@ -63,9 +63,13 @@ router.get("/api/tasks/search", async (req, res) => {
 	// if(!req.permissions.page.includes("leadsr"))
 	// 	others.addedBy = req.user.id
 
-	const results = await Tasks.find({ serviceType: req.query.serviceType, ...others})
-									.limit(rowsPerPage)
-									.skip(rowsPerPage * page);
+	let results = await Tasks.find({ serviceType: req.query.serviceType, ...others})
+			.limit(rowsPerPage)
+			.skip(rowsPerPage * page)
+			.sort({createdTime:-1});
+
+	results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
+
 	// console.log(clients)
 	res.json(results)
 })

@@ -21,17 +21,30 @@ const checkLeadW = (req, res, next) => {
 
 router.post("/api/leads/add", checkLeadW, async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
+	let leadIdPrefix = ""
+
+	switch (req.body.leadType) {
+		case ("developer"):
+			leadIdPrefix = "LD"
+			break;
+		case ("litigation"):
+			leadIdPrefix = "LL"
+			break;
+		case ("agent"):
+			leadIdPrefix = "LA"
+			break;
+	}
 	let _ = await Leads.create({
 		...req.body,
 		memberID:memberInfo.memberID,
-		leadID:"LD" + await getID("lead"),
+		leadID:leadIdPrefix + await getID(leadIdPrefix),
 		addedBy: req.user.id
 	});
 	_ = await updateID("lead")
 	res.send("OK")
 })
 
-router.get("/api/leads/search", async (req, res) => {
+router.get("/api/leads/search", checkLeadR, async (req, res) => {
 	try{
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
@@ -48,7 +61,12 @@ router.get("/api/leads/search", async (req, res) => {
 		if(!req.permissions.page.includes("Leads R"))
 			others.addedBy = req.user.id
 
-		const leads = await Leads.find({ leadType: req.query.leadType, ...others}).limit(rowsPerPage).skip(rowsPerPage * page);
+		let leads = await Leads.find({ leadType: req.query.leadType, ...others})
+			.limit(rowsPerPage)
+			.skip(rowsPerPage * page)
+			.sort({createdTime:-1});
+
+		leads = leads.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
 		// console.log(clients)
 		res.json(leads)
 	} catch (err) {
@@ -57,7 +75,7 @@ router.get("/api/leads/search", async (req, res) => {
 	}
 })
 
-router.get("/api/leads/", async (req, res) => {
+router.get("/api/leads/", checkLeadR, async (req, res) => {
 	try{
 		const _id = req.query._id
 		delete req.query._id

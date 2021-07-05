@@ -25,7 +25,7 @@ router.post("/api/quotations/add", checkQuotationW, async (req, res) => {
 	let _ = await Quotations.create({
 		...req.body,
 		memberID:memberInfo.memberID,
-		quotationID:"QT" + await getID("quotation"),
+		quotationID:"REQ" + await getID("quotation"),
 		addedBy: req.user.id
 	});
 	_ = await updateID("quotation")
@@ -44,7 +44,13 @@ router.get("/api/quotations/search", async (req, res) => {
 		if(!req.permissions.page.includes("Quotations R"))
 			others.addedBy = req.user.id
         // console.log(others)
-		const quotations = await Quotations.find({...others}).limit(rowsPerPage).skip(rowsPerPage * page);
+		let quotations = await Quotations.find({...others})
+			.limit(rowsPerPage)
+			.skip(rowsPerPage * page)
+			.sort({createdTime:-1});
+
+		quotations = quotations.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
+
 		res.json(quotations)
 	} catch (err) {
 		console.log(err)

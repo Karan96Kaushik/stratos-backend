@@ -20,23 +20,36 @@ router.get("/api/clients/search", async (req, res) => {
 		const rowsPerPage = parseInt(req.query.rowsPerPage ?? 10)
 		const page = parseInt(req.query.page ?? 1)-1
 
-		if(req.query.text)
-			others[req.query.type] = req.query.text;
-		if(req.query.clientType)
-			others.clientType = req.query.clientType;
-		if(req.query.clientType)
-			others.clientType = req.query.clientType;
+		// if(req.query.text)
+		// 	others[req.query.type] = req.query.text;
+		// if(req.query.clientType)
+		// 	others.clientType = req.query.clientType;
+		// if(req.query.clientType)
+		// 	others.clientType = req.query.clientType;
 
-		// console.log(req.permissions.page)
-		console.log(page, rowsPerPage)
+		// console.log(page, rowsPerPage)
 
-		// if(!req.permissions.page.includes("leadsr"))
-		// 	others.addedBy = req.user.id
-
-		console.log(others)
-		const results = await Clients.find({...others})
-								.limit(rowsPerPage)
-								.skip(rowsPerPage * page);
+		if(!req.query.clientType) {
+			res.send()
+			return
+		}
+		
+		const results = await Clients.find({
+			$and:[
+				{
+					$or:[
+						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					]
+				}, 
+				{
+					clientType: req.query.clientType
+				}
+			],
+		})
+			.limit(rowsPerPage)
+			.skip(rowsPerPage * page)
+			.sort({createdTime:-1});
 
 		res.json(results)
 	} catch (err) {
