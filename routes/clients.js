@@ -27,30 +27,35 @@ router.get("/api/clients/search", async (req, res) => {
 		// if(req.query.clientType)
 		// 	others.clientType = req.query.clientType;
 
-		// console.log(page, rowsPerPage)
 
-		if(!req.query.clientType) {
+		if(!req.query.clientType && !req.query.searchAll) {
 			res.send()
 			return
 		}
-		
-		const results = await Clients.find({
+
+		let query = {
 			$and:[
 				{
 					$or:[
 						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
 						{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					]
-				}, 
-				{
-					clientType: req.query.clientType
 				}
 			],
-		})
+		}
+
+		if(!req.query.searchAll) {
+			query['$and'].push({
+				clientType: req.query.clientType
+			})
+		}
+		
+		const results = await Clients.find(query)
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
 			.sort({createdTime:-1});
 
+		// console.log(results)
 		res.json(results)
 	} catch (err) {
 		console.log(err)
