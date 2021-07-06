@@ -77,6 +77,18 @@ router.get("/api/clients/", async (req, res) => {
 	}
 })
 
+router.delete("/api/clients/", async (req, res) => {
+	try{
+		const _id = req.query._id
+		const clients = await Clients.deleteOne({_id});
+		// console.log(clients)
+		res.send("ok")
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
 router.post("/api/clients/update", async (req, res) => {
 	try {
 		let _id = req.body._id

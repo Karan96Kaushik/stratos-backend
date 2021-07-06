@@ -50,6 +50,13 @@ router.get("/api/tasks/", async (req, res) => {
 	res.json(tasks)
 })
 
+router.delete("/api/tasks/", async (req, res) => {
+	console.log(req.query)
+	await Tasks.deleteOne({...req.query});
+	// console.log(tasks)
+	res.send("ok")
+})
+
 router.get("/api/tasks/search", async (req, res) => {
 	let others = {}
 	const rowsPerPage = parseInt(req.query.rowsPerPage)
