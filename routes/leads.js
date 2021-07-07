@@ -48,6 +48,8 @@ router.get("/api/leads/search", checkLeadR, async (req, res) => {
 	try{
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
+		const sortID = req.query.sortID
+		const sortDir = parseInt(req.query.sortDir)
 		const page = parseInt(req.query.page)-1
 
 		if(!req.query.leadType && !req.query.searchAll) {
@@ -73,11 +75,13 @@ router.get("/api/leads/search", checkLeadR, async (req, res) => {
 				leadType: req.query.leadType
 			})
 		}
+
+		// console.log({[sortID || "createdTime"]: sortDir || -1})
 		
 		let results = await Leads.find(query)
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
-			.sort({createdTime:-1});
+			.sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
 

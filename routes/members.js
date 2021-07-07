@@ -63,7 +63,7 @@ router.post("/api/members/update", async (req, res) => {
 		let _id = req.body._id
 
 		delete req.body.email
-		delete req.body.password
+		// delete req.body.password
 		delete req.body._id
 		delete req.body.memberID
 
