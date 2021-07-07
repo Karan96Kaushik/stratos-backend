@@ -78,10 +78,13 @@ router.get("/api/leads/search", checkLeadR, async (req, res) => {
 
 		// console.log({[sortID || "createdTime"]: sortDir || -1})
 		
+		// console.time("Sorted leads")
 		let results = await Leads.find(query)
+			.collation({locale: "en" })
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
+		// console.timeEnd("Sorted leads")
 
 		results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
 
