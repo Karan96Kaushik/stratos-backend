@@ -15,11 +15,11 @@ router.post("/api/clients/add", async (req, res) => {
 	try {
 
 		let files
-		if(req.body.docs.length) {
+		if(req.body.docs?.length) {
 			files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
 				file.name = file.name.replace(/(?!\.)[^\w\s]/gi, '_')
 				file.name = parseInt(Math.random()*1000) + "_" + file.name
-				
+
 				let fileName = tmpdir + +new Date + "_" + file.name
 
 				const fileContents = Buffer.from(file.data, 'base64')
@@ -41,7 +41,7 @@ router.post("/api/clients/add", async (req, res) => {
 		});
 		_ = await updateID("client")
 
-		if(files.length) {
+		if(files?.length) {
 			await Promise.all(files.map(async (file) => {
 				await uploadToS3(clientID + "/" + file.name, file.path)
 				fs.unlink(file.path, () => {})
@@ -118,10 +118,15 @@ router.get("/api/clients/", async (req, res) => {
 		delete req.query._id
 
 		const clients = await Clients.findOne({_id});
+		if(!clients){
+			res.status(404).send("Client not found")
+		}
+
 		let files = await getAllFiles(clients.clientID + "/")
 
 		files = files.map(f => f.Key)
 		res.json({...clients._doc, files})
+		
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
@@ -153,7 +158,7 @@ router.post("/api/clients/update", async (req, res) => {
 
 		// console.time("Uploading")
 		let files
-		if(req.body.docs.length) {
+		if(req.body.docs?.length) {
 			files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
 				file.name = file.name.replace(/(?!\.)[^\w\s]/gi, '_')
 				file.name = parseInt(Math.random()*1000) + "_" + file.name
@@ -180,7 +185,7 @@ router.post("/api/clients/update", async (req, res) => {
 			});
 
 		// console.time("S3")
-		if(files.length) {
+		if(files?.length) {
 			await Promise.all(files.map(async (file) => {
 				await uploadToS3(clientID + "/" + file.name, file.path)
 				fs.unlink(file.path, () => {})
