@@ -17,7 +17,7 @@ router.post("/api/clients/add", async (req, res) => {
 		let files
 		if(req.body.docs.length) {
 			files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
-				file.name = file.name.replace(/[^\w\s](?!\.)/gi, '_')
+				file.name = file.name.replace(/(?!\.)[^\w\s]/gi, '_')
 				file.name = parseInt(Math.random()*1000) + "_" + file.name
 				
 				let fileName = tmpdir + +new Date + "_" + file.name
@@ -155,7 +155,7 @@ router.post("/api/clients/update", async (req, res) => {
 		let files
 		if(req.body.docs.length) {
 			files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
-				file.name = file.name.replace(/[^\w\s](?!\.)/gi, '_')
+				file.name = file.name.replace(/(?!\.)[^\w\s]/gi, '_')
 				file.name = parseInt(Math.random()*1000) + "_" + file.name
 
 				let fileName = tmpdir + +new Date + "_" + file.name
