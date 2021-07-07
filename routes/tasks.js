@@ -62,22 +62,36 @@ router.get("/api/tasks/search", async (req, res) => {
 	const rowsPerPage = parseInt(req.query.rowsPerPage)
 	const page = parseInt(req.query.page)-1
 
-	if(req.query.text)
-		others[req.query.type] = req.query.text;
+	if(!req.query.serviceType && !req.query.searchAll) {
+		res.send()
+		return
+	}
 
-	// console.log(req.permissions.page)
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				]
+			}
+		],
+	}
 
-	// if(!req.permissions.page.includes("leadsr"))
-	// 	others.addedBy = req.user.id
-
-	let results = await Tasks.find({ serviceType: req.query.serviceType, ...others})
-			.limit(rowsPerPage)
-			.skip(rowsPerPage * page)
-			.sort({createdTime:-1});
+	if(!req.query.searchAll) {
+		query['$and'].push({
+			serviceType: req.query.serviceType
+		})
+	}
+	
+	let results = await Tasks.find(query)
+		.limit(rowsPerPage)
+		.skip(rowsPerPage * page)
+		.sort({createdTime:-1});
 
 	results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
 
-	// console.log(clients)
 	res.json(results)
 })
 

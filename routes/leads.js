@@ -50,25 +50,38 @@ router.get("/api/leads/search", checkLeadR, async (req, res) => {
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
 		const page = parseInt(req.query.page)-1
 
-		// console.log(page, rowsPerPage)
+		if(!req.query.leadType && !req.query.searchAll) {
+			res.send()
+			return
+		}
 
+		let query = {
+			$and:[
+				{
+					$or:[
+						{ leadID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					]
+				}
+			],
+		}
 
-		if(req.query.text)
-			others[req.query.type] = req.query.text;
-
-		// console.log(req.permissions.page)
-
-		if(!req.permissions.page.includes("Leads R"))
-			others.addedBy = req.user.id
-
-		let leads = await Leads.find({ leadType: req.query.leadType, ...others})
+		if(!req.query.searchAll) {
+			query['$and'].push({
+				leadType: req.query.leadType
+			})
+		}
+		
+		let results = await Leads.find(query)
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
 			.sort({createdTime:-1});
 
-		leads = leads.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
-		// console.log(clients)
-		res.json(leads)
+		results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
+
+		res.json(results)
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
