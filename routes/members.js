@@ -63,9 +63,18 @@ router.post("/api/members/update", async (req, res) => {
 		let _id = req.body._id
 
 		delete req.body.email
-		// delete req.body.password
 		delete req.body._id
 		delete req.body.memberID
+
+		console.log(req.body.password)
+		
+		if(req.body.password?.length) {
+			req.body.password = crypto.createHmac('sha256', "someSalt")
+				.update(req.body.password)
+				.digest('hex')
+		} else {
+			delete req.body.password
+		}
 
 		let permissions = [...req.body.servicePermissions, ...req.body.pagePermissions]
 		// permissions = permissions.map(val => val.toLowerCase())

@@ -44,7 +44,7 @@ router.post("/api/leads/add", checkLeadW, async (req, res) => {
 	res.send("OK")
 })
 
-router.get("/api/leads/search", checkLeadR, async (req, res) => {
+router.get("/api/leads/search", async (req, res) => {
 	try{
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
@@ -76,6 +76,12 @@ router.get("/api/leads/search", checkLeadR, async (req, res) => {
 			})
 		}
 
+		if(!req.permissions.page.includes("Leads R")) {
+			query['$and'].push({
+				addedBy: req.user.id
+			})
+		}
+
 		// console.log({[sortID || "createdTime"]: sortDir || -1})
 		
 		// console.time("Sorted leads")
@@ -95,12 +101,16 @@ router.get("/api/leads/search", checkLeadR, async (req, res) => {
 	}
 })
 
-router.get("/api/leads/", checkLeadR, async (req, res) => {
+router.get("/api/leads/", async (req, res) => {
 	try{
-		const _id = req.query._id
-		delete req.query._id
-		const leads = await Leads.findOne({_id});
-		// console.log(clients)
+		const query = req.query
+
+		if(!req.permissions.page.includes("Leads R")) {
+			query.addedBy = req.user.id
+		}
+
+		const leads = await Leads.findOne({...query});
+		
 		res.json(leads)
 	} catch (err) {
 		console.log(err)
