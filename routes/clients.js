@@ -2,15 +2,66 @@ const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const {Clients} = require("../models/Clients");
 const {getID, updateID} = require("../models/Utils");
+const {
+	getAllFiles,
+	uploadToS3,
+	getFilePath
+} = require("../modules/useS3");
+const fs = require('fs');
+
+const tmpdir = "/tmp/"
 
 router.post("/api/clients/add", async (req, res) => {
-	let _ = await Clients.create({
-		...req.body,
-		clientID:"CL" + await getID("client"),
-		addedBy: req.user.id
-	});
-	_ = await updateID("client")
-	res.send("OK")
+	try {
+
+		let files
+		if(req.body.docs.length) {
+			files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
+				file.name = file.name.replace(/[^\w\s]/gi, '_')
+
+				let fileName = tmpdir + +new Date + "_" + file.name
+
+				const fileContents = Buffer.from(file.data, 'base64')
+				fs.writeFile( fileName, fileContents, 'base64', (err) => {
+					console.log(err)
+					if (err) reject(err)
+					resolve({name:file.name,path:fileName})
+				})
+			})))
+			// console.log(files)
+
+		}
+
+		let clientID = "CL" + await getID("client")
+		let _ = await Clients.create({
+			...req.body,
+			clientID,
+			addedBy: req.user.id
+		});
+		_ = await updateID("client")
+
+		if(files.length) {
+			await Promise.all(files.map(async (file) => {
+				await uploadToS3(clientID + "/" + file.name, file.path)
+				fs.unlink(file.path, () => {})
+			}))
+		}
+		res.send("OK")
+	} catch (err) {
+		console.log(err)
+		res.status(500).send()
+	}
+})
+
+router.post("/api/clients/files", async (req, res) => {
+	try {
+		const file = await getFilePath(req.body.fileName)
+		// console.log(file)
+		res.json({file})
+	} catch (err) {
+		console.log(err)
+		res.status(500).send()
+	}
 })
 
 router.get("/api/clients/search", async (req, res) => {
@@ -21,14 +72,6 @@ router.get("/api/clients/search", async (req, res) => {
 		const page = parseInt(req.query.page ?? 1)-1
 		const sortID = req.query.sortID
 		const sortDir = parseInt(req.query.sortDir)
-
-		// if(req.query.text)
-		// 	others[req.query.type] = req.query.text;
-		// if(req.query.clientType)
-		// 	others.clientType = req.query.clientType;
-		// if(req.query.clientType)
-		// 	others.clientType = req.query.clientType;
-
 
 		if(!req.query.clientType && !req.query.searchAll) {
 			res.send()
@@ -72,9 +115,12 @@ router.get("/api/clients/", async (req, res) => {
 	try{
 		const _id = req.query._id
 		delete req.query._id
+		
 		const clients = await Clients.findOne({_id});
-		// console.log(clients)
-		res.json(clients)
+		let files = await getAllFiles(clients.clientID + "/")
+
+		files = files.map(f => f.Key)
+		res.json({...clients._doc, files})
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
@@ -97,10 +143,32 @@ router.post("/api/clients/update", async (req, res) => {
 	try {
 		let _id = req.body._id
 
+		let clientID = req.body.clientID
+
 		delete req.body._id
 		delete req.body.clientID
 		delete req.body.clientType
 		delete req.body.addedBy
+
+		// console.time("Uploading")
+		let files
+		if(req.body.docs.length) {
+			files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
+				file.name = file.name.replace(/[^\w\s](\s)/gi, '_')
+				file.name = parseInt(Math.random()*1000) + "_" + file.name
+
+				let fileName = tmpdir + +new Date + "_" + file.name
+
+				const fileContents = Buffer.from(file.data, 'base64')
+				fs.writeFile( fileName, fileContents, 'base64', (err) => {
+					console.log(err)
+					if (err) reject(err)
+					resolve({name:file.name,path:fileName})
+				})
+			})))
+			console.log(files)
+
+		}
 
 		let _ = await Clients.updateOne(
 			{
@@ -109,6 +177,16 @@ router.post("/api/clients/update", async (req, res) => {
 			{
 				...req.body
 			});
+
+		// console.time("S3")
+		if(files.length) {
+			await Promise.all(files.map(async (file) => {
+				await uploadToS3(clientID + "/" + file.name, file.path)
+				fs.unlink(file.path, () => {})
+			}))
+		}
+		// console.timeEnd("S3")
+		// console.timeEnd("Uploading")
 
 		res.send("OK")
 	} catch (err) {
