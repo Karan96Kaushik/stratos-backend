@@ -61,6 +61,8 @@ router.get("/api/tasks/search", async (req, res) => {
 	let others = {}
 	const rowsPerPage = parseInt(req.query.rowsPerPage)
 	const page = parseInt(req.query.page)-1
+	const sortID = req.query.sortID
+	const sortDir = parseInt(req.query.sortDir)
 
 	if(!req.query.serviceType && !req.query.searchAll) {
 		res.send()
@@ -86,9 +88,10 @@ router.get("/api/tasks/search", async (req, res) => {
 	}
 	
 	let results = await Tasks.find(query)
+		.collation({locale: "en" })
 		.limit(rowsPerPage)
 		.skip(rowsPerPage * page)
-		.sort({createdTime:-1});
+		.sort({[sortID || "createdTime"]: sortDir || -1});
 
 	results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
 

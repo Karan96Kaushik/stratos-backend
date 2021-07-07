@@ -36,22 +36,36 @@ router.get("/api/quotations/search", async (req, res) => {
 	try{
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
+		const sortID = req.query.sortID
+		const sortDir = parseInt(req.query.sortDir)
 		const page = parseInt(req.query.page)-1
 
-		if(req.query.text)
-			others[req.query.type] = req.query.text;
+		let query = {
+			$and:[
+				{
+					$or:[
+						{ quotationID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ relatedProject: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					]
+				}
+			],
+		}
 
-		if(!req.permissions.page.includes("Quotations R"))
-			others.addedBy = req.user.id
-        // console.log(others)
-		let quotations = await Quotations.find({...others})
+		// console.log({[sortID || "createdTime"]: sortDir || -1})
+		
+		// console.time("Sorted leads")
+		let results = await Quotations.find(query)
+			.collation({locale: "en" })
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
-			.sort({createdTime:-1});
+			.sort({[sortID || "createdTime"]: sortDir || -1});
+		// console.timeEnd("Sorted leads")
 
-		quotations = quotations.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
+		results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
 
-		res.json(quotations)
+		res.json(results)
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)

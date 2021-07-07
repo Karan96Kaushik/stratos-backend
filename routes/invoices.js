@@ -34,22 +34,42 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 
 router.get("/api/invoices/search", async (req, res) => {
 	try{
+
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
+		const sortID = req.query.sortID
+		const sortDir = parseInt(req.query.sortDir)
 		const page = parseInt(req.query.page)-1
-
-		if(req.query.text)
-			others[req.query.type] = req.query.text;
 
 		if(!req.permissions.page.includes("Invoices R"))
 			others.addedBy = req.user.id
-        // console.log(others)
-		const invoices = await Invoices.find({...others})
+
+		let query = {
+			$and:[
+				{
+					$or:[
+						{ invoiceID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					],
+					...others
+				}
+			],
+		}
+
+		// console.log({[sortID || "createdTime"]: sortDir || -1})
+		
+		// console.time("Sorted leads")
+		let results = await Invoices.find(query)
+			.collation({locale: "en" })
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
-			.sort({createdTime:-1});
+			.sort({[sortID || "createdTime"]: sortDir || -1});
+		// console.timeEnd("Sorted leads")
 
-		res.json(invoices)
+		results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
+
+		res.json(results)
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)

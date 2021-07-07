@@ -19,6 +19,8 @@ router.get("/api/clients/search", async (req, res) => {
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage ?? 10)
 		const page = parseInt(req.query.page ?? 1)-1
+		const sortID = req.query.sortID
+		const sortDir = parseInt(req.query.sortDir)
 
 		// if(req.query.text)
 		// 	others[req.query.type] = req.query.text;
@@ -50,10 +52,12 @@ router.get("/api/clients/search", async (req, res) => {
 			})
 		}
 		
-		const results = await Clients.find(query)
+		let results = await Clients.find(query)
+			.collation({locale: "en" })
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
-			.sort({createdTime:-1});
+			.sort({[sortID || "createdTime"]: sortDir || -1});
+		results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
 
 		// console.log(results)
 		res.json(results)
