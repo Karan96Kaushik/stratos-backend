@@ -54,17 +54,6 @@ router.post("/api/clients/add", async (req, res) => {
 	}
 })
 
-router.post("/api/clients/files", async (req, res) => {
-	try {
-		const file = await getFilePath(req.body.fileName)
-		// console.log(file)
-		res.json({file})
-	} catch (err) {
-		console.log(err)
-		res.status(500).send()
-	}
-})
-
 router.get("/api/clients/search", async (req, res) => {
 	try{
 

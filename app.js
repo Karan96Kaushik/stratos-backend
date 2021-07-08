@@ -40,6 +40,7 @@ app.use(routes.tasks)
 app.use(routes.leads)
 app.use(routes.quotations)
 app.use(routes.invoices)
+app.use(routes.utils)
 
 /*****************  ***********************/
 

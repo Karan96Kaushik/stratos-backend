@@ -7,4 +7,5 @@ module.exports = {
 	leads: require('./leads'),
 	quotations: require('./quotations'),
 	invoices: require('./invoices'),
+	utils: require('./utils'),
 }
