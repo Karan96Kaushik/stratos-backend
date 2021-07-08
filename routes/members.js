@@ -9,6 +9,7 @@ const {
 	uploadToS3,
 	getFilePath
 } = require("../modules/useS3");
+const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 
 const tmpdir = "/tmp/"
@@ -21,25 +22,6 @@ router.post("/api/members/add", async (req, res) => {
 
 		if(data)
 			throw new Error("Email ID Exists")
-
-		let files
-		if(req.body.docs?.length) {
-			files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
-				file.name = file.name.replace(/(?!\.)[^\w\s]/gi, '_')
-				file.name = parseInt(Math.random()*1000) + "_" + file.name
-
-				let fileName = tmpdir + +new Date + "_" + file.name
-
-				const fileContents = Buffer.from(file.data, 'base64')
-				fs.writeFile( fileName, fileContents, 'base64', (err) => {
-					console.log(err)
-					if (err) reject(err)
-					resolve({name:file.name,path:fileName})
-				})
-			})))
-			// console.log(files)
-
-		}
 
 		req.body.password = crypto.createHmac('sha256', "someSalt")
 			.update(req.body.password)
@@ -59,11 +41,9 @@ router.post("/api/members/add", async (req, res) => {
 		});
 		_ = await updateID("member")
 
-		if(files?.length) {
-			await Promise.all(files.map(async (file) => {
-				await uploadToS3(memberID + "/" + file.name, file.path)
-				fs.unlink(file.path, () => {})
-			}))
+		if(req.body.docs?.length) {
+			let files = await saveFilesToLocal(req.body.docs)
+			await uploadFiles(files, memberID)
 		}
 
 		res.send("OK")
@@ -125,25 +105,6 @@ router.post("/api/members/update", async (req, res) => {
 		delete req.body._id
 		let memberID = req.body.memberID
 
-		let files
-		if(req.body.docs?.length) {
-			files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
-				file.name = file.name.replace(/(?!\.)[^\w\s]/gi, '_')
-				file.name = parseInt(Math.random()*1000) + "_" + file.name
-
-				let fileName = tmpdir + +new Date + "_" + file.name
-
-				const fileContents = Buffer.from(file.data, 'base64')
-				fs.writeFile( fileName, fileContents, 'base64', (err) => {
-					console.log(err)
-					if (err) reject(err)
-					resolve({name:file.name,path:fileName})
-				})
-			})))
-			// console.log(files)
-
-		}
-
 		if(req.body.password?.length) {
 			req.body.password = crypto.createHmac('sha256', "someSalt")
 				.update(req.body.password)
@@ -166,11 +127,9 @@ router.post("/api/members/update", async (req, res) => {
 				permissions
 			});
 
-		if(files?.length) {
-			await Promise.all(files.map(async (file) => {
-				await uploadToS3(clientID + "/" + file.name, file.path)
-				fs.unlink(file.path, () => {})
-			}))
+		if(req.body.docs?.length) {
+			let files = await saveFilesToLocal(req.body.docs)
+			await uploadFiles(files, memberID)
 		}
 
 		res.send("OK")

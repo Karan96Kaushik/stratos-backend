@@ -8,9 +8,7 @@ const {
 	uploadToS3,
 	getFilePath
 } = require("../modules/useS3");
-const fs = require('fs');
-
-const tmpdir = "/tmp/"
+const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 
 const checkLeadR = (req, res, next) => {
 	if(req.permissions.page.includes("Leads R"))
@@ -30,27 +28,7 @@ const checkLeadW = (req, res, next) => {
 router.post("/api/leads/add", checkLeadW, async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
 
-	let files
-	if(req.body.docs?.length) {
-		files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
-			file.name = file.name.replace(/(?!\.)[^\w\s]/gi, '_')
-			file.name = parseInt(Math.random()*1000) + "_" + file.name
-
-			let fileName = tmpdir + +new Date + "_" + file.name
-
-			const fileContents = Buffer.from(file.data, 'base64')
-			fs.writeFile( fileName, fileContents, 'base64', (err) => {
-				console.log(err)
-				if (err) reject(err)
-				resolve({name:file.name,path:fileName})
-			})
-		})))
-		// console.log(files)
-
-	}
-
 	let leadIdPrefix = ""
-
 	switch (req.body.leadType) {
 		case ("developer"):
 			leadIdPrefix = "LD"
@@ -70,13 +48,11 @@ router.post("/api/leads/add", checkLeadW, async (req, res) => {
 		leadID,
 		addedBy: req.user.id
 	});
-	_ = await updateID("lead")
+	_ = await updateID(leadIdPrefix)
 
-	if(files?.length) {
-		await Promise.all(files.map(async (file) => {
-			await uploadToS3(leadID + "/" + file.name, file.path)
-			fs.unlink(file.path, () => {})
-		}))
+	if(req.body.docs?.length) {
+		let files = await saveFilesToLocal(req.body.docs)
+		await uploadFiles(files, leadID)
 	}
 	res.send("OK")
 })
@@ -146,12 +122,14 @@ router.get("/api/leads/", async (req, res) => {
 			query.addedBy = req.user.id
 		}
 
-		const leads = await Leads.findOne({...query});
+		let leads = await Leads.findOne({...query});
+		leads = leads._doc
 
 		let files = await getAllFiles(leads.leadID + "/")
-
 		files = files.map(f => f.Key)
-		res.json({...leads._doc, files})
+		leads.files = files
+		
+		res.json(leads)
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
@@ -209,11 +187,9 @@ router.post("/api/leads/update", checkLeadW, async (req, res) => {
 				...req.body
 			});
 
-		if(files?.length) {
-			await Promise.all(files.map(async (file) => {
-				await uploadToS3(leadID + "/" + file.name, file.path)
-				fs.unlink(file.path, () => {})
-			}))
+		if(req.body.docs?.length) {
+			let files = await saveFilesToLocal(req.body.docs)
+			await uploadFiles(files, leadID)
 		}
 
 		res.send("OK")

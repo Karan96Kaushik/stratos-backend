@@ -1,8 +1,12 @@
 const router     = new (require('express')).Router()
-// const mongoose = require("mongoose");
 const {Tasks} = require("../models/Tasks");
 const {getID, updateID} = require("../models/Utils");
-// const crypto = require("crypto");
+const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
+const {
+	getAllFiles,
+	uploadToS3,
+	getFilePath
+} = require("../modules/useS3");
 
 const serviceCodes = {
 	"Agent Registration": "AR",
@@ -31,12 +35,18 @@ router.post("/api/tasks/add", async (req, res) => {
 		let _;
 		let serviceCode = serviceCodes[req.body.serviceType]
 
+		let taskID = serviceCode + await getID(serviceCode)
 		_ = await Tasks.create({
 			...req.body,
-			taskID:serviceCode + await getID(serviceCode),
+			taskID,
 			addedBy: req.user.id
 		});
 		_ = await updateID(serviceCode)
+
+		if(req.body.docs?.length) {
+			let files = await saveFilesToLocal(req.body.docs)
+			await uploadFiles(files, taskID)
+		}
 		res.send("OK")
 	} catch (err) {
 		res.status(500).send(err.message)
@@ -44,16 +54,15 @@ router.post("/api/tasks/add", async (req, res) => {
 })
 
 router.get("/api/tasks/", async (req, res) => {
-	// console.log(req.query)
-	const tasks = await Tasks.find({...req.query});
-	// console.log(tasks)
-	res.json(tasks)
+	const tasks = await Tasks.findOne({...req.query});
+	let files = await getAllFiles(tasks.taskID + "/")
+
+	files = files.map(f => f.Key)
+	res.json({...tasks._doc, files})
 })
 
 router.delete("/api/tasks/", async (req, res) => {
-	console.log(req.query)
 	await Tasks.deleteOne({...req.query});
-	// console.log(tasks)
 	res.send("ok")
 })
 
@@ -101,6 +110,7 @@ router.get("/api/tasks/search", async (req, res) => {
 router.post("/api/tasks/update", async (req, res) => {
 	try {
 		let _id = req.body._id
+		let taskID = req.body.taskID
 
 		delete req.body._id
 		delete req.body.taskID
@@ -117,6 +127,10 @@ router.post("/api/tasks/update", async (req, res) => {
 				...req.body
 			});
 
+		if(req.body.docs?.length) {
+			let files = await saveFilesToLocal(req.body.docs)
+			await uploadFiles(files, taskID)
+		}
 		res.send("OK")
 	} catch (err) {
 		console.log(err)
