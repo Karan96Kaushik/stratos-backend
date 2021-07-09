@@ -30,10 +30,46 @@ const serviceCodes = {
 	"Others - Legal": "OL",
 }
 
-router.post("/api/tasks/add", async (req, res) => {
+const checkR = (req, res, next) => {
+	const isPermitted = req.permissions.page.includes("Tasks R")
+
+	if(typeof next !== "function") {
+		return isPermitted
+	}
+
+	if(isPermitted)
+		next()
+	else
+		res.status(401).send("Unauthorized Access")
+}
+
+const checkW = (req, res, next) => {
+	const isPermitted = req.permissions.page.includes("Tasks W")
+
+	if(typeof next !== "function") {
+		return isPermitted
+	}
+
+	if(isPermitted)
+		next()
+	else
+		res.status(401).send("Unauthorized Access")
+}
+
+const checkTaskPermission = (req, taskType) => {
+	// console.log(req.permissions, taskType)
+	return req.permissions.service.includes(taskType)
+}
+
+router.post("/api/tasks/add", checkW, async (req, res) => {
 	try {
 		let _;
 		let serviceCode = serviceCodes[req.body.serviceType]
+
+		if(!checkTaskPermission(req, req.body.serviceType)) {
+			res.status(401).send("Unauthorized to create this task")
+			return
+		}
 
 		let taskID = serviceCode + await getID(serviceCode)
 		_ = await Tasks.create({
@@ -54,14 +90,19 @@ router.post("/api/tasks/add", async (req, res) => {
 })
 
 router.get("/api/tasks/", async (req, res) => {
-	const tasks = await Tasks.findOne({...req.query});
+	let query = req.query
+
+	if(!checkR(req))
+		query.addedBy = req.user.id
+
+	const tasks = await Tasks.findOne(query);
 	let files = await getAllFiles(tasks.taskID + "/")
 
 	files = files.map(f => f.Key)
 	res.json({...tasks._doc, files})
 })
 
-router.delete("/api/tasks/", async (req, res) => {
+router.delete("/api/tasks/", checkW, async (req, res) => {
 	await Tasks.deleteOne({...req.query});
 	res.send("ok")
 })
@@ -75,6 +116,11 @@ router.get("/api/tasks/search", async (req, res) => {
 
 	if(!req.query.serviceType && !req.query.searchAll) {
 		res.send()
+		return
+	}
+
+	if(!checkTaskPermission(req, req.query.serviceType)) {
+		res.status(401).send("Unauthorized to view this task type")
 		return
 	}
 
@@ -95,6 +141,11 @@ router.get("/api/tasks/search", async (req, res) => {
 			serviceType: req.query.serviceType
 		})
 	}
+
+	if(!checkR(req))
+		query['$and'].push({
+			addedBy: req.user.id
+		})
 	
 	let results = await Tasks.find(query)
 		.collation({locale: "en" })
@@ -107,7 +158,7 @@ router.get("/api/tasks/search", async (req, res) => {
 	res.json(results)
 })
 
-router.post("/api/tasks/update", async (req, res) => {
+router.post("/api/tasks/update", checkW, async (req, res) => {
 	try {
 		let _id = req.body._id
 		let taskID = req.body.taskID

@@ -11,7 +11,33 @@ const fs = require('fs');
 
 const tmpdir = "/tmp/"
 
-router.post("/api/clients/add", async (req, res) => {
+const checkR = (req, res, next) => {
+	const isPermitted = req.permissions.page.includes("Clients R")
+
+	if(typeof next !== "function") {
+		return isPermitted
+	}
+
+	if(isPermitted)
+		next()
+	else
+		res.status(401).send("Unauthorized Access")
+}
+
+const checkW = (req, res, next) => {
+	const isPermitted = req.permissions.page.includes("Clients W")
+
+	if(typeof next !== "function") {
+		return isPermitted
+	}
+
+	if(isPermitted)
+		next()
+	else
+		res.status(401).send("Unauthorized Access")
+}
+
+router.post("/api/clients/add", checkW, async (req, res) => {
 	try {
 
 		let files
@@ -84,7 +110,12 @@ router.get("/api/clients/search", async (req, res) => {
 				clientType: req.query.clientType
 			})
 		}
-		
+
+		if(!checkR(req))
+			query['$and'].push({
+				addedBy : req.user.id
+			})
+			
 		let results = await Clients.find(query)
 			.collation({locale: "en" })
 			.limit(rowsPerPage)
@@ -103,10 +134,12 @@ router.get("/api/clients/search", async (req, res) => {
 
 router.get("/api/clients/", async (req, res) => {
 	try{
-		const _id = req.query._id
-		delete req.query._id
 
-		const clients = await Clients.findOne({_id});
+		let query = req.query
+		if(!checkR(req))
+			query.addedBy = req.user.id
+
+		const clients = await Clients.findOne(req.query);
 		if(!clients){
 			res.status(404).send("Client not found")
 		}
@@ -122,7 +155,7 @@ router.get("/api/clients/", async (req, res) => {
 	}
 })
 
-router.delete("/api/clients/", async (req, res) => {
+router.delete("/api/clients/", checkW, async (req, res) => {
 	try{
 		const _id = req.query._id
 		const clients = await Clients.deleteOne({_id});
@@ -134,7 +167,7 @@ router.delete("/api/clients/", async (req, res) => {
 	}
 })
 
-router.post("/api/clients/update", async (req, res) => {
+router.post("/api/clients/update", checkW, async (req, res) => {
 	try {
 		let _id = req.body._id
 

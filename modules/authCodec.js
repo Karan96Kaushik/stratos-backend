@@ -13,6 +13,8 @@ const pagePermissions = [
 	"Quotations W",
 	"Invoices R",
 	"Invoices W",
+	"Tasks R",
+	"Tasks W",
 ]
 
 let servicePermissions = [

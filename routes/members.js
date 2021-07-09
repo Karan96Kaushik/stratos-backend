@@ -14,7 +14,33 @@ const fs = require('fs');
 
 const tmpdir = "/tmp/"
 
-router.post("/api/members/add", async (req, res) => {
+const checkR = (req, res, next) => {
+	const isPermitted = req.permissions.page.includes("Members R")
+
+	if(typeof next !== "function") {
+		return isPermitted
+	}
+
+	if(isPermitted)
+		next()
+	else
+		res.status(401).send("Unauthorized Access")
+}
+
+const checkW = (req, res, next) => {
+	const isPermitted = req.permissions.page.includes("Members W")
+
+	if(typeof next !== "function") {
+		return isPermitted
+	}
+
+	if(isPermitted)
+		next()
+	else
+		res.status(401).send("Unauthorized Access")
+}
+
+router.post("/api/members/add", checkW, async (req, res) => {
 	try {
 		let _;
 
@@ -52,7 +78,7 @@ router.post("/api/members/add", async (req, res) => {
 	}
 })
 
-router.get("/api/members/search", async (req, res) => {
+router.get("/api/members/search", checkR, async (req, res) => {
 	try {
 		let members = await Members.find({...req.query});
 
@@ -97,7 +123,7 @@ router.get("/api/members/", async (req, res) => {
 	
 })
 
-router.post("/api/members/update", async (req, res) => {
+router.post("/api/members/update", checkW, async (req, res) => {
 	try {
 		let _id = req.body._id
 
