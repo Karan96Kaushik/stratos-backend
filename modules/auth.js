@@ -4,7 +4,7 @@ const {encodeAuth, decodeAuth} = require("./authCodec")
 const auth = (req, res, next) => {
 	const token = req.headers["x-authentication"]
 	if(token) {
-		jwt.verify(token, process.env.authSecret || 'authSecret', function(err, decoded) {
+		jwt.verify(token, process.env.authSecretTms || 'authSecretTms', function(err, decoded) {
 			// console.log(decoded)
 			if(!err && decoded.exp*1000 > +new Date) {
 				req.user = decoded
