@@ -41,6 +41,7 @@ app.use(routes.leads)
 app.use(routes.quotations)
 app.use(routes.invoices)
 app.use(routes.utils)
+app.use(routes.accounts)
 
 /*****************  ***********************/
 

@@ -99,6 +99,9 @@ router.get("/api/clients/search", async (req, res) => {
 				{
 					$or:[
 						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ userID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 						{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					]
 				}

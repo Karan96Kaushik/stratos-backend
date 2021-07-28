@@ -8,4 +8,5 @@ module.exports = {
 	quotations: require('./quotations'),
 	invoices: require('./invoices'),
 	utils: require('./utils'),
+	accounts: require('./accounts'),
 }
