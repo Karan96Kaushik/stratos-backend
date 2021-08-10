@@ -73,7 +73,14 @@ router.get("/api/quotations/search", async (req, res) => {
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
-		results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
+		let userIds = results.map(val => val._doc.addedBy)
+
+		userIds = await Members.find({_id: {$in: userIds}})
+		
+		results = results.map(val => {
+			let user = userIds.find(v => String(v._id) == String(val.addedBy))
+			return ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0], addedBy: user.userName})
+		})
 
 		res.json(results)
 	} catch (err) {

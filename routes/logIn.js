@@ -4,7 +4,7 @@ const passport = require("passport");
 const crypto = require("crypto");
 const {Members} = require("../models/Members");
 const {generate, decode} = require("../modules/auth");
-const {encodeAuth, decodeAuth} = require("../modules/authCodec")
+const {encodeAuth, decodeAuth} = require("../modules/authCodec");
 
 router.post('/api/login', async (req, res) => {
 	try{
@@ -22,18 +22,21 @@ router.post('/api/login', async (req, res) => {
 					user.permissions.service
 				]})
 
+			user = user._doc
+
 			delete user.password
 			delete user.createdTime
 			delete user.updateTime
 
 			let permissions = decodeAuth(user.permissions)
 
-			user._doc.permissions = permissions
+			user.permissions = permissions
 			res.send({user, token})
 		} else {
 			res.status(401).send("Email or password Incorrect")
 		}
 	} catch (err) {
+			console.log(err)
 			res.status(500).send(err.message)
 	}
 

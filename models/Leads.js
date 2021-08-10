@@ -15,6 +15,7 @@ let Leads = new Schema(
     office: String,
 
     projectName: String,
+    companyName: String,
     reraNum: String,
     location: String,
     serviceType: String,
