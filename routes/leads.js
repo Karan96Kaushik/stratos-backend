@@ -89,23 +89,37 @@ router.get("/api/leads/search", async (req, res) => {
 			})
 		}
 
+		// non leads-read user can only view their own added leads
 		if(!req.permissions.page.includes("Leads R")) {
 			query['$and'].push({
 				addedBy: req.user.id
 			})
 		}
 
-		// console.log({[sortID || "createdTime"]: sortDir || -1})
-		
-		// console.time("Sorted leads")
 		let results = await Leads.find(query)
 			.collation({locale: "en" })
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
-		// console.timeEnd("Sorted leads")
 
-		results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
+		results = results.map(val => val._doc)
+
+		// followup duration
+		results = results.map(val => {
+			let followUpDateColor = +new Date(val.followUpDate) - +new Date()
+
+			if(followUpDateColor < 0)						// follow up date passed
+				followUpDateColor = 2
+			else if(followUpDateColor < 1000*60*60*24*3) 	// 3 days pending
+				followUpDateColor = 1
+			else 											// more than 3 days
+				followUpDateColor = 0
+
+			return ({...val, followUpDateColor})
+		})
+
+		// created timestamp
+		results = results.map(val => ({...val, createdTime:val.createdTime.toISOString().split("T")[0]}))
 
 		res.json(results)
 	} catch (err) {
