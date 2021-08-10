@@ -18,7 +18,7 @@ let Leads = new Schema(
     companyName: String,
     reraNum: String,
     location: String,
-    serviceType: String,
+    serviceType: Array,
 
     breifService: String,
     breifCase: String,
