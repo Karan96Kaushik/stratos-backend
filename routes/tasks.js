@@ -158,6 +158,15 @@ router.get("/api/tasks/search", async (req, res) => {
 	res.json(results)
 })
 
+router.get("/api/tasks/search/all", async (req, res) => {
+	let query = req.query
+
+	const tasks = await Tasks.find(query);
+
+	res.json(tasks)
+})
+
+
 router.post("/api/tasks/update", checkW, async (req, res) => {
 	try {
 		let _id = req.body._id

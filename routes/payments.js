@@ -1,6 +1,6 @@
 const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
-const {Invoices} = require("../models/Invoices");
+const {Payments} = require("../models/Payments");Payments
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
 const {
@@ -26,17 +26,17 @@ const checkInvoiceW = (req, res, next) => {
 		res.status(401).send("Unauthorized")
 }
 
-router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
-	const memberInfo = await Members.findOne({_id: req.user.id})
+router.post("/api/payments/add", checkInvoiceW, async (req, res) => {
+	// const memberInfo = await Members.findOne({_id: req.user.id})
 
-    let invoiceID = "IN" + await getID("invoice")
-	let _ = await Invoices.create({
+    let paymentID = "AC" + await getID("account")
+	let _ = await Payments.create({
 		...req.body,
-		memberID:memberInfo.memberID,
-		invoiceID,
+		// memberID:memberInfo.memberID,
+		paymentID,
 		addedBy: req.user.id
 	});
-	_ = await updateID("invoice")
+	_ = await updateID("account")
 
 	if(req.body.docs?.length) {
 		let files = await saveFilesToLocal(req.body.docs)
@@ -45,7 +45,7 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 	res.send("OK")
 })
 
-router.get("/api/invoices/search", async (req, res) => {
+router.get("/api/payments/search", async (req, res) => {
 	try{
 
 		let others = {}
@@ -70,7 +70,7 @@ router.get("/api/invoices/search", async (req, res) => {
 			],
 		}
 
-		let results = await Invoices.find(query)
+		let results = await Payments.find(query)
 			.collation({locale: "en" })
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
@@ -85,11 +85,11 @@ router.get("/api/invoices/search", async (req, res) => {
 	}
 })
 
-router.get("/api/invoices/", async (req, res) => {
+router.get("/api/payments/", async (req, res) => {
 	try{
 		const _id = req.query._id
 		delete req.query._id
-		let invoices = await Invoices.findOne({_id});
+		let invoices = await Payments.findOne({_id});
 		invoices = invoices._doc
 
 		let files = await getAllFiles(invoices.invoiceID + "/")
@@ -104,15 +104,15 @@ router.get("/api/invoices/", async (req, res) => {
 	}
 })
 
-router.get("/api/invoices/search/all", async (req, res) => {
+router.get("/api/payments/search/all", async (req, res) => {
 	let query = req.query
 
-	const invoices = await Invoices.find(query);
+	const invoices = await Payments.find(query);
 
 	res.json(invoices)
 })
 
-router.post("/api/invoices/update", checkInvoiceW, async (req, res) => {
+router.post("/api/payments/update", checkInvoiceW, async (req, res) => {
 	try {
 		let _id = req.body._id
 		let invoiceID = req.body.invoiceID
@@ -122,7 +122,7 @@ router.post("/api/invoices/update", checkInvoiceW, async (req, res) => {
 		delete req.body.memberID
 		delete req.body.addedBy
 
-		let _ = await Invoices.updateOne(
+		let _ = await Payments.updateOne(
 			{
 				_id
 			},

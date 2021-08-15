@@ -13,24 +13,7 @@ let Payments = new Schema(
 
     clientName:String,
 
-    serviceType:String,
     remarks:String,
-
-    priority:Number,
-
-    letterHead:Boolean,
-    form3:Boolean,
-    form2:Boolean,
-    itr:Boolean,
-    receiptFormat:Boolean,
-    titleCertificate:Boolean,
-    agreementDraft:Boolean,
-    
-    remarks:String,
-    status:String,
-    action:String,
-    notes:String,
-    deadline:String,
 
     addedBy: {
       required:true,
