@@ -1,5 +1,6 @@
 const router     = new (require('express')).Router()
 const {Tasks} = require("../models/Tasks");
+const {Payments} = require("../models/Payments");
 const {getID, updateID} = require("../models/Utils");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const {
@@ -75,6 +76,8 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 		_ = await Tasks.create({
 			...req.body,
 			taskID,
+			docs:null,
+			files:null,
 			addedBy: req.user.id
 		});
 		_ = await updateID(serviceCode)
@@ -158,6 +161,57 @@ router.get("/api/tasks/search", async (req, res) => {
 	res.json(results)
 })
 
+const calculateTotal = (val) => (
+	Number(val.billAmount ?? 0) +
+	Number(val.gst ?? 0) +
+	Number(val.govtFees ?? 0) +
+	Number(val.sroFees ?? 0)
+)
+
+router.get("/api/tasks/payments/search", async (req, res) => {
+	let others = {}
+	const rowsPerPage = parseInt(req.query.rowsPerPage)
+	const page = parseInt(req.query.page)-1
+	const sortID = req.query.sortID
+	const sortDir = parseInt(req.query.sortDir)
+
+	if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+		res.status(401).send("Unauthorized access")
+		return
+	}
+
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				]
+			}
+		],
+	}
+	
+	let results = await Tasks.find(query)
+		.collation({locale: "en" })
+		.limit(rowsPerPage)
+		.skip(rowsPerPage * page)
+		.sort({[sortID || "createdTime"]: sortDir || -1});
+
+	let taskIDs = results.map(val => (val.taskID))
+	taskIDs = await Payments.find({
+		taskID: {$in:taskIDs}
+	})
+
+	results = results.map(val => ({...val._doc, payments: taskIDs.filter((v) => (val.taskID == v.taskID))}))
+	results = results.map(val => ({...val, received: val.payments.reduce((tot, curr) => ((Number(curr._doc.receivedAmount) ?? 0) + tot),0)}))
+	results = results.map(val => ({...val, createdTime:val.createdTime.toISOString().split("T")[0]}))
+	results = results.map(val => ({...val, total: calculateTotal(val)}))
+	results = results.map(val => ({...val, balance: val.total - val.received}))
+
+	res.json(results)
+})
+
 router.get("/api/tasks/search/all", async (req, res) => {
 	let query = req.query
 
@@ -184,7 +238,9 @@ router.post("/api/tasks/update", checkW, async (req, res) => {
 				_id
 			},
 			{
-				...req.body
+				...req.body,
+				docs:null,
+				files:null,
 			});
 
 		if(req.body.docs?.length) {

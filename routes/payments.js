@@ -11,23 +11,13 @@ const {
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 
-const checkInvoiceR = (req, res, next) => {
-	if(req.permissions.page.includes("Invoices R"))
-		next()
-	else
-		res.status(401).send("Unauthorized")
-}
-
-const checkInvoiceW = (req, res, next) => {
-	// console.log(req.permissions)
-	if(req.permissions.page.includes("Invoices W"))
-		next()
-	else
-		res.status(401).send("Unauthorized")
-}
-
-router.post("/api/payments/add", checkInvoiceW, async (req, res) => {
+router.post("/api/payments/add", async (req, res) => {
 	// const memberInfo = await Members.findOne({_id: req.user.id})
+
+	if(!req.permissions.page.includes("Payments W")) {
+		res.status(401).send("Unauthorized")
+		return
+	}
 
     let paymentID = "AC" + await getID("account")
 	let _ = await Payments.create({
@@ -54,7 +44,7 @@ router.get("/api/payments/search", async (req, res) => {
 		const sortDir = parseInt(req.query.sortDir)
 		const page = parseInt(req.query.page)-1
 
-		if(!req.permissions.page.includes("Invoices R"))
+		if(!req.permissions.page.includes("Payments R"))
 			others.addedBy = req.user.id
 
 		let query = {
@@ -62,8 +52,9 @@ router.get("/api/payments/search", async (req, res) => {
 				{
 					$or:[
 						{ invoiceID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ remarks: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					],
 					...others
 				}
@@ -104,16 +95,34 @@ router.get("/api/payments/", async (req, res) => {
 	}
 })
 
+router.delete("/api/payments/", async (req, res) => {
+	try{
+		const _id = req.query._id
+		await Payments.deleteOne({_id});
+
+		res.send("OK")
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
 router.get("/api/payments/search/all", async (req, res) => {
 	let query = req.query
 
-	const invoices = await Payments.find(query);
+	const payments = await Payments.find(query);
 
-	res.json(invoices)
+	res.json(payments)
 })
 
-router.post("/api/payments/update", checkInvoiceW, async (req, res) => {
+router.post("/api/payments/update", async (req, res) => {
 	try {
+
+		if(!req.permissions.page.includes("Payments W")) {
+			res.status(401).send("Unauthorized")
+			return
+		}
+
 		let _id = req.body._id
 		let invoiceID = req.body.invoiceID
 
