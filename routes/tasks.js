@@ -1,5 +1,6 @@
 const router     = new (require('express')).Router()
 const {Tasks} = require("../models/Tasks");
+const {Clients} = require("../models/Clients");
 const {Payments} = require("../models/Payments");
 const {getID, updateID} = require("../models/Utils");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
@@ -220,6 +221,27 @@ router.get("/api/tasks/search/all", async (req, res) => {
 	res.json(tasks)
 })
 
+router.get("/api/tasks/payments/search/add", async (req, res) => {
+	try {
+		let query = req.query
+
+		let task = await Tasks.findOne(query);
+		if(!task)
+			throw new Error("Task not found")
+		task = task._doc
+
+		if(!task.clientID) {
+			let client = await Clients.findOne({_id: task._clientID})
+			task.clientID = client.clientID
+		}
+
+		res.json(task)
+
+	} catch (err) {
+		res.status(500).send(err.message)
+	}
+
+})
 
 router.post("/api/tasks/update", checkW, async (req, res) => {
 	try {
