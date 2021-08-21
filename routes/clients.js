@@ -2,6 +2,8 @@ const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
 const {Clients} = require("../models/Clients");
+const {generateExcel} = require("../modules/excelProcessor");
+const clientFields = require("../statics/clientFields");
 const {getID, updateID} = require("../models/Utils");
 const {
 	getAllFiles,
@@ -134,6 +136,57 @@ router.get("/api/clients/search", async (req, res) => {
 	}
 })
 
+router.get("/api/clients/export", async (req, res) => {
+	try{
+
+		let others = {}
+
+		if(!req.query.clientType && !req.query.searchAll) {
+			res.send()
+			return
+		}
+
+		let query = {
+			$and:[
+				{
+					$or:[
+						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ userID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					]
+				}
+			],
+		}
+
+		if(!req.query.searchAll) {
+			query['$and'].push({
+				clientType: req.query.clientType
+			})
+		}
+
+		if(!checkR(req))
+			query['$and'].push({
+				addedBy : req.user.id
+			})
+			
+		let results = await Clients.find(query)
+			.collation({locale: "en" })
+
+		results = results.map(val => ({...val._doc, createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+
+		let file = await generateExcel(results, clientFields[req.query.clientType], "clientsExport" + (+new Date))
+
+		res.download("/tmp/" + file,(err) => {
+			fs.unlink("/tmp/" + file, () => {})
+		})
+
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
 
 router.get("/api/clients/", async (req, res) => {
 	try{
@@ -209,15 +262,12 @@ router.post("/api/clients/update", checkW, async (req, res) => {
 				...req.body
 			});
 
-		// console.time("S3")
 		if(files?.length) {
 			await Promise.all(files.map(async (file) => {
 				await uploadToS3(clientID + "/" + file.name, file.path)
 				fs.unlink(file.path, () => {})
 			}))
 		}
-		// console.timeEnd("S3")
-		// console.timeEnd("Uploading")
 
 		res.send("OK")
 	} catch (err) {

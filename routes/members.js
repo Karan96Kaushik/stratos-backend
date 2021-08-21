@@ -1,16 +1,20 @@
-const router     = new (require('express')).Router()
-const mongoose = require("mongoose");
-const {Members} = require("../models/Members");
+const fs = require('fs');
 const crypto = require("crypto");
-const {encodeAuth, decodeAuth} = require("../modules/authCodec")
+const mongoose = require("mongoose");
+const router     = new (require('express')).Router()
+
+const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils")
+
+const {generateExcel} = require("../modules/excelProcessor");
+const {memberFields} = require("../statics/memberFields");
+const {encodeAuth, decodeAuth} = require("../modules/authCodec")
 const {
 	getAllFiles,
 	uploadToS3,
 	getFilePath
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
-const fs = require('fs');
 
 const tmpdir = "/tmp/"
 
@@ -91,6 +95,31 @@ router.get("/api/members/search", checkR, async (req, res) => {
 		})
 
 		res.json(members)
+
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err)
+	}
+	
+})
+
+router.get("/api/members/export", checkR, async (req, res) => {
+	try {
+		let members = await Members.find({...req.query});
+
+		members = members.map((val) => {
+			val.password = undefined
+			const perms = Object.assign({}, decodeAuth(val.permissions))
+
+			val._doc.permissions = decodeAuth(val.permissions)
+			return val._doc
+		})
+
+		let file = await generateExcel(members, memberFields, "membersExport" + (+new Date))
+
+		res.download("/tmp/" + file,(err) => {
+			fs.unlink("/tmp/" + file, () => {})
+		})
 
 	} catch (err) {
 		console.log(err)

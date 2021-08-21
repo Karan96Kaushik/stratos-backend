@@ -1,9 +1,15 @@
 const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
+const fs = require("fs");
+
 const {Leads} = require("../models/Leads");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
+
+const {generateExcel} = require("../modules/excelProcessor");
+const leadFields = require("../statics/leadFields");
+
 const {
 	getAllFiles,
 	uploadToS3,
@@ -123,6 +129,78 @@ router.get("/api/leads/search", async (req, res) => {
 		results = results.map(val => ({...val, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
 
 		res.json(results)
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.get("/api/leads/export", async (req, res) => {
+	try{
+		let others = {}
+
+		if(!req.query.leadType && !req.query.searchAll) {
+			res.send()
+			return
+		}
+
+		let query = {
+			$and:[
+				{
+					$or:[
+						{ leadID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					]
+				}
+			],
+		}
+
+		if(!req.query.searchAll) {
+			query['$and'].push({
+				leadType: req.query.leadType
+			})
+		}
+
+		// non leads-read user can only view their own added leads
+		if(!req.permissions.page.includes("Leads R")) {
+			query['$and'].push({
+				addedBy: req.user.id
+			})
+		}
+
+		let results = await Leads.find(query)
+			.collation({locale: "en" })
+			// .sort({[sortID || "createdTime"]: sortDir || -1});
+
+		results = results.map(val => val._doc)
+
+		// followup duration
+		results = results.map(val => {
+			let followUpDateColor = +new Date(val.followUpDate) - +new Date()
+
+			if(followUpDateColor < 0)						// follow up date passed
+				followUpDateColor = 2
+			else if(followUpDateColor < 1000*60*60*24*3) 	// 3 days pending
+				followUpDateColor = 1
+			else 											// more than 3 days
+				followUpDateColor = 0
+
+			return ({...val, followUpDateColor})
+		})
+
+		// created timestamp
+		results = results.map(val => ({...val, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+
+		console.log(results.length, leadFields[req.query.leadType])
+
+		let file = await generateExcel(results, leadFields[req.query.leadType], "leadsExport" + (+new Date))
+
+		res.download("/tmp/" + file,(err) => {
+			fs.unlink("/tmp/" + file, () => {})
+		})
+
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
