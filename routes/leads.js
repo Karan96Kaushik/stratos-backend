@@ -1,5 +1,6 @@
 const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
+const moment = require("moment");
 const {Leads} = require("../models/Leads");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
@@ -119,7 +120,7 @@ router.get("/api/leads/search", async (req, res) => {
 		})
 
 		// created timestamp
-		results = results.map(val => ({...val, createdTime:val.createdTime.toISOString().split("T")[0]}))
+		results = results.map(val => ({...val, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
 
 		res.json(results)
 	} catch (err) {

@@ -1,6 +1,7 @@
 const router     = new (require('express')).Router()
 const {Tasks} = require("../models/Tasks");
 const {Clients} = require("../models/Clients");
+const moment = require("moment");
 const {Payments} = require("../models/Payments");
 const {getID, updateID} = require("../models/Utils");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
@@ -157,7 +158,7 @@ router.get("/api/tasks/search", async (req, res) => {
 		.skip(rowsPerPage * page)
 		.sort({[sortID || "createdTime"]: sortDir || -1});
 
-	results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
+	results = results.map(val => ({...val._doc, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
 
 	res.json(results)
 })
@@ -206,7 +207,7 @@ router.get("/api/tasks/payments/search", async (req, res) => {
 
 	results = results.map(val => ({...val._doc, payments: taskIDs.filter((v) => (val.taskID == v.taskID))}))
 	results = results.map(val => ({...val, received: val.payments.reduce((tot, curr) => ((Number(curr._doc.receivedAmount) ?? 0) + tot),0)}))
-	results = results.map(val => ({...val, createdTime:val.createdTime.toISOString().split("T")[0]}))
+	results = results.map(val => ({...val, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
 	results = results.map(val => ({...val, total: calculateTotal(val)}))
 	results = results.map(val => ({...val, balance: val.total - val.received}))
 

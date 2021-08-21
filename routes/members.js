@@ -123,6 +123,18 @@ router.get("/api/members/", async (req, res) => {
 	
 })
 
+router.delete("/api/members/", async (req, res) => {
+	try {
+		let members = await Members.deleteOne({...req.query});
+		res.send("OK")
+
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err)
+	}
+	
+})
+
 router.post("/api/members/update", checkW, async (req, res) => {
 	try {
 		let _id = req.body._id

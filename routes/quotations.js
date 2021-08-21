@@ -1,5 +1,6 @@
 const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
+const moment = require("moment");
 const {Quotations} = require("../models/Quotations");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
@@ -79,7 +80,7 @@ router.get("/api/quotations/search", async (req, res) => {
 		
 		results = results.map(val => {
 			let user = userIds.find(v => String(v._id) == String(val.addedBy))
-			return ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0], addedBy: user.userName})
+			return ({...val._doc, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"), addedBy: user.userName})
 		})
 
 		res.json(results)

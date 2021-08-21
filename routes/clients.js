@@ -1,5 +1,6 @@
 const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
+const moment = require("moment");
 const {Clients} = require("../models/Clients");
 const {getID, updateID} = require("../models/Utils");
 const {
@@ -124,9 +125,8 @@ router.get("/api/clients/search", async (req, res) => {
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
-		results = results.map(val => ({...val._doc, createdTime:val.createdTime.toISOString().split("T")[0]}))
+		results = results.map(val => ({...val._doc, createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
 
-		// console.log(results)
 		res.json(results)
 	} catch (err) {
 		console.log(err)
