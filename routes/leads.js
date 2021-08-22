@@ -64,71 +64,91 @@ router.post("/api/leads/add", checkLeadW, async (req, res) => {
 	res.send("OK")
 })
 
+const generateQuery = (req) => {
+
+	let others = {}
+
+	if(!req.query.leadType && !req.query.searchAll) {
+		res.send()
+		return
+	}
+
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ leadID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				]
+			}
+		],
+	}
+
+	if(!req.query.searchAll) {
+		query['$and'].push({
+			leadType: req.query.leadType
+		})
+	}
+
+	// add filters to the query, if present
+	Object.keys(req.query.filters ?? []).forEach(filter => {
+
+		// filter is range - date/number
+		if(typeof req.query.filters[filter] == "object") {
+			req.query.filters[filter].forEach((val,i) => {
+				if(val == null)
+					return
+
+				let operator = i == 0 ? "$lt" : "$gt"
+				query['$and'].push({
+					[filter]: {
+						[operator]: val
+					}
+				})	
+			})
+		} 
+		// filter is normal value
+		else {
+			query['$and'].push({
+				[filter]: req.query.filters[filter]
+			})	
+		}
+	})
+
+	// non leads-read user can only view their own added leads
+	if(!req.permissions.page.includes("Leads R")) {
+		query['$and'].push({
+			addedBy: req.user.id
+		})
+	}
+
+	return query
+}
+
+const commonProcessor = (results) => {
+	// created & followup timestamp
+	results = results.map(val => ({
+		...val, 
+		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
+	}))
+
+	return results
+}
+
 router.post("/api/leads/search", async (req, res) => {
 	try{
+
 		req.query = req.body
 
-		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
 		const sortID = req.query.sortID
 		const sortDir = parseInt(req.query.sortDir)
 		const page = parseInt(req.query.page)-1
 
-		if(!req.query.leadType && !req.query.searchAll) {
-			res.send()
-			return
-		}
-
-		let query = {
-			$and:[
-				{
-					$or:[
-						{ leadID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					]
-				}
-			],
-		}
-
-		if(!req.query.searchAll) {
-			query['$and'].push({
-				leadType: req.query.leadType
-			})
-		}
-
-		// add filters to the query, if present
-		Object.keys(req.query.filters ?? []).forEach(filter => {
-
-			// filter is range - date/number
-			if(typeof req.query.filters[filter] == "object") {
-				req.query.filters[filter].forEach((val,i) => {
-					if(val == null)
-						return
-
-					let operator = i == 0 ? "$lt" : "$gt"
-					query['$and'].push({
-						[filter]: {
-							[operator]: val
-						}
-					})	
-				})
-			} 
-			// filter is normal value
-			else {
-				query['$and'].push({
-					[filter]: req.query.filters[filter]
-				})	
-			}
-		})
-
-		// non leads-read user can only view their own added leads
-		if(!req.permissions.page.includes("Leads R")) {
-			query['$and'].push({
-				addedBy: req.user.id
-			})
-		}
+		let query = generateQuery(req)
 
 		let results = await Leads.find(query)
 			.collation({locale: "en" })
@@ -152,12 +172,7 @@ router.post("/api/leads/search", async (req, res) => {
 			return ({...val, followUpDateColor})
 		})
 
-		// created timestamp
-		results = results.map(val => ({
-			...val, 
-			createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
-			followUpDate: val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
-		}))
+		results = commonProcessor(results)
 
 		res.json(results)
 	} catch (err) {
@@ -170,82 +185,14 @@ router.post("/api/leads/export", async (req, res) => {
 	try{
 		req.query = req.body
 
-		let others = {}
-		const rowsPerPage = parseInt(req.query.rowsPerPage)
-		const sortID = req.query.sortID
-		const sortDir = parseInt(req.query.sortDir)
-		const page = parseInt(req.query.page)-1
-
-		if(!req.query.leadType && !req.query.searchAll) {
-			res.send()
-			return
-		}
-
-		let query = {
-			$and:[
-				{
-					$or:[
-						{ leadID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					]
-				}
-			],
-		}
-
-		if(!req.query.searchAll) {
-			query['$and'].push({
-				leadType: req.query.leadType
-			})
-		}
-
-		// add filters to the query, if present
-		Object.keys(req.query.filters ?? []).forEach(filter => {
-
-			// filter is range - date/number
-			if(typeof req.query.filters[filter] == "object") {
-				req.query.filters[filter].forEach((val,i) => {
-					if(val == null)
-						return
-					
-					let operator = i == 0 ? "$lt" : "$gt"
-					query['$and'].push({
-						[filter]: {
-							[operator]: val
-						}
-					})	
-				})
-			} 
-			// filter is normal value
-			else {
-				query['$and'].push({
-					[filter]: req.query.filters[filter]
-				})	
-			}
-		})
-
-		// non leads-read user can only view their own added leads
-		if(!req.permissions.page.includes("Leads R")) {
-			query['$and'].push({
-				addedBy: req.user.id
-			})
-		}
+		let query = generateQuery(req)
 
 		let results = await Leads.find(query)
 			.collation({locale: "en" })
-			// .limit(rowsPerPage)
-			// .skip(rowsPerPage * page)
-			// .sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = results.map(val => val._doc)
 
-		// created timestamp
-		results = results.map(val => ({
-			...val, 
-			createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
-			followUpDate: val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
-		}))
+		results = commonProcessor(results)
 
 		let file = await generateExcel(results, leadFields[req.query.leadType], "leadsExport" + (+new Date))
 

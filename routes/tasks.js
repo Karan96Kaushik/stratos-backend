@@ -112,6 +112,80 @@ router.delete("/api/tasks/", checkW, async (req, res) => {
 	res.send("ok")
 })
 
+const generateQuery = (req) => {
+
+	if(!req.query.serviceType && !req.query.searchAll) {
+		res.send()
+		return
+	}
+
+	if(!checkTaskPermission(req, req.query.serviceType)) {
+		res.status(401).send("Unauthorized to view this task type")
+		return
+	}
+
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				]
+			}
+		],
+	}
+
+	// add filters to the query, if present
+	Object.keys(req.query.filters ?? []).forEach(filter => {
+
+		// filter is range - date/number
+		if(typeof req.query.filters[filter] == "object") {
+			req.query.filters[filter].forEach((val,i) => {
+				if(val == null)
+					return
+
+				let operator = i == 0 ? "$lt" : "$gt"
+				query['$and'].push({
+					[filter]: {
+						[operator]: val
+					}
+				})	
+			})
+		} 
+		// filter is normal value
+		else {
+			query['$and'].push({
+				[filter]: req.query.filters[filter]
+			})	
+		}
+	})
+
+	if(!req.query.searchAll) {
+		query['$and'].push({
+			serviceType: req.query.serviceType
+		})
+	}
+
+	if(!checkR(req))
+		query['$and'].push({
+			addedBy: req.user.id
+		})
+	
+	return query
+}
+
+const commonProcessor = (results) => {
+
+	results = results.map(val => ({
+		...val._doc, 
+		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")
+	}))
+
+	return results
+
+}
+
 router.post("/api/tasks/search", async (req, res) => {
 
 	try {
@@ -123,71 +197,15 @@ router.post("/api/tasks/search", async (req, res) => {
 		const sortID = req.query.sortID
 		const sortDir = parseInt(req.query.sortDir)
 
-		if(!req.query.serviceType && !req.query.searchAll) {
-			res.send()
-			return
-		}
+		let query = generateQuery(req)
 
-		if(!checkTaskPermission(req, req.query.serviceType)) {
-			res.status(401).send("Unauthorized to view this task type")
-			return
-		}
-
-		let query = {
-			$and:[
-				{
-					$or:[
-						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					]
-				}
-			],
-		}
-
-		// add filters to the query, if present
-		Object.keys(req.query.filters ?? []).forEach(filter => {
-
-			// filter is range - date/number
-			if(typeof req.query.filters[filter] == "object") {
-				req.query.filters[filter].forEach((val,i) => {
-					if(val == null)
-						return
-
-					let operator = i == 0 ? "$lt" : "$gt"
-					query['$and'].push({
-						[filter]: {
-							[operator]: val
-						}
-					})	
-				})
-			} 
-			// filter is normal value
-			else {
-				query['$and'].push({
-					[filter]: req.query.filters[filter]
-				})	
-			}
-		})
-
-		if(!req.query.searchAll) {
-			query['$and'].push({
-				serviceType: req.query.serviceType
-			})
-		}
-
-		if(!checkR(req))
-			query['$and'].push({
-				addedBy: req.user.id
-			})
-		
 		let results = await Tasks.find(query)
 			.collation({locale: "en" })
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
-		results = results.map(val => ({...val._doc, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+		results = commonProcessor(results)
 
 		res.json(results)
 	}
@@ -207,7 +225,7 @@ const calculateTotal = (val) => (
 router.post("/api/tasks/payments/search", async (req, res) => {
 
 	req.query = req.body
-	
+
 	let others = {}
 	const rowsPerPage = parseInt(req.query.rowsPerPage)
 	const page = parseInt(req.query.page)-1

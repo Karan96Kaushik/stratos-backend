@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const {Users} = require("../models/Users");
+const {Clients} = require("../models/Clients");
 const crypto = require("crypto");
 const {Utils} = require("../models/Utils");
 mongoose
@@ -8,8 +8,7 @@ mongoose
 		useUnifiedTopology: true,
 		useFindAndModify: false
 	})
-	.then(
-		() => {
+	.then(async () => {
 		  console.log("Database successfully connected!");
 
 		//   let info = {
@@ -24,11 +23,13 @@ mongoose
 		// 	.digest('hex')
 	
 		// const save = Utils.create({...info});
-		// const save = Users.create({...info, isActive:true});
+		
+		// const save = await Clients.updateMany({clientType:"litigation"}, {clientType:"Litigation"});
+
+		// console.log(save)
   
   
 		},
 		error => {
 		  console.log("Database could not connected", error);
-		}
-	);
+	});

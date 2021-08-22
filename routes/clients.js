@@ -83,6 +83,48 @@ router.post("/api/clients/add", checkW, async (req, res) => {
 	}
 })
 
+const generateQuery = (req) => {
+
+	if(!req.query.clientType && !req.query.searchAll) {
+		res.json({})
+		return
+	}
+
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ userID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ email: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ mobile: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				]
+			}
+		],
+	}
+
+	if(!req.query.searchAll) {
+		query['$and'].push({
+			clientType: req.query.clientType
+		})
+	}
+
+	if(!checkR(req))
+		query['$and'].push({
+			addedBy : req.user.id
+		})
+
+	return query
+}
+
+const commonProcessor = (results) => {
+	results = results.map(val => ({...val._doc, createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+	return results
+}
+
 router.get("/api/clients/search", async (req, res) => {
 	try{
 
@@ -92,42 +134,15 @@ router.get("/api/clients/search", async (req, res) => {
 		const sortID = req.query.sortID
 		const sortDir = parseInt(req.query.sortDir)
 
-		if(!req.query.clientType && !req.query.searchAll) {
-			res.json({})
-			return
-		}
-
-		let query = {
-			$and:[
-				{
-					$or:[
-						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ userID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					]
-				}
-			],
-		}
-
-		if(!req.query.searchAll) {
-			query['$and'].push({
-				clientType: req.query.clientType
-			})
-		}
-
-		if(!checkR(req))
-			query['$and'].push({
-				addedBy : req.user.id
-			})
+		let query = generateQuery(req)
 			
 		let results = await Clients.find(query)
 			.collation({locale: "en" })
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
-		results = results.map(val => ({...val._doc, createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+
+		results = commonProcessor(results)
 
 		res.json(results)
 	} catch (err) {
@@ -139,44 +154,14 @@ router.get("/api/clients/search", async (req, res) => {
 router.get("/api/clients/export", async (req, res) => {
 	try{
 
-		let others = {}
+		let query = generateQuery(req)
 
-		if(!req.query.clientType && !req.query.searchAll) {
-			res.send()
-			return
-		}
-
-		let query = {
-			$and:[
-				{
-					$or:[
-						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ userID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					]
-				}
-			],
-		}
-
-		if(!req.query.searchAll) {
-			query['$and'].push({
-				clientType: req.query.clientType
-			})
-		}
-
-		if(!checkR(req))
-			query['$and'].push({
-				addedBy : req.user.id
-			})
-			
 		let results = await Clients.find(query)
 			.collation({locale: "en" })
 
-		results = results.map(val => ({...val._doc, createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+		results = commonProcessor(results)
 
-		let file = await generateExcel(results, clientFields[req.query.clientType], "clientsExport" + (+new Date))
+		let file = await generateExcel(results, clientFields[req.query.searchAll ? "all" : req.query.clientType], "clientsExport" + (+new Date))
 
 		res.download("/tmp/" + file,(err) => {
 			fs.unlink("/tmp/" + file, () => {})

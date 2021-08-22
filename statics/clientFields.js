@@ -1,6 +1,19 @@
 module.exports = {
-    project: {
-        name:"Project",
+    all: {
+        texts: [
+            {label:"Date Added", id:"createdTime"},
+            {label:"Name", id:"name"},
+            {label:"Client Type", id:"clientType", isRequired:true},
+            {label:"Client ID", id:"clientID", isRequired:true},
+            {label:"UserID", id:"userID"},
+            {label:"password", id:"password"},
+            {label:"Mobile", id:"mobile"},
+            {label:"Email", id:"email"},
+            {label:"Remarks", id:"remarks"},
+        ],
+        checkboxes: []
+    },
+    Developers: {
         texts:[
             {label:"Date Added", id:"createdTime", isRequired:true},
             {label:"Client ID", id:"clientID", isRequired:true},
@@ -31,8 +44,7 @@ module.exports = {
             {label:"Extension", id:"extension"},
         ]
     },
-    agent: {
-        name:"Agent",
+    Agents: {
         texts:[
             {label:"Date Added", id:"createdTime", isRequired:true},
             {label:"Client ID", id:"clientID", isRequired:true},
@@ -53,8 +65,7 @@ module.exports = {
         checkboxes:[
         ]
     },
-    litigation: {
-        name:"Litigation",
+    Litigation: {
         texts:[
             {label:"Date Added", id:"createdTime", isRequired:true},
             {label:"Client ID", id:"clientID", isRequired:true},
