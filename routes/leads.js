@@ -64,8 +64,10 @@ router.post("/api/leads/add", checkLeadW, async (req, res) => {
 	res.send("OK")
 })
 
-router.get("/api/leads/search", async (req, res) => {
+router.post("/api/leads/search", async (req, res) => {
 	try{
+		req.query = req.body
+
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
 		const sortID = req.query.sortID
@@ -96,6 +98,31 @@ router.get("/api/leads/search", async (req, res) => {
 			})
 		}
 
+		// add filters to the query, if present
+		Object.keys(req.query.filters ?? []).forEach(filter => {
+
+			// filter is range - date/number
+			if(typeof req.query.filters[filter] == "object") {
+				req.query.filters[filter].forEach((val,i) => {
+					if(val == null)
+						return
+
+					let operator = i == 0 ? "$lt" : "$gt"
+					query['$and'].push({
+						[filter]: {
+							[operator]: val
+						}
+					})	
+				})
+			} 
+			// filter is normal value
+			else {
+				query['$and'].push({
+					[filter]: req.query.filters[filter]
+				})	
+			}
+		})
+
 		// non leads-read user can only view their own added leads
 		if(!req.permissions.page.includes("Leads R")) {
 			query['$and'].push({
@@ -111,7 +138,7 @@ router.get("/api/leads/search", async (req, res) => {
 
 		results = results.map(val => val._doc)
 
-		// followup duration
+		// followup duration color coding
 		results = results.map(val => {
 			let followUpDateColor = +new Date(val.followUpDate) - +new Date()
 
@@ -126,7 +153,11 @@ router.get("/api/leads/search", async (req, res) => {
 		})
 
 		// created timestamp
-		results = results.map(val => ({...val, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+		results = results.map(val => ({
+			...val, 
+			createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+			followUpDate:moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
+		}))
 
 		res.json(results)
 	} catch (err) {
@@ -135,9 +166,15 @@ router.get("/api/leads/search", async (req, res) => {
 	}
 })
 
-router.get("/api/leads/export", async (req, res) => {
+router.post("/api/leads/export", async (req, res) => {
 	try{
+		req.query = req.body
+
 		let others = {}
+		const rowsPerPage = parseInt(req.query.rowsPerPage)
+		const sortID = req.query.sortID
+		const sortDir = parseInt(req.query.sortDir)
+		const page = parseInt(req.query.page)-1
 
 		if(!req.query.leadType && !req.query.searchAll) {
 			res.send()
@@ -163,6 +200,31 @@ router.get("/api/leads/export", async (req, res) => {
 			})
 		}
 
+		// add filters to the query, if present
+		Object.keys(req.query.filters ?? []).forEach(filter => {
+
+			// filter is range - date/number
+			if(typeof req.query.filters[filter] == "object") {
+				req.query.filters[filter].forEach((val,i) => {
+					if(val == null)
+						return
+					
+					let operator = i == 0 ? "$lt" : "$gt"
+					query['$and'].push({
+						[filter]: {
+							[operator]: val
+						}
+					})	
+				})
+			} 
+			// filter is normal value
+			else {
+				query['$and'].push({
+					[filter]: req.query.filters[filter]
+				})	
+			}
+		})
+
 		// non leads-read user can only view their own added leads
 		if(!req.permissions.page.includes("Leads R")) {
 			query['$and'].push({
@@ -172,28 +234,18 @@ router.get("/api/leads/export", async (req, res) => {
 
 		let results = await Leads.find(query)
 			.collation({locale: "en" })
+			// .limit(rowsPerPage)
+			// .skip(rowsPerPage * page)
 			// .sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = results.map(val => val._doc)
 
-		// followup duration
-		results = results.map(val => {
-			let followUpDateColor = +new Date(val.followUpDate) - +new Date()
-
-			if(followUpDateColor < 0)						// follow up date passed
-				followUpDateColor = 2
-			else if(followUpDateColor < 1000*60*60*24*3) 	// 3 days pending
-				followUpDateColor = 1
-			else 											// more than 3 days
-				followUpDateColor = 0
-
-			return ({...val, followUpDateColor})
-		})
-
 		// created timestamp
-		results = results.map(val => ({...val, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
-
-		console.log(results.length, leadFields[req.query.leadType])
+		results = results.map(val => ({
+			...val, 
+			createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+			followUpDate:moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
+		}))
 
 		let file = await generateExcel(results, leadFields[req.query.leadType], "leadsExport" + (+new Date))
 
