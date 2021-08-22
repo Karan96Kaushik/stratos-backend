@@ -169,7 +169,10 @@ const generateQuery = (req) => {
 
 	if(!checkR(req))
 		query['$and'].push({
-			addedBy: req.user.id
+			$or:[
+				{addedBy: req.user.id},
+				{_memberID: req.user.id},
+			]
 		})
 	
 	return query

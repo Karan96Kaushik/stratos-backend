@@ -34,6 +34,7 @@ app.use(routes.signUp)
 /**************** Auth ************************/
 
 app.use(require('./modules/auth').auth)
+
 app.use(routes.clients)
 app.use(routes.members)
 app.use(routes.tasks)
@@ -43,6 +44,7 @@ app.use(routes.invoices)
 app.use(routes.utils)
 app.use(routes.accounts)
 app.use(routes.payments)
+app.use(routes.dashboard)
 
 /*****************  ***********************/
 

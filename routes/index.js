@@ -10,4 +10,5 @@ module.exports = {
 	payments: require('./payments'),
 	utils: require('./utils'),
 	accounts: require('./accounts'),
+	dashboard: require('./dashboard'),
 }
