@@ -93,7 +93,7 @@ router.get("/api/clients/search", async (req, res) => {
 		const sortDir = parseInt(req.query.sortDir)
 
 		if(!req.query.clientType && !req.query.searchAll) {
-			res.send()
+			res.json({})
 			return
 		}
 
