@@ -156,7 +156,7 @@ router.post("/api/leads/search", async (req, res) => {
 		results = results.map(val => ({
 			...val, 
 			createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
-			followUpDate:moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
+			followUpDate: val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
 		}))
 
 		res.json(results)
@@ -244,7 +244,7 @@ router.post("/api/leads/export", async (req, res) => {
 		results = results.map(val => ({
 			...val, 
 			createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
-			followUpDate:moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
+			followUpDate: val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
 		}))
 
 		let file = await generateExcel(results, leadFields[req.query.leadType], "leadsExport" + (+new Date))

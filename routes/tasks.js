@@ -112,55 +112,89 @@ router.delete("/api/tasks/", checkW, async (req, res) => {
 	res.send("ok")
 })
 
-router.get("/api/tasks/search", async (req, res) => {
-	let others = {}
-	const rowsPerPage = parseInt(req.query.rowsPerPage)
-	const page = parseInt(req.query.page)-1
-	const sortID = req.query.sortID
-	const sortDir = parseInt(req.query.sortDir)
+router.post("/api/tasks/search", async (req, res) => {
 
-	if(!req.query.serviceType && !req.query.searchAll) {
-		res.send()
-		return
-	}
+	try {
+		req.query = req.body
 
-	if(!checkTaskPermission(req, req.query.serviceType)) {
-		res.status(401).send("Unauthorized to view this task type")
-		return
-	}
+		let others = {}
+		const rowsPerPage = parseInt(req.query.rowsPerPage)
+		const page = parseInt(req.query.page)-1
+		const sortID = req.query.sortID
+		const sortDir = parseInt(req.query.sortDir)
 
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				]
+		if(!req.query.serviceType && !req.query.searchAll) {
+			res.send()
+			return
+		}
+
+		if(!checkTaskPermission(req, req.query.serviceType)) {
+			res.status(401).send("Unauthorized to view this task type")
+			return
+		}
+
+		let query = {
+			$and:[
+				{
+					$or:[
+						{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+						{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					]
+				}
+			],
+		}
+
+		// add filters to the query, if present
+		Object.keys(req.query.filters ?? []).forEach(filter => {
+
+			// filter is range - date/number
+			if(typeof req.query.filters[filter] == "object") {
+				req.query.filters[filter].forEach((val,i) => {
+					if(val == null)
+						return
+
+					let operator = i == 0 ? "$lt" : "$gt"
+					query['$and'].push({
+						[filter]: {
+							[operator]: val
+						}
+					})	
+				})
+			} 
+			// filter is normal value
+			else {
+				query['$and'].push({
+					[filter]: req.query.filters[filter]
+				})	
 			}
-		],
-	}
-
-	if(!req.query.searchAll) {
-		query['$and'].push({
-			serviceType: req.query.serviceType
 		})
+
+		if(!req.query.searchAll) {
+			query['$and'].push({
+				serviceType: req.query.serviceType
+			})
+		}
+
+		if(!checkR(req))
+			query['$and'].push({
+				addedBy: req.user.id
+			})
+		
+		let results = await Tasks.find(query)
+			.collation({locale: "en" })
+			.limit(rowsPerPage)
+			.skip(rowsPerPage * page)
+			.sort({[sortID || "createdTime"]: sortDir || -1});
+
+		results = results.map(val => ({...val._doc, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+
+		res.json(results)
 	}
-
-	if(!checkR(req))
-		query['$and'].push({
-			addedBy: req.user.id
-		})
-	
-	let results = await Tasks.find(query)
-		.collation({locale: "en" })
-		.limit(rowsPerPage)
-		.skip(rowsPerPage * page)
-		.sort({[sortID || "createdTime"]: sortDir || -1});
-
-	results = results.map(val => ({...val._doc, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
-
-	res.json(results)
+	catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
 })
 
 const calculateTotal = (val) => (
@@ -170,7 +204,10 @@ const calculateTotal = (val) => (
 	Number(val.sroFees ?? 0)
 )
 
-router.get("/api/tasks/payments/search", async (req, res) => {
+router.post("/api/tasks/payments/search", async (req, res) => {
+
+	req.query = req.body
+	
 	let others = {}
 	const rowsPerPage = parseInt(req.query.rowsPerPage)
 	const page = parseInt(req.query.page)-1
@@ -193,6 +230,31 @@ router.get("/api/tasks/payments/search", async (req, res) => {
 			}
 		],
 	}
+
+	// add filters to the query, if present
+	Object.keys(req.query.filters ?? []).forEach(filter => {
+
+		// filter is range - date/number
+		if(typeof req.query.filters[filter] == "object") {
+			req.query.filters[filter].forEach((val,i) => {
+				if(val == null)
+					return
+
+				let operator = i == 0 ? "$lt" : "$gt"
+				query['$and'].push({
+					[filter]: {
+						[operator]: val
+					}
+				})	
+			})
+		} 
+		// filter is normal value
+		else {
+			query['$and'].push({
+				[filter]: req.query.filters[filter]
+			})	
+		}
+	})
 	
 	let results = await Tasks.find(query)
 		.collation({locale: "en" })

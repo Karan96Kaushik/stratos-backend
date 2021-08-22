@@ -16,7 +16,7 @@ let Tasks = new Schema(
     serviceType:String,
     remarks:String,
 
-    priority:Number,
+    priority:String,
 
     letterHead:Boolean,
     form3:Boolean,
