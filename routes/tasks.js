@@ -114,16 +114,6 @@ router.delete("/api/tasks/", checkW, async (req, res) => {
 
 const generateQuery = (req) => {
 
-	if(!req.query.serviceType && !req.query.searchAll) {
-		res.send()
-		return
-	}
-
-	if(!checkTaskPermission(req, req.query.serviceType)) {
-		res.status(401).send("Unauthorized to view this task type")
-		return
-	}
-
 	let query = {
 		$and:[
 			{
@@ -134,6 +124,16 @@ const generateQuery = (req) => {
 				]
 			}
 		],
+	}
+
+	if(!req.query.serviceType) {
+		query['$and'].push({'$or':
+			req.permissions.service.map((svc) => ({
+				serviceType: svc
+			}))
+		})
+
+		// console.log(query['$and'])
 	}
 
 	// add filters to the query, if present
@@ -199,6 +199,16 @@ router.post("/api/tasks/search", async (req, res) => {
 		const page = parseInt(req.query.page)-1
 		const sortID = req.query.sortID
 		const sortDir = parseInt(req.query.sortDir)
+
+		if(!req.query.serviceType && !req.query.searchAll) {
+			res.json([])
+			return
+		}
+
+		if(req.query.serviceType && !checkTaskPermission(req, req.query.serviceType)) {
+			res.status(401).send("Unauthorized to view this task type")
+			return
+		}
 
 		let query = generateQuery(req)
 
