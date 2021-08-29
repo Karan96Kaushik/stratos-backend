@@ -2,6 +2,8 @@ const router     = new (require('express')).Router()
 const moment = require("moment");
 const {Invoices} = require("../models/Invoices");
 const {Members} = require("../models/Members");
+const {invoiceFields} = require("../statics/invoiceFields")
+const {generateExcel} = require("../modules/excelProcessor")
 const {getID, updateID} = require("../models/Utils");
 const {
 	getAllFiles,
@@ -45,8 +47,62 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 	res.send("OK")
 })
 
-router.get("/api/invoices/search", async (req, res) => {
+const generateQuery = (req) => {
+	let others = {}
+
+	if(!req.permissions.page.includes("Invoices R"))
+		others.addedBy = req.user.id
+
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ invoiceID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				],
+				...others
+			}
+		],
+	}
+
+	// add filters to the query, if present
+	Object.keys(req.query.filters ?? []).forEach(filter => {
+
+		// filter is range - date/number
+		if(typeof req.query.filters[filter] == "object") {
+			req.query.filters[filter].forEach((val,i) => {
+				if(val == null)
+					return
+
+				let operator = i == 0 ? "$lt" : "$gt"
+				query['$and'].push({
+					[filter]: {
+						[operator]: val
+					}
+				})	
+			})
+		} 
+		// filter is normal value
+		else {
+			query['$and'].push({
+				[filter]: req.query.filters[filter]
+			})	
+		}
+	})
+
+	return query
+}
+
+const commonProcessor = (results) => {
+	results = results.map(val => ({...val._doc, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+	return results
+}
+
+router.post("/api/invoices/search", async (req, res) => {
 	try{
+
+		req.query = req.body
 
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
@@ -54,21 +110,7 @@ router.get("/api/invoices/search", async (req, res) => {
 		const sortDir = parseInt(req.query.sortDir)
 		const page = parseInt(req.query.page)-1
 
-		if(!req.permissions.page.includes("Invoices R"))
-			others.addedBy = req.user.id
-
-		let query = {
-			$and:[
-				{
-					$or:[
-						{ invoiceID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					],
-					...others
-				}
-			],
-		}
+		let query = generateQuery(req)
 
 		let results = await Invoices.find(query)
 			.collation({locale: "en" })
@@ -76,9 +118,33 @@ router.get("/api/invoices/search", async (req, res) => {
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
-		results = results.map(val => ({...val._doc, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+		results = commonProcessor(results)
 
 		res.json(results)
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.post("/api/invoices/export", async (req, res) => {
+	try{
+
+		req.query = req.body
+
+		let query = generateQuery(req)
+
+		let results = await Invoices.find(query)
+			.collation({locale: "en" })
+
+		results = commonProcessor(results)
+
+		let file = await generateExcel(results, invoiceFields["all"], "invoicesExport" + (+new Date))
+
+		res.download("/tmp/" + file,(err) => {
+			fs.unlink("/tmp/" + file, () => {})
+		})
+
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)

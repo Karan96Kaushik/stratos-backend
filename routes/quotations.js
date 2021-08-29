@@ -4,6 +4,8 @@ const moment = require("moment");
 const {Quotations} = require("../models/Quotations");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
+const {quotationFields} = require("../statics/quotationFields")
+const {generateExcel} = require("../modules/excelProcessor")
 const {
 	getAllFiles,
 	uploadToS3,
@@ -47,26 +49,81 @@ router.post("/api/quotations/add", checkQuotationW, async (req, res) => {
 	res.send("OK")
 })
 
-router.get("/api/quotations/search", async (req, res) => {
+const generateQuery = (req) => {
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ quotationID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ relatedProject: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				]
+			}
+		],
+	}
+
+	// add filters to the query, if present
+	Object.keys(req.query.filters ?? []).forEach(filter => {
+
+		// filter is range - date/number
+		if(typeof req.query.filters[filter] == "object") {
+			req.query.filters[filter].forEach((val,i) => {
+				if(val == null)
+					return
+
+				let operator = i == 0 ? "$lt" : "$gt"
+				query['$and'].push({
+					[filter]: {
+						[operator]: val
+					}
+				})	
+			})
+		} 
+		// filter is normal value
+		else {
+			query['$and'].push({
+				[filter]: req.query.filters[filter]
+			})	
+		}
+	})
+
+	// console.log(JSON.stringify(query, null, 4))
+
+	return query
+}
+
+const commonProcessor = async (results) => {
+
+	let userIds = results.map(val => val._doc.addedBy)
+
+	userIds = await Members.find({_id: {$in: userIds}})
+	
+	results = results.map(val => {
+		let user = userIds.find(v => String(v._id) == String(val.addedBy))
+		return ({
+			...val._doc, 
+			createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"), 
+			addedBy: user.userName,
+			memberID: user.memberID
+		})
+	})
+
+	return results
+}
+
+router.post("/api/quotations/search", async (req, res) => {
 	try{
+
+		req.query = req.body
+
+		let query = generateQuery(req)
+
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
 		const sortID = req.query.sortID
 		const sortDir = parseInt(req.query.sortDir)
 		const page = parseInt(req.query.page)-1
-
-		let query = {
-			$and:[
-				{
-					$or:[
-						{ quotationID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-						{ relatedProject: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					]
-				}
-			],
-		}
 
 		let results = await Quotations.find(query)
 			.collation({locale: "en" })
@@ -74,16 +131,33 @@ router.get("/api/quotations/search", async (req, res) => {
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
-		let userIds = results.map(val => val._doc.addedBy)
-
-		userIds = await Members.find({_id: {$in: userIds}})
-		
-		results = results.map(val => {
-			let user = userIds.find(v => String(v._id) == String(val.addedBy))
-			return ({...val._doc, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"), addedBy: user.userName})
-		})
+		results = await commonProcessor(results)
 
 		res.json(results)
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.post("/api/quotations/export", async (req, res) => {
+	try{
+
+		req.query = req.body
+
+		let query = generateQuery(req)
+
+		let results = await Quotations.find(query)
+			.collation({locale: "en" })
+
+		results = await commonProcessor(results)
+
+		let file = await generateExcel(results, quotationFields["all"], "quotationsExport" + (+new Date))
+
+		res.download("/tmp/" + file,(err) => {
+			fs.unlink("/tmp/" + file, () => {})
+		})
+
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)

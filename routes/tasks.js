@@ -5,6 +5,9 @@ const moment = require("moment");
 const {Payments} = require("../models/Payments");
 const {getID, updateID} = require("../models/Utils");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
+const {generateExcel} = require("../modules/excelProcessor");
+const {taskFields} = require("../statics/taskFields");
+const fs = require("fs");
 const {
 	getAllFiles,
 	uploadToS3,
@@ -126,6 +129,7 @@ const generateQuery = (req) => {
 		],
 	}
 
+	// search only the tasks that are permitted
 	if(!req.query.serviceType)
 		query['$and'].push({'$or':
 			req.permissions.service.map((svc) => ({
@@ -224,6 +228,29 @@ router.post("/api/tasks/search", async (req, res) => {
 		res.json(results)
 	}
 	catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.post("/api/tasks/export", async (req, res) => {
+	try{
+		req.query = req.body
+
+		let query = generateQuery(req)
+
+		let results = await Tasks.find(query)
+			.collation({locale: "en" })
+
+		results = commonProcessor(results)
+
+		let file = await generateExcel(results, taskFields[req.query.searchAll ? "all" : req.query.serviceType], "tasksExport" + (+new Date))
+
+		res.download("/tmp/" + file,(err) => {
+			fs.unlink("/tmp/" + file, () => {})
+		})
+
+	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
 	}
