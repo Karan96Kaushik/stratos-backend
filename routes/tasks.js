@@ -126,15 +126,12 @@ const generateQuery = (req) => {
 		],
 	}
 
-	if(!req.query.serviceType) {
+	if(!req.query.serviceType)
 		query['$and'].push({'$or':
 			req.permissions.service.map((svc) => ({
 				serviceType: svc
 			}))
 		})
-
-		// console.log(query['$and'])
-	}
 
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
@@ -182,7 +179,11 @@ const commonProcessor = (results) => {
 
 	results = results.map(val => ({
 		...val._doc, 
-		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")
+		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		billAmount: undefined,
+		gst: undefined,
+		govtFees: undefined,
+		sroFees: undefined
 	}))
 
 	return results
