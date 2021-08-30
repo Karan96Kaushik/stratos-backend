@@ -368,6 +368,29 @@ const taskFields = {
 
 const allTasks = Object.keys(taskFields)
 
+let taskPayments = {
+    "all":{
+        texts:  [
+            {label:"Task Date", id: "createdTime"},
+            {label:"Task ID", id: "taskID"},
+            {label:"Type", id: "serviceType", options:["",...allTasks]},
+            {label:"Client ID", id: "clientID"},
+            {label:"Client Name", id: "clientName"},
+            {label:"Status", id: "status", options:allStatuses},
+            {label:"Remarks", id: "remarks"},
+            {label:"Bill Amount", id:"billAmount", type:"number"},
+            {label:"GST", id:"gst", type:"number"},
+            {label:"SRO Fees", id:"sroFees", type:"number"},
+            {label:"Government Fees", id:"govtFees", type:"number"},
+            {label:"Received", id:"received", type:"number"},
+            {label:"Total", id:"total", type:"number"},
+            {label:"Balance", id:"balance", type:"number"},
+        // {label:"Files", id:"files", type:"file"},
+        ], 
+        checkboxes:[]
+    }
+}
+
 allStatuses = [...allStatuses]
 
-module.exports = {taskFields, allStatuses, allTasks}
+module.exports = {taskFields, allStatuses, allTasks, taskPayments}

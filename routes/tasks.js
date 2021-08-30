@@ -6,7 +6,7 @@ const {Payments} = require("../models/Payments");
 const {getID, updateID} = require("../models/Utils");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const {generateExcel} = require("../modules/excelProcessor");
-const {taskFields} = require("../statics/taskFields");
+const {taskFields, taskPayments} = require("../statics/taskFields");
 const fs = require("fs");
 const {
 	getAllFiles,
@@ -263,20 +263,7 @@ const calculateTotal = (val) => (
 	Number(val.sroFees ?? 0)
 )
 
-router.post("/api/tasks/payments/search", async (req, res) => {
-
-	req.query = req.body
-
-	let others = {}
-	const rowsPerPage = parseInt(req.query.rowsPerPage)
-	const page = parseInt(req.query.page)-1
-	const sortID = req.query.sortID
-	const sortDir = parseInt(req.query.sortDir)
-
-	if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
-		res.status(401).send("Unauthorized access")
-		return
-	}
+const generateQueryPayments = (req) => {
 
 	let query = {
 		$and:[
@@ -314,13 +301,12 @@ router.post("/api/tasks/payments/search", async (req, res) => {
 			})	
 		}
 	})
-	
-	let results = await Tasks.find(query)
-		.collation({locale: "en" })
-		.limit(rowsPerPage)
-		.skip(rowsPerPage * page)
-		.sort({[sortID || "createdTime"]: sortDir || -1});
 
+	return query
+
+}
+
+const commonProcessorPayments = async (results) => {
 	let taskIDs = results.map(val => (val.taskID))
 	taskIDs = await Payments.find({
 		taskID: {$in:taskIDs}
@@ -332,7 +318,61 @@ router.post("/api/tasks/payments/search", async (req, res) => {
 	results = results.map(val => ({...val, total: calculateTotal(val)}))
 	results = results.map(val => ({...val, balance: val.total - val.received}))
 
+	return results
+}
+
+router.post("/api/tasks/payments/search", async (req, res) => {
+
+	req.query = req.body
+
+	if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+		res.status(401).send("Unauthorized access")
+		return
+	}
+
+	let others = {}
+	const rowsPerPage = parseInt(req.query.rowsPerPage)
+	const page = parseInt(req.query.page)-1
+	const sortID = req.query.sortID
+	const sortDir = parseInt(req.query.sortDir)
+
+	let query = generateQueryPayments(req)
+
+	// console.log(JSON.stringify(query, null, 4))
+	
+	let results = await Tasks.find(query)
+		.collation({locale: "en" })
+		.limit(rowsPerPage)
+		.skip(rowsPerPage * page)
+		.sort({[sortID || "createdTime"]: sortDir || -1});
+
+	// console.log(results)
+
+	results = await commonProcessorPayments(results)
 	res.json(results)
+})
+
+router.post("/api/tasks/payments/export", async (req, res) => {
+
+	req.query = req.body
+
+	if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+		res.status(401).send("Unauthorized access")
+		return
+	}
+
+	let query = generateQueryPayments(req)
+	
+	let results = await Tasks.find(query)
+		.collation({locale: "en" })
+
+	results = await commonProcessorPayments(results)
+	
+	let file = await generateExcel(results, taskPayments["all"], "taskPaymentsExport" + (+new Date))
+
+	res.download("/tmp/" + file,(err) => {
+		fs.unlink("/tmp/" + file, () => {})
+	})
 })
 
 router.get("/api/tasks/search/all", async (req, res) => {

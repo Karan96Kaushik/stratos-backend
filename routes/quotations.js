@@ -56,6 +56,7 @@ const generateQuery = (req) => {
 				$or:[
 					{ quotationID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ relatedProject: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
