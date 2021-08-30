@@ -50,6 +50,11 @@ router.post("/api/quotations/add", checkQuotationW, async (req, res) => {
 })
 
 const generateQuery = (req) => {
+	let others = {}
+
+	if(!req.permissions.page.includes("Quotations R"))
+		others.addedBy = req.user.id
+
 	let query = {
 		$and:[
 			{
@@ -59,8 +64,9 @@ const generateQuery = (req) => {
 					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ relatedProject: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				]
-			}
+				],
+				...others
+			},
 		],
 	}
 
@@ -106,7 +112,8 @@ const commonProcessor = async (results) => {
 			...val._doc, 
 			createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"), 
 			addedBy: user.userName,
-			memberID: user.memberID
+			memberID: user.memberID,
+			serviceType: val.serviceType.join(", ")
 		})
 	})
 

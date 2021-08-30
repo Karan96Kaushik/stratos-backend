@@ -15,7 +15,7 @@ let Quotations = new Schema(
     quotationAmount:String,
     status:String,
 
-    serviceType:String,
+    serviceType:Array,
     remarks:String,
 
     addedBy: {

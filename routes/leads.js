@@ -81,6 +81,11 @@ const generateQuery = (req) => {
 					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ mobile: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ email: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ companyName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ office: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
 			}
 		],
@@ -241,7 +246,7 @@ router.delete("/api/leads/", checkLeadW, async (req, res) => {
 	}
 })
 
-router.post("/api/leads/update", checkLeadW, async (req, res) => {
+router.post("/api/leads/update", async (req, res) => {
 	try {
 		let _id = req.body._id
 
@@ -262,7 +267,7 @@ router.post("/api/leads/update", checkLeadW, async (req, res) => {
 
 				const fileContents = Buffer.from(file.data, 'base64')
 				fs.writeFile( fileName, fileContents, 'base64', (err) => {
-					console.log(err)
+					// console.log(err)
 					if (err) reject(err)
 					resolve({name:file.name,path:fileName})
 				})

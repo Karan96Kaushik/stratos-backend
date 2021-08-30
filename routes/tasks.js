@@ -72,10 +72,10 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 		let _;
 		let serviceCode = serviceCodes[req.body.serviceType]
 
-		if(!checkTaskPermission(req, req.body.serviceType)) {
-			res.status(401).send("Unauthorized to create this task")
-			return
-		}
+		// if(!checkTaskPermission(req, req.body.serviceType)) {
+		// 	res.status(401).send("Unauthorized to create this task")
+		// 	return
+		// }
 
 		let taskID = serviceCode + await getID(serviceCode)
 		_ = await Tasks.create({
@@ -98,10 +98,16 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 })
 
 router.get("/api/tasks/", async (req, res) => {
-	let query = req.query
+	let query = {"$and" : [{...req.query}]}
 
-	if(!checkR(req))
-		query.addedBy = req.user.id
+	if(!checkR(req)) {
+		query["$and"].push({
+			"$or" : [
+				{addedBy:req.user.id}, 
+				{_memberID:req.user.id}
+			]
+		})
+	}
 
 	const tasks = await Tasks.findOne(query);
 	let files = await getAllFiles(tasks.taskID + "/")
@@ -111,6 +117,13 @@ router.get("/api/tasks/", async (req, res) => {
 })
 
 router.delete("/api/tasks/", checkW, async (req, res) => {
+	let task = await Tasks.findOne({_id})
+
+	if(task.addedBy != req.user.id) {
+		res.status(401).send("Unauthorized to delete this task")
+		return
+	}
+
 	await Tasks.deleteOne({...req.query});
 	res.send("ok")
 })
@@ -385,6 +398,12 @@ router.get("/api/tasks/search/all", async (req, res) => {
 
 router.get("/api/tasks/payments/search/add", async (req, res) => {
 	try {
+
+		if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+			res.status(401).send("Unauthorized access")
+			return
+		}
+		
 		let query = req.query
 
 		let task = await Tasks.findOne(query);
@@ -405,7 +424,7 @@ router.get("/api/tasks/payments/search/add", async (req, res) => {
 
 })
 
-router.post("/api/tasks/update", checkW, async (req, res) => {
+router.post("/api/tasks/update", async (req, res) => {
 	try {
 		let _id = req.body._id
 		let taskID = req.body.taskID
@@ -416,6 +435,14 @@ router.post("/api/tasks/update", checkW, async (req, res) => {
 		delete req.body.clientID
 		delete req.body._clientID
 		delete req.body.clientName
+
+		let task = await Tasks.findOne({_id})
+		task = task._doc
+
+		if(task.addedBy != req.user.id && task._memberID != req.user.id) {
+			res.status(401).send("Unauthorized to update this task")
+			return
+		}
 
 		let _ = await Tasks.updateOne(
 			{

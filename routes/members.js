@@ -103,6 +103,25 @@ router.get("/api/members/search", checkR, async (req, res) => {
 	
 })
 
+router.get("/api/members/list", async (req, res) => {
+	try {
+		let members = await Members.find({...req.query});
+
+		members = members.map((val) => ({
+			_id: val._id,
+			memberID: val.memberID,
+			userName: val.userName,
+		}))
+
+		res.json(members)
+
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err)
+	}
+	
+})
+
 router.get("/api/members/export", checkR, async (req, res) => {
 	try {
 		let members = await Members.find({...req.query});
