@@ -32,6 +32,8 @@ const checkLeadW = (req, res, next) => {
 		res.status(401).send("Unauthorized")
 }
 
+const tmpdir = "/tmp/"
+
 router.post("/api/leads/add", async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
 
