@@ -32,7 +32,7 @@ const checkLeadW = (req, res, next) => {
 		res.status(401).send("Unauthorized")
 }
 
-router.post("/api/leads/add", checkLeadW, async (req, res) => {
+router.post("/api/leads/add", async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
 
 	let leadIdPrefix = ""
@@ -233,10 +233,19 @@ router.get("/api/leads/", async (req, res) => {
 	}
 })
 
-router.delete("/api/leads/", checkLeadW, async (req, res) => {
+router.delete("/api/leads/", async (req, res) => {
 	try{
 		const _id = req.query._id
 		delete req.query._id
+
+		if(!req.permissions.page.includes("Leads R")) {
+			let result = await Leads.findOne({_id})
+			if (String(result.addedBy) != req.user.id) {
+				res.status(401).send("Unauthorized to delete this task")
+				return
+			}
+		}
+
 		await Leads.deleteOne({_id});
 		// console.log(clients)
 		res.send("ok")
@@ -256,6 +265,14 @@ router.post("/api/leads/update", async (req, res) => {
 		delete req.body.leadType
 		delete req.body.memberID
 		delete req.body.addedBy
+
+		if(!req.permissions.page.includes("Leads R")) {
+			let result = await Leads.findOne({_id})
+			if (String(result.addedBy) != req.user.id) {
+				res.status(401).send("Unauthorized to update this task")
+				return
+			}
+		}
 
 		let files
 		if(req.body.docs?.length) {

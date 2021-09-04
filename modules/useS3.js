@@ -3,8 +3,8 @@ const sstorage = new AWS.S3()
 const fs = require("fs")
 
 sstorage.config.update({
-	accessKeyId: "AKIAXRPMYGKGXNQCJYF4", 
-	secretAccessKey: "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",
+	accessKeyId: process.env.S3Secret, //"AKIAXRPMYGKGXNQCJYF4", 
+	secretAccessKey: process.env.S3Secret, //"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",
 	signatureVersion: "v4",
 	region: 'ap-south-1'
 })
