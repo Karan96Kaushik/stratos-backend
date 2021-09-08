@@ -132,7 +132,7 @@ const migratePayments = async () => {
 }
 
 
-// migrateTaskPromoter()
+migrateTaskPromoter()
 // migrateQuotes()
 // migrateLeads()
-migratePayments()
+// migratePayments()

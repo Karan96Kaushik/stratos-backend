@@ -95,7 +95,11 @@ const generateQuery = (req) => {
 }
 
 const commonProcessor = (results) => {
-	results = results.map(val => ({...val._doc, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+	results = results.map(val => ({
+		...val._doc, 
+		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		paymentDate:moment(new Date(val.paymentDate)).format("DD-MM-YYYY"),
+	}))
 	return results
 }
 
