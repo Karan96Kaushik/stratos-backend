@@ -13,10 +13,9 @@ function errorHandler (err, req, res, next) {
 	res.render('error', { error: err })
 }
 
-app.use(express.json({limit: '10mb'}));
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
 app.use(bodyParser.raw({limit: '5mb'}) );
+app.use(express.json({limit: '5mb'}));
+app.use(bodyParser.urlencoded({limit: "5mb",extended: false}));
 
 // app.use(session({ secret: "cats" }));
 

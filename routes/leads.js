@@ -54,6 +54,7 @@ router.post("/api/leads/add", async (req, res) => {
 	let _ = await Leads.create({
 		...req.body,
 		memberID:memberInfo.memberID,
+		memberName:memberInfo.userName,
 		leadID,
 		addedBy: req.user.id
 	});

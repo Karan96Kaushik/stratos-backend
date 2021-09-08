@@ -8,6 +8,7 @@ let Leads = new Schema(
     leadType: String,
 
     memberID: String,
+    memberName: String,
 
     name:String,
     mobile: String,

@@ -5,7 +5,9 @@ const Schema = mongoose.Schema;
 let Quotations = new Schema(
   {
     quotationID:String,
+
     memberID:String,
+
     dept:String,
     clientName:String,
     relatedProject:String,
@@ -15,7 +17,9 @@ let Quotations = new Schema(
     quotationAmount:String,
     status:String,
 
-    serviceType:Array,
+    memberName:String,
+
+    serviceType:String,
     remarks:String,
 
     addedBy: {

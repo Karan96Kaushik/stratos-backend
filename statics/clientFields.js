@@ -79,7 +79,7 @@ module.exports = {
             {label:"Mobile", id:"mobile"},
             {label:"Email", id:"email"},
             {label:"Remarks", id:"remarks"},
-            {label:"Completion Date", id:"completionDate"},
+            {label:"Hearing Date", id:"completionDate"},
             {label:"Files", id:"files", type:"file"},
         ],
         checkboxes:[

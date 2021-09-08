@@ -13,6 +13,8 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
+const _ = require('lodash');
+
 
 const checkQuotationR = (req, res, next) => {
 	if(req.permissions.page.includes("Quotations R"))
@@ -37,8 +39,10 @@ router.post("/api/quotations/add", checkQuotationW, async (req, res) => {
 	let _ = await Quotations.create({
 		...req.body,
 		memberID:memberInfo.memberID,
+		memberName:memberInfo.userName,
 		quotationID,
-		addedBy: req.user.id
+		addedBy: req.user.id,
+		serviceType: JSON.stringify(req.body.serviceType ?? [])
 	});
 	_ = await updateID("quotation")
 
@@ -58,16 +62,21 @@ const generateQuery = (req) => {
 	let query = {
 		$and:[
 			{
-				$or:[
-					{ quotationID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ relatedProject: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				],
 				...others
-			},
-		],
+			}
+		]
+	}
+
+	if(req.query.text) {
+		query.$and[0].$or = [
+			{ serviceType: { $regex: new RegExp(req.query.text) , $options:"i" }},
+			{ memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+			{ quotationID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+			{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+			{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+			{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+			{ relatedProject: { $regex: new RegExp(req.query.text) , $options:"i" }},
+		]
 	}
 
 	// add filters to the query, if present
@@ -102,18 +111,21 @@ const generateQuery = (req) => {
 
 const commonProcessor = async (results) => {
 
-	let userIds = results.map(val => val._doc.addedBy)
+	// let userIds = results.map(val => val._doc.addedBy)
 
-	userIds = await Members.find({_id: {$in: userIds}})
+	// userIds = await Members.find({_id: {$in: userIds}})
 	
 	results = results.map(val => {
-		let user = userIds.find(v => String(v._id) == String(val.addedBy))
+		// let user = userIds.find(v => String(v._id) == String(val.addedBy))
+		let serviceType = _.attempt(JSON.parse.bind(null, val.serviceType))
+
 		return ({
 			...val._doc, 
 			createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"), 
-			addedBy: user.userName,
-			memberID: user.memberID,
-			serviceType: val.serviceType.join(", ")
+			// addedBy: user.userName,
+			// memberID: user.memberID,
+			// memberName: user.userName,
+			serviceType: serviceType.join(", ")
 		})
 	})
 
@@ -140,6 +152,8 @@ router.post("/api/quotations/search", async (req, res) => {
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = await commonProcessor(results)
+
+		console.log(results)
 
 		res.json(results)
 	} catch (err) {
@@ -178,6 +192,7 @@ router.get("/api/quotations/", async (req, res) => {
 		delete req.query._id
 		let quotations = await Quotations.findOne({_id});
 		quotations = quotations._doc
+		quotations.serviceType = JSON.parse(quotations.serviceType)
 
 		let files = await getAllFiles(quotations.quotationID + "/")
 		files = files.map(({Key}) => (Key))
@@ -206,7 +221,8 @@ router.post("/api/quotations/update", checkQuotationW, async (req, res) => {
 				_id
 			},
 			{
-				...req.body
+				...req.body,
+				serviceType: JSON.stringify(req.body.serviceType ?? [])
 			});
 
 		if(req.body.docs?.length) {

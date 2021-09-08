@@ -52,6 +52,9 @@ const generateQuery = (req) => {
 					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ remarks: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ receivedAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				],
 				...others
 			}

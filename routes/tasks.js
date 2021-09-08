@@ -137,6 +137,9 @@ const generateQuery = (req) => {
 					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
 			}
 		],
@@ -276,7 +279,7 @@ const calculateTotal = (val) => (
 	Number(val.sroFees ?? 0)
 )
 
-const generateQueryPayments = (req) => {
+const generateQueryPayments = async (req) => {
 
 	let query = {
 		$and:[
@@ -285,10 +288,17 @@ const generateQueryPayments = (req) => {
 					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
 			}
 		],
 	}
+
+	// if(Number(req.query.text)) {
+	// 	const taskIDs = await searchBillAmount(req.query.text)
+	// 	query["$and"][0]["$or"].push({taskID: {"$in": taskIDs}})		
+	// }
 
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
@@ -334,6 +344,24 @@ const commonProcessorPayments = async (results) => {
 	return results
 }
 
+const searchBillAmount = async (amount) => {
+
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ receivedAmount: { $regex: new RegExp(amount) , $options:"i" }},
+				]
+			}
+		],
+	}
+
+	let result = await Payments.find(query)
+
+	result = result.map(val => val.taskID)
+
+}
+
 router.post("/api/tasks/payments/search", async (req, res) => {
 
 	req.query = req.body
@@ -349,7 +377,7 @@ router.post("/api/tasks/payments/search", async (req, res) => {
 	const sortID = req.query.sortID
 	const sortDir = parseInt(req.query.sortDir)
 
-	let query = generateQueryPayments(req)
+	let query = await generateQueryPayments(req)
 
 	// console.log(JSON.stringify(query, null, 4))
 	
@@ -374,7 +402,7 @@ router.post("/api/tasks/payments/export", async (req, res) => {
 		return
 	}
 
-	let query = generateQueryPayments(req)
+	let query = await generateQueryPayments(req)
 	
 	let results = await Tasks.find(query)
 		.collation({locale: "en" })

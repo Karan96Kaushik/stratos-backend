@@ -85,11 +85,6 @@ router.post("/api/clients/add", checkW, async (req, res) => {
 
 const generateQuery = (req) => {
 
-	if(!req.query.clientType && !req.query.searchAll) {
-		res.json({})
-		return
-	}
-
 	let query = {
 		$and:[
 			{
@@ -106,6 +101,31 @@ const generateQuery = (req) => {
 		],
 	}
 
+	// add filters to the query, if present
+	Object.keys(req.query.filters ?? []).forEach(filter => {
+
+		// filter is range - date/number
+		if(typeof req.query.filters[filter] == "object") {
+			req.query.filters[filter].forEach((val,i) => {
+				if(val == null)
+					return
+
+				let operator = i == 0 ? "$lt" : "$gt"
+				query['$and'].push({
+					[filter]: {
+						[operator]: val
+					}
+				})	
+			})
+		} 
+		// filter is normal value
+		else {
+			query['$and'].push({
+				[filter]: req.query.filters[filter]
+			})	
+		}
+	})
+
 	if(!req.query.searchAll) {
 		query['$and'].push({
 			clientType: req.query.clientType
@@ -121,12 +141,23 @@ const generateQuery = (req) => {
 }
 
 const commonProcessor = (results) => {
-	results = results.map(val => ({...val._doc, createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+	results = results.map(val => ({
+		...val._doc, 
+		createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		completionDate: moment(new Date(val.completionDate)).format("DD-MM-YYYY"),
+	}))
 	return results
 }
 
-router.get("/api/clients/search", async (req, res) => {
+router.post("/api/clients/search", async (req, res) => {
 	try{
+
+		req.query = req.body
+
+		if(!req.query.clientType && !req.query.searchAll) {
+			res.json({})
+			return
+		}
 
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage ?? 10)
@@ -153,6 +184,8 @@ router.get("/api/clients/search", async (req, res) => {
 
 router.get("/api/clients/export", async (req, res) => {
 	try{
+
+		req.body = req.query
 
 		let query = generateQuery(req)
 
