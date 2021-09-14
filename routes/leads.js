@@ -81,6 +81,8 @@ const generateQuery = (req) => {
 			{
 				$or:[
 					{ leadID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ leadResponsibility: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},

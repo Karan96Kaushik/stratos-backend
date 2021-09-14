@@ -5,7 +5,6 @@ const {Utils} = require("../models/Utils");
 
 // 'mongodb://karan:karan12345@bayonetbaron.com:27017/tms?authSource=admin'
 const dbCreds = process.env.dbCreds
-console.log(dbCreds)
 mongoose
 	.connect(dbCreds, {
 		useNewUrlParser: true,

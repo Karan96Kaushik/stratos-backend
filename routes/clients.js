@@ -2,6 +2,7 @@ const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
 const {Clients} = require("../models/Clients");
+const {Members} = require("../models/Members");
 const {generateExcel} = require("../modules/excelProcessor");
 const clientFields = require("../statics/clientFields");
 const {getID, updateID} = require("../models/Utils");
@@ -11,6 +12,7 @@ const {
 	getFilePath
 } = require("../modules/useS3");
 const fs = require('fs');
+const crypto = require('crypto');
 
 const tmpdir = "/tmp/"
 
@@ -182,10 +184,21 @@ router.post("/api/clients/search", async (req, res) => {
 	}
 })
 
-router.get("/api/clients/export", async (req, res) => {
+router.post("/api/clients/export", async (req, res) => {
 	try{
 
-		req.body = req.query
+		req.query = req.body
+
+		let password = crypto.createHmac('sha256', "someSalt")
+			.update(req.query.password)
+			.digest('hex')
+		delete req.query.password
+
+		let user = await Members.findOne({_id: req.user.id, password})
+		if(!user) {
+			res.status(401).send("Incorrect password")
+			return
+		}
 
 		let query = generateQuery(req)
 
