@@ -82,10 +82,30 @@ router.post("/api/members/add", checkW, async (req, res) => {
 	}
 })
 
+const generateQuery = (req) => {
+
+	let others = {}
+
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ email: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ userName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				]
+			}
+		],
+	}
+
+	return query
+}
+
 router.get("/api/members/search", checkR, async (req, res) => {
 	try {
-		let members = await Members.find({...req.query});
 
+		let query = generateQuery(req)
+
+		let members = await Members.find(query);
 		members = members.map((val) => {
 			val.password = undefined
 			const perms = Object.assign({}, decodeAuth(val.permissions))
@@ -124,7 +144,8 @@ router.get("/api/members/list", async (req, res) => {
 
 router.get("/api/members/export", checkR, async (req, res) => {
 	try {
-		let members = await Members.find({...req.query});
+		let query = generateQuery(req)
+		let members = await Members.find(query);
 
 		members = members.map((val) => {
 			val.password = undefined
