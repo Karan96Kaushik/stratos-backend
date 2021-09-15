@@ -12,6 +12,7 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
+const crypto = require('crypto');
 
 const checkInvoiceR = (req, res, next) => {
 	if(req.permissions.page.includes("Invoices R"))
@@ -136,6 +137,17 @@ router.post("/api/invoices/export", async (req, res) => {
 
 		req.query = req.body
 
+		let password = crypto.createHmac('sha256', "someSalt")
+			.update(req.query.password)
+			.digest('hex')
+		delete req.query.password
+
+		let user = await Members.findOne({_id: req.user.id, password})
+		if(!user) {
+			res.status(401).send("Incorrect password")
+			return
+		}
+		
 		let query = generateQuery(req)
 
 		let results = await Invoices.find(query)

@@ -14,6 +14,7 @@ const {
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 const _ = require('lodash');
+const crypto = require('crypto');
 
 
 const checkQuotationR = (req, res, next) => {
@@ -166,6 +167,17 @@ router.post("/api/quotations/export", async (req, res) => {
 	try{
 
 		req.query = req.body
+
+		let password = crypto.createHmac('sha256', "someSalt")
+			.update(req.query.password)
+			.digest('hex')
+		delete req.query.password
+
+		let user = await Members.findOne({_id: req.user.id, password})
+		if(!user) {
+			res.status(401).send("Incorrect password")
+			return
+		}
 
 		let query = generateQuery(req)
 

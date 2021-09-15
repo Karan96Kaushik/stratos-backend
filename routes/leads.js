@@ -9,6 +9,7 @@ const {getID, updateID} = require("../models/Utils");
 
 const {generateExcel} = require("../modules/excelProcessor");
 const leadFields = require("../statics/leadFields");
+const crypto = require('crypto');
 
 const {
 	getAllFiles,
@@ -81,6 +82,8 @@ const generateQuery = (req) => {
 			{
 				$or:[
 					{ leadID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ leadResponsibility: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
@@ -192,6 +195,18 @@ router.post("/api/leads/search", async (req, res) => {
 router.post("/api/leads/export", async (req, res) => {
 	try{
 		req.query = req.body
+
+		let password = crypto.createHmac('sha256', "someSalt")
+			.update(req.query.password)
+			.digest('hex')
+		delete req.query.password
+
+		let user = await Members.findOne({_id: req.user.id, password})
+		if(!user) {
+			res.status(401).send("Incorrect password")
+			return
+		}
+
 
 		let query = generateQuery(req)
 
