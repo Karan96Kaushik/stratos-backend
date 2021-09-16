@@ -8,8 +8,8 @@ sstorage.config.update({
 	signatureVersion: "v4",
 	region: 'ap-south-1'
 })
-const myBucket = "tmsbucket0721"
-// const myBucket = "tms0001"
+// const myBucket = "tmsbucket0721"
+const myBucket = "tms0001"
 
 const getAllFiles = (filePath, finalResult = [], StartAfter = false) => {
     return new Promise((resolve, reject) => {
