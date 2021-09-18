@@ -129,6 +129,13 @@ router.post("/api/payments/search", async (req, res) => {
 router.post("/api/payments/export", async (req, res) => {
 	try{
 		req.query = req.body
+
+		if(req.query.password != (process.env.ExportPassword ?? "export45678")) {
+			res.status(401).send("Incorrect password")
+			return
+		}
+		delete req.query.password
+
 		let query = generateQuery(req)
 
 		let results = await Payments.find(query)

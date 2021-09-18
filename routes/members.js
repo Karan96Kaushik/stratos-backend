@@ -145,18 +145,13 @@ router.get("/api/members/list", async (req, res) => {
 router.get("/api/members/export", checkR, async (req, res) => {
 	try {
 
-		let password = crypto.createHmac('sha256', "someSalt")
-			.update(req.query.password)
-			.digest('hex')
-		delete req.query.password
-
-		let query = generateQuery(req)
-
-		let user = await Members.findOne({_id: req.user.id, password})
-		if(!user) {
+		if(req.query.password != (process.env.ExportPassword ?? "export45678")) {
 			res.status(401).send("Incorrect password")
 			return
 		}
+		delete req.query.password
+
+		let query = generateQuery(req)
 		
 		let members = await Members.find(query);
 

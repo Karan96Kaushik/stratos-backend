@@ -189,16 +189,11 @@ router.post("/api/clients/export", async (req, res) => {
 
 		req.query = req.body
 
-		let password = crypto.createHmac('sha256', "someSalt")
-			.update(req.query.password)
-			.digest('hex')
-		delete req.query.password
-
-		let user = await Members.findOne({_id: req.user.id, password})
-		if(!user) {
+		if(req.query.password != (process.env.ExportPassword ?? "export45678")) {
 			res.status(401).send("Incorrect password")
 			return
 		}
+		delete req.query.password
 
 		let query = generateQuery(req)
 

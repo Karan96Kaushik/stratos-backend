@@ -255,16 +255,12 @@ router.post("/api/tasks/export", async (req, res) => {
 	try{
 		req.query = req.body
 
-		let password = crypto.createHmac('sha256', "someSalt")
-			.update(req.query.password)
-			.digest('hex')
-		delete req.query.password
-
-		let user = await Members.findOne({_id: req.user.id, password})
-		if(!user) {
+		if(req.query.password != (process.env.ExportPassword ?? "export45678")) {
 			res.status(401).send("Incorrect password")
 			return
 		}
+		delete req.query.password
+
 		let query = generateQuery(req)
 
 		let results = await Tasks.find(query)
@@ -409,17 +405,11 @@ router.post("/api/tasks/payments/export", async (req, res) => {
 
 	req.query = req.body
 
-	let password = crypto.createHmac('sha256', "someSalt")
-		.update(req.query.password)
-		.digest('hex')
-	delete req.query.password
-
-	let user = await Members.findOne({_id: req.user.id, password})
-	if(!user) {
+	if(req.query.password != (process.env.ExportPassword ?? "export45678")) {
 		res.status(401).send("Incorrect password")
 		return
 	}
-
+	delete req.query.password
 
 	if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
 		res.status(401).send("Unauthorized access")
