@@ -191,6 +191,7 @@ const generateQuery = (req) => {
 			$or:[
 				{addedBy: req.user.id},
 				{_memberID: req.user.id},
+				{$all: {_membersAssigned: req.user.id}},
 			]
 		})
 	

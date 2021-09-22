@@ -142,11 +142,26 @@ const generateQuery = (req) => {
 	return query
 }
 
+const processDate = (compDate) => {
+	if(!compDate)
+		return "-"
+
+	else if(typeof compDate == "date")
+		return compDate
+
+	// to handle dates in the format of "30.12.2021"
+	else if (compDate.includes("."))
+		return new Date(compDate.split(".").reverse().join("-"))
+
+	else 
+		return new Date(compDate)
+}
+
 const commonProcessor = (results) => {
 	results = results.map(val => ({
 		...val._doc, 
 		createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
-		completionDate: moment(new Date(val.completionDate)).format("DD-MM-YYYY"),
+		completionDate: val.completionDate ? moment(new Date(processDate(val.completionDate))).format("DD-MM-YYYY") : "-",
 	}))
 	return results
 }
@@ -221,10 +236,13 @@ router.get("/api/clients/", async (req, res) => {
 		if(!checkR(req))
 			query.addedBy = req.user.id
 
-		const clients = await Clients.findOne(req.query);
+		let clients = await Clients.findOne(req.query);
 		if(!clients){
 			res.status(404).send("Client not found")
 		}
+
+		clients.certDate = moment(new Date(processDate(clients.certDate))).format("YYYY-MM-DD")
+		clients.completionDate = moment(new Date(processDate(clients.completionDate))).format("YYYY-MM-DD")
 
 		let files = await getAllFiles(clients.clientID + "/")
 
