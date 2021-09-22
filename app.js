@@ -8,6 +8,11 @@ const timings = require('server-timings')
 const routes  = require('./routes');
 require('./scripts/db');
 
+global.adminIDs = [
+	"60bcdcf13c1c2a1751864354", // Karan The First
+	"6130dc761ee03e38423def2e"	// Shantanu
+]
+
 function errorHandler (err, req, res, next) {
 	res.status(500)
 	res.render('error', { error: err })

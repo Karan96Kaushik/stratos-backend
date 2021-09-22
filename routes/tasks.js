@@ -139,7 +139,8 @@ const generateQuery = (req) => {
 					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ membersAssigned: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					// { memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
@@ -191,7 +192,7 @@ const generateQuery = (req) => {
 			$or:[
 				{addedBy: req.user.id},
 				{_memberID: req.user.id},
-				{$all: {_membersAssigned: req.user.id}},
+				{_membersAssigned: req.user.id},
 			]
 		})
 	
@@ -502,7 +503,7 @@ router.post("/api/tasks/update", async (req, res) => {
 		let task = await Tasks.findOne({_id})
 		task = task._doc
 
-		if(task.addedBy != req.user.id && task._memberID != req.user.id) {
+		if(task.addedBy != req.user.id && task._memberID != req.user.id && !adminIDs.includes(req.user.id)) {
 			res.status(401).send("Unauthorized to update this task")
 			return
 		}
