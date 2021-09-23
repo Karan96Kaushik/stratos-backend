@@ -232,8 +232,12 @@ const handlePayment = async (body, originalPaymentId, isDelete=false) => {
 		paymentAmount = ((Number(body.receivedAmount) || 0)) - Number(originalPayment?.receivedAmount || 0) 
 
 	let task = await Tasks.findOne({_id: body._taskID})
-	task = task._doc
 	let client = await Clients.findOne({_id: body._clientID})
+
+	if(!task || !client)
+		throw new Error("Linked client or task not found - contact admin")
+
+	task = task._doc
 	client = client._doc
 
 	let totalAmount = calculateTotal(task)
