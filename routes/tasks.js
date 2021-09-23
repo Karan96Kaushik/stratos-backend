@@ -155,6 +155,7 @@ const generateQuery = (req) => {
 					{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ ca: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ engineer: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ status: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
 			}
 		],
@@ -393,9 +394,11 @@ const commonProcessorPayments = async (results) => {
 	results = results.map(val => ({
 		...val,
 		payments: taskIDs
+			.filter((v) => (val.taskID == v._doc.taskID))
 			.map(v => (
-				(v.paymentDate ? moment(new Date(v.paymentDate)).format("DD-MM-YYYY") + " - " : v.createdTime ? moment(new Date(v.createdTime)).format("DD-MM-YYYY") + " - " : " - ") +
-				"₹" + v._doc.receivedAmount
+				(v._doc.paymentDate ? moment(new Date(v._doc.paymentDate)).format("DD-MM-YYYY") + " - " : v._doc.createdTime ? (moment(new Date(v._doc.createdTime)).format("DD-MM-YYYY") + " - ") : " - ") +
+				"₹" + v._doc.receivedAmount + " - " +
+				v._doc.mode
 			))
 	}))
 
