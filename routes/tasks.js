@@ -121,6 +121,13 @@ router.get("/api/tasks/", async (req, res) => {
 })
 
 router.delete("/api/tasks/", checkW, async (req, res) => {
+
+	if(req.query.password != (process.env.DeletePassword ?? "delete45678")) {
+		res.status(401).send("Incorrect password")
+		return
+	}
+	delete req.query.password
+	
 	let task = await Tasks.findOne({_id: req.query._id})
 
 	if(task.addedBy != req.user.id) {

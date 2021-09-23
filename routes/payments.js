@@ -183,6 +183,13 @@ router.get("/api/payments/", async (req, res) => {
 
 router.delete("/api/payments/", async (req, res) => {
 	try{
+
+		if(req.query.password != (process.env.DeletePassword ?? "delete45678")) {
+			res.status(401).send("Incorrect password")
+			return
+		}
+		delete req.query.password
+
 		let _
 		const _id = req.query._id
 

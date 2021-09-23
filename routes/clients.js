@@ -270,6 +270,13 @@ router.get("/api/clients/", async (req, res) => {
 
 router.delete("/api/clients/", checkW, async (req, res) => {
 	try{
+
+		if(req.query.password != (process.env.DeletePassword ?? "delete45678")) {
+			res.status(401).send("Incorrect password")
+			return
+		}
+		delete req.query.password
+
 		const _id = req.query._id
 		const clients = await Clients.deleteOne({_id});
 		// console.log(clients)

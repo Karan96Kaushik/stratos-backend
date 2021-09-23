@@ -235,5 +235,23 @@ router.post("/api/invoices/update", checkInvoiceW, async (req, res) => {
 	}
 })
 
+router.delete("/api/invoices/", async (req, res) => {
+	try{
+
+		if(req.query.password != (process.env.DeletePassword ?? "delete45678")) {
+			res.status(401).send("Incorrect password")
+			return
+		}
+		delete req.query.password
+
+		const _id = req.query._id
+		const _ = await Invoices.deleteOne({_id});
+		// console.log(clients)
+		res.send("ok")
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
 
 module.exports = router
