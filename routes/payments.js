@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const moment = require("moment");
 const {Payments} = require("../models/Payments");Payments
 const {Members} = require("../models/Members");
+const {Tasks} = require("../models/Tasks");
+const {Clients} = require("../models/Clients");
 const {paymentFields} = require("../statics/paymentFields")
 const {generateExcel} = require("../modules/excelProcessor")
 const {getID, updateID} = require("../models/Utils");
@@ -21,6 +23,8 @@ router.post("/api/payments/add", async (req, res) => {
 		res.status(401).send("Unauthorized")
 		return
 	}
+
+	await handlePayment(req.body, null)
 
     let paymentID = "AC" + await getID("account")
 	let _ = await Payments.create({
@@ -179,7 +183,11 @@ router.get("/api/payments/", async (req, res) => {
 
 router.delete("/api/payments/", async (req, res) => {
 	try{
+		let _
 		const _id = req.query._id
+
+		await handlePayment(req.query, _id, true)
+
 		await Payments.deleteOne({_id});
 
 		res.send("OK")
@@ -197,6 +205,49 @@ router.get("/api/payments/search/all", async (req, res) => {
 	res.json(payments)
 })
 
+const calculateTotal = (val) => (
+	Number(val.billAmount ?? 0) +
+	Number(val.gst ?? 0) +
+	Number(val.govtFees ?? 0) +
+	Number(val.sroFees ?? 0)
+)
+
+// manages denormalised balance/received amount in Clients/Tasks
+const handlePayment = async (body, originalPaymentId, isDelete=false) => {
+	let originalPayment, 
+		_, 
+		paymentAmount = 0
+
+	if(originalPaymentId) {
+		originalPayment = await Payments.findOne({_id: originalPaymentId});
+		originalPayment = originalPayment._doc
+
+		body._taskID = originalPayment._taskID
+		body._clientID = originalPayment._clientID
+	}
+
+	if(isDelete)
+		paymentAmount = - Number(originalPayment?.receivedAmount ?? 0) 
+	else
+		paymentAmount = ((Number(body.receivedAmount) ?? 0)) - Number(originalPayment?.receivedAmount || 0) 
+
+	let task = await Tasks.findOne({_id: body._taskID})
+	task = task._doc
+	let client = await Clients.findOne({_id: body._clientID})
+	client = client._doc
+
+	let totalAmount = calculateTotal(task)
+
+	_ = await Tasks.updateOne({
+		_id: body._taskID}, 
+		{
+			receivedAmount: paymentAmount + (Number(task.receivedAmount || 0)),
+			balanceAmount: totalAmount - (paymentAmount + (Number(task.receivedAmount || 0)))
+		})
+	_ = await Clients.updateOne({_id: body._clientID}, {receivedAmount: paymentAmount + (Number(client.receivedAmount) ?? 0)})
+
+}
+
 router.post("/api/payments/update", async (req, res) => {
 	try {
 
@@ -206,14 +257,14 @@ router.post("/api/payments/update", async (req, res) => {
 		}
 
 		let _id = req.body._id
-		let invoiceID = req.body.invoiceID
 
-		delete req.body.invoiceID
 		delete req.body._id
 		delete req.body.memberID
 		delete req.body.addedBy
 
-		let _ = await Payments.updateOne(
+		await handlePayment(req.body, _id)
+
+		_ = await Payments.updateOne(
 			{
 				_id
 			},

@@ -79,6 +79,8 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 		// 	return
 		// }
 
+		req.body.totalAmount = calculateTotal(req.body)
+
 		let taskID = serviceCode + await getID(serviceCode)
 		_ = await Tasks.create({
 			...req.body,
@@ -119,7 +121,7 @@ router.get("/api/tasks/", async (req, res) => {
 })
 
 router.delete("/api/tasks/", checkW, async (req, res) => {
-	let task = await Tasks.findOne({_id})
+	let task = await Tasks.findOne({_id: req.query._id})
 
 	if(task.addedBy != req.user.id) {
 		res.status(401).send("Unauthorized to delete this task")
@@ -142,7 +144,10 @@ const generateQuery = (req) => {
 					{ membersAssigned: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					// { memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ totalAmount: Number(req.query.text)},
 					{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ ca: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ engineer: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
 			}
 		],
@@ -159,6 +164,18 @@ const generateQuery = (req) => {
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
 
+		if(filter == "balanceStatus") {
+			if(req.query.filters[filter] == "Nil") 
+				query['$and'].push({
+					balanceAmount: {$lte:0}
+				})
+			else if(req.query.filters[filter] == "Pending") 
+				query['$and'].push({
+					balanceAmount: {$gt:0}
+				})
+
+			return
+		}
 		// filter is range - date/number
 		if(typeof req.query.filters[filter] == "object") {
 			req.query.filters[filter].forEach((val,i) => {
@@ -180,7 +197,6 @@ const generateQuery = (req) => {
 			})	
 		}
 	})
-
 	if(!req.query.searchAll) {
 		query['$and'].push({
 			serviceType: req.query.serviceType
@@ -298,7 +314,10 @@ const generateQueryPayments = async (req) => {
 					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ receivedAmount: Number(req.query.text)},
+					{ balanceAmount: Number(req.query.text)},
+					{ totalAmount: Number(req.query.text)},
+					{ billAmount: Number(req.query.text)},
 					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
 			}
@@ -312,6 +331,19 @@ const generateQueryPayments = async (req) => {
 
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
+
+		if(filter == "balanceStatus") {
+			if(req.query.filters[filter] == "Nil") 
+				query['$and'].push({
+					balanceAmount: {$lte:0}
+				})
+			else if(req.query.filters[filter] == "Pending") 
+				query['$and'].push({
+					balanceAmount: {$gt:0}
+				})
+
+			return
+		}
 
 		// filter is range - date/number
 		if(typeof req.query.filters[filter] == "object") {
@@ -389,15 +421,11 @@ router.post("/api/tasks/payments/search", async (req, res) => {
 
 	let query = await generateQueryPayments(req)
 
-	// console.log(JSON.stringify(query, null, 4))
-	
 	let results = await Tasks.find(query)
 		.collation({locale: "en" })
 		.limit(rowsPerPage)
 		.skip(rowsPerPage * page)
 		.sort({[sortID || "createdTime"]: sortDir || -1});
-
-	// console.log(results)
 
 	results = await commonProcessorPayments(results)
 	res.json(results)
@@ -454,6 +482,7 @@ router.get("/api/tasks/payments/search/add", async (req, res) => {
 		if(!task)
 			throw new Error("Task not found")
 		task = task._doc
+		task._taskID = task._id
 
 		if(!task.clientID) {
 			let client = await Clients.findOne({_id: task._clientID})
@@ -502,6 +531,8 @@ router.post("/api/tasks/update", async (req, res) => {
 
 		let task = await Tasks.findOne({_id})
 		task = task._doc
+
+		req.body.totalAmount = calculateTotal(req.body)
 
 		if(task.addedBy != req.user.id && task._memberID != req.user.id && !adminIDs.includes(req.user.id)) {
 			res.status(401).send("Unauthorized to update this task")
@@ -634,7 +665,7 @@ router.post("/api/clients/payments/search", async (req, res) => {
 		.sort({[sortID || "createdTime"]: sortDir || -1});
 
 	results = await commonProcessorClientPayments(results)
-	console.log(results)
+	// console.log(results)
 
 	res.json(results)
 })

@@ -24,6 +24,7 @@ const invoiceFields = {
             {label:"Total Bill Amount", id:"billAmount", type:"number"},
             {label:"Total Tax Amount", id:"taxAmount", type:"number"},
             {label:"Total Amount", id:"totalAmount", type:"number"},
+            {label:"Govt Fees", id:"govtFees", type:"number"},
             {label:"Paid Amount", id:"paidAmount", type:"number"},
             {label:"Balance Amount", id:"balanceAmount", type:"number"},
             // {label:"Files", id:"files", type:"file"},

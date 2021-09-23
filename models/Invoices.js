@@ -16,12 +16,12 @@ let Invoices = new Schema(
     panNum:String,
     projectName:String,
     clientGST:String,
-    billAmount:String,
-    taxAmount:String,
-    totalAmount:String,
-    paidAmount:String,
-    totalAmount:String,
-    balanceAmount:String,
+    billAmount:Number,
+    taxAmount:Number,
+    totalAmount:Number,
+    govtFees:Number,
+    paidAmount:Number,
+    balanceAmount:Number,
 
     addedBy: {
       required:true,

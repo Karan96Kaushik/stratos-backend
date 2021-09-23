@@ -83,9 +83,9 @@ const generateQuery = (req) => {
 				$or:[
 					{ leadID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ leadResponsibility: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					// { memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					// { memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ mobile: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ email: { $regex: new RegExp(req.query.text) , $options:"i" }},
@@ -196,7 +196,7 @@ router.post("/api/leads/export", async (req, res) => {
 	try{
 		req.query = req.body
 
-		if(!req.query.password == (process.env.ExportPassword ?? "export45678")) {
+		if(!(req.query.password == (process.env.ExportPassword ?? "export45678"))) {
 			res.status(401).send("Incorrect password")
 			return
 		}

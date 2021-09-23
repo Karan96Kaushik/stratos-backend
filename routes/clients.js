@@ -106,6 +106,19 @@ const generateQuery = (req) => {
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
 
+		if(filter == "balanceStatus") {
+			if(req.query.filters[filter] == "Nil") 
+				query['$and'].push({
+					balanceAmount: {$lte:0}
+				})
+			else if(req.query.filters[filter] == "Pending") 
+				query['$and'].push({
+					balanceAmount: {$gt:0}
+				})
+
+			return
+		}
+
 		// filter is range - date/number
 		if(typeof req.query.filters[filter] == "object") {
 			req.query.filters[filter].forEach((val,i) => {
