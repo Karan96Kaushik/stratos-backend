@@ -244,7 +244,7 @@ const handlePayment = async (body, originalPaymentId, isDelete=false) => {
 			receivedAmount: paymentAmount + (Number(task.receivedAmount || 0)),
 			balanceAmount: totalAmount - (paymentAmount + (Number(task.receivedAmount || 0)))
 		})
-	_ = await Clients.updateOne({_id: body._clientID}, {receivedAmount: paymentAmount + (Number(client.receivedAmount) ?? 0)})
+	_ = await Clients.updateOne({_id: body._clientID}, {receivedAmount: paymentAmount + (Number(client.receivedAmount) || 0)})
 
 }
 
