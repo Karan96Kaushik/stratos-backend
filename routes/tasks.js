@@ -383,6 +383,15 @@ const commonProcessorPayments = async (results) => {
 	results = results.map(val => ({...val, total: calculateTotal(val)}))
 	results = results.map(val => ({...val, balance: val.total - val.received}))
 
+	results = results.map(val => ({
+		...val,
+		payments: taskIDs
+			.map(v => (
+				(v.paymentDate ? moment(new Date(v.paymentDate)).format("DD-MM-YYYY") + " - " : v.createdTime ? moment(new Date(v.createdTime)).format("DD-MM-YYYY") + " - " : " - ") +
+				"₹" + v._doc.receivedAmount
+			))
+	}))
+
 	return results
 }
 
