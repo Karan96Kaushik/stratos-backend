@@ -229,7 +229,7 @@ const handlePayment = async (body, originalPaymentId, isDelete=false) => {
 	if(isDelete)
 		paymentAmount = - Number(originalPayment?.receivedAmount ?? 0) 
 	else
-		paymentAmount = ((Number(body.receivedAmount) ?? 0)) - Number(originalPayment?.receivedAmount || 0) 
+		paymentAmount = ((Number(body.receivedAmount) || 0)) - Number(originalPayment?.receivedAmount || 0) 
 
 	let task = await Tasks.findOne({_id: body._taskID})
 	task = task._doc

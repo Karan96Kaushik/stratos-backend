@@ -154,8 +154,6 @@ router.post("/api/quotations/search", async (req, res) => {
 
 		results = await commonProcessor(results)
 
-		console.log(results)
-
 		res.json(results)
 	} catch (err) {
 		console.log(err)

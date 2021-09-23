@@ -18,6 +18,7 @@ let Quotations = new Schema(
     status:String,
 
     memberName:String,
+    closureStatus:String,
 
     serviceType:String,
     remarks:String,
