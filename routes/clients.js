@@ -1,6 +1,8 @@
 const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
+const {Payments} = require("../models/Payments");
+const {Tasks} = require("../models/Tasks");
 const {Clients} = require("../models/Clients");
 const {Members} = require("../models/Members");
 const {generateExcel} = require("../modules/excelProcessor");
@@ -85,7 +87,7 @@ router.post("/api/clients/add", checkW, async (req, res) => {
 	}
 })
 
-const generateQuery = (req) => {
+const generateQuery = (req, ignorePermissions=false) => {
 
 	let query = {
 		$and:[
@@ -147,7 +149,7 @@ const generateQuery = (req) => {
 		})
 	}
 
-	if(!checkR(req))
+	if(!checkR(req) && !req.query.ignorePermissions)
 		query['$and'].push({
 			addedBy : req.user.id
 		})
@@ -231,6 +233,157 @@ router.post("/api/clients/export", async (req, res) => {
 		results = commonProcessor(results)
 
 		let file = await generateExcel(results, clientFields[req.query.searchAll ? "all" : req.query.clientType], "clientsExport" + (+new Date))
+
+		res.download("/tmp/" + file,(err) => {
+			fs.unlink("/tmp/" + file, () => {})
+		})
+
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+const generatePaymentsQuery = (req) => {
+
+	let query = {
+		$and:[
+			{
+				$or:[
+					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ userID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ email: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ mobile: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				]
+			}
+		],
+	}
+
+	// add filters to the query, if present
+	Object.keys(req.query.filters ?? []).forEach(filter => {
+
+		if(filter == "balanceStatus") {
+			if(req.query.filters[filter] == "Nil") 
+				query['$and'].push({
+					balanceAmount: {$lte:0}
+				})
+			else if(req.query.filters[filter] == "Pending") 
+				query['$and'].push({
+					balanceAmount: {$gt:0}
+				})
+
+			return
+		}
+
+		// filter is range - date/number
+		if(typeof req.query.filters[filter] == "object") {
+			req.query.filters[filter].forEach((val,i) => {
+				if(val == null)
+					return
+
+				let operator = i == 0 ? "$lt" : "$gt"
+				query['$and'].push({
+					[filter]: {
+						[operator]: val
+					}
+				})	
+			})
+		} 
+		// filter is normal value
+		else {
+			query['$and'].push({
+				[filter]: req.query.filters[filter]
+			})	
+		}
+	})
+
+	return query
+}
+
+const commonPaymentsProcessor = async (results) => {
+	const clientIDs = results.map(v => v.clientID)
+	let payments = await Payments.find({
+		clientID: {$in:clientIDs}
+	})
+	payments = payments.map(v => v._doc)
+
+	let tasks = payments.map(v => v.taskID)
+	tasks = await Tasks.find({
+		clientID: {$in: clientIDs}
+	})
+	tasks = tasks.map(v => v._doc)
+
+	results = results.map(val => ({
+		...val._doc, 
+		createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		completionDate: val.completionDate ? moment(new Date(processDate(val.completionDate))).format("DD-MM-YYYY") : "-",
+		tasks: tasks.filter(v => (String(val.clientID) == String(v.clientID))),
+		payments: payments.filter(v => (String(val.clientID) == String(v.clientID)))
+	}))
+	results = results.map(val => ({
+		...val, 
+		totalAmount: val.tasks.reduce((tot, curr) => Number(curr.totalAmount) + tot,0),
+		receivedAmount: val.payments.reduce((tot, curr) => Number(curr.receivedAmount) + tot,0),
+		taskList: val.tasks.map(v => v.taskID).join(", "),
+	}))
+	results = results.map(val => ({...val, balanceAmount: Number(val.totalAmount) - Number(val.receivedAmount)}))
+	return results
+}
+
+router.post("/api/clients/payments/search", async (req, res) => {
+	try{
+		req.query = req.body
+
+		if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+			res.status(401).send("Unauthorized access")
+			return
+		}
+
+		let others = {}
+		const rowsPerPage = parseInt(req.query.rowsPerPage ?? 10)
+		const page = parseInt(req.query.page ?? 1)-1
+		const sortID = req.query.sortID
+		const sortDir = parseInt(req.query.sortDir)
+
+		let query = generatePaymentsQuery(req)
+			
+		let results = await Clients.find(query)
+			.collation({locale: "en" })
+			.limit(rowsPerPage)
+			.skip(rowsPerPage * page)
+			.sort({[sortID || "createdTime"]: sortDir || -1});
+
+		results = await commonPaymentsProcessor(results)
+
+		res.json(results)
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.post("/api/clients/export", async (req, res) => {
+	try{
+
+		req.query = req.body
+
+		if(req.query.password != (process.env.ExportPassword ?? "export45678")) {
+			res.status(401).send("Incorrect password")
+			return
+		}
+		delete req.query.password
+
+		let query = generatePaymentsQuery(req)
+
+		let results = await Clients.find(query)
+			.collation({locale: "en" })
+
+		results = commonPaymentsProcessor(results)
+
+		let file = await generateExcel(results, clientFields["all"], "clientAccountsExport" + (+new Date))
 
 		res.download("/tmp/" + file,(err) => {
 			fs.unlink("/tmp/" + file, () => {})

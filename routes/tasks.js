@@ -65,7 +65,6 @@ const checkW = (req, res, next) => {
 }
 
 const checkTaskPermission = (req, taskType) => {
-	// console.log(req.permissions, taskType)
 	return req.permissions.service.includes(taskType)
 }
 
@@ -261,7 +260,6 @@ router.post("/api/tasks/search", async (req, res) => {
 		}
 
 		let query = generateQuery(req)
-
 		let results = await Tasks.find(query)
 			.collation({locale: "en" })
 			.limit(rowsPerPage)
@@ -375,7 +373,6 @@ const generateQueryPayments = async (req) => {
 			})	
 		}
 	})
-	console.log(JSON.stringify(query, null, 4))
 	return query
 
 }
@@ -578,116 +575,6 @@ router.post("/api/tasks/update", async (req, res) => {
 		console.log(err)
 		res.status(500).send(err.message)
 	}
-})
-
-const generateQueryClientPayments = async (req) => {
-
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				]
-			}
-		],
-	}
-
-	// add filters to the query, if present
-	Object.keys(req.query.filters ?? []).forEach(filter => {
-
-		// filter is range - date/number
-		if(typeof req.query.filters[filter] == "object") {
-			req.query.filters[filter].forEach((val,i) => {
-				if(val == null)
-					return
-
-				let operator = i == 0 ? "$lt" : "$gt"
-				query['$and'].push({
-					[filter]: {
-						[operator]: val
-					}
-				})	
-			})
-		} 
-		// filter is normal value
-		else {
-			query['$and'].push({
-				[filter]: req.query.filters[filter]
-			})	
-		}
-	})
-
-	return query
-
-}
-
-const commonProcessorClientPayments = async (results) => {
-	let taskIDs = results.map(val => (val.taskID))
-	taskIDs = await Payments.find({
-		taskID: {$in:taskIDs}
-	})
-
-	results = results.map(val => ({...val._doc, payments: taskIDs.filter((v) => (val.taskID == v.taskID))}))
-	results = results.map(val => ({...val, received: val.payments.reduce((tot, curr) => ((Number(curr._doc.receivedAmount) ?? 0) + tot),0)}))
-	results = results.map(val => ({...val, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
-	results = results.map(val => ({...val, total: calculateTotal(val)}))
-	results = results.map(val => ({...val, balance: val.total - val.received}))
-
-	let clientResults = {}
-
-	results.forEach(val => {
-		if(!clientResults[val._clientID])
-			clientResults[val._clientID] = []
-
-		clientResults[val._clientID].push(val)
-	})
-
-	let clientInfo = await Clients.find({
-		_id:{$in:Object.keys(clientResults)}
-	})
-
-	clientResults = Object.keys(clientResults).map(_client => ({
-		...clientInfo.find(v => String(v._id) == String(_client))._doc,
-		total: clientResults[_client].reduce((a,b) => (a+b.total), 0),
-		balance: clientResults[_client].reduce((a,b) => (a+b.balance), 0),
-		taskList: clientResults[_client].map(v=>v.taskID).join(", "),
-		tasks: clientResults[_client]
-	}))
-
-	return clientResults
-}
-
-router.post("/api/clients/payments/search", async (req, res) => {
-
-	req.query = req.body
-
-	if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
-		res.status(401).send("Unauthorized access")
-		return
-	}
-
-	let others = {}
-	const rowsPerPage = parseInt(req.query.rowsPerPage)
-	const page = parseInt(req.query.page)-1
-	const sortID = req.query.sortID
-	const sortDir = parseInt(req.query.sortDir)
-
-	let query = await generateQueryClientPayments(req)
-
-	let results = await Tasks.find(query)
-		.collation({locale: "en" })
-		.limit(rowsPerPage)
-		.skip(rowsPerPage * page)
-		.sort({[sortID || "createdTime"]: sortDir || -1});
-
-	results = await commonProcessorClientPayments(results)
-	// console.log(results)
-
-	res.json(results)
 })
 
 module.exports = router
