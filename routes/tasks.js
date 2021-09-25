@@ -80,6 +80,7 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 		// }
 
 		req.body.totalAmount = calculateTotal(req.body)
+		req.body.balanceAmount = req.body.totalAmount
 
 		let taskID = serviceCode + await getID(serviceCode)
 		_ = await Tasks.create({
@@ -374,7 +375,7 @@ const generateQueryPayments = async (req) => {
 			})	
 		}
 	})
-
+	console.log(JSON.stringify(query, null, 4))
 	return query
 
 }
@@ -552,7 +553,7 @@ router.post("/api/tasks/update", async (req, res) => {
 		task = task._doc
 
 		req.body.totalAmount = calculateTotal(req.body)
-		
+
 		if(task.addedBy != req.user.id && !task._membersAssigned.includes(String(req.user.id)) && !adminIDs.includes(req.user.id)) {
 			res.status(401).send("Unauthorized to update this task")
 			return

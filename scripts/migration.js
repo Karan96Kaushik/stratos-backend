@@ -131,8 +131,47 @@ const migratePayments = async () => {
 
 }
 
+const calculateTotal = (val) => (
+	Number(val.billAmount ?? 0) +
+	Number(val.gst ?? 0) +
+	Number(val.govtFees ?? 0) +
+	Number(val.sroFees ?? 0)
+)
 
-migrateTaskPromoter()
+const migrateTasksReceivedAmount = async () => {
+
+	let allTasks = await Tasks.find()
+
+	console.log(allTasks.length)
+
+	for (task of allTasks) {
+		task = task._doc
+		
+		if(task.receivedAmount || task.balanceAmount)
+			continue
+		// console.log(task.taskID)
+
+		let amount = calculateTotal(task)
+
+		let _ = await Tasks.updateOne(
+			{_id: String(task._id)}, 
+			{
+				receivedAmount: 0,
+				totalAmount: amount,
+				balanceAmount: amount,
+			}
+		)
+		console.log(_)
+
+	}
+
+	console.log("Done")
+
+}
+
+
+migrateTasksReceivedAmount()
+// migrateTaskPromoter()
 // migrateQuotes()
 // migrateLeads()
 // migratePayments()
