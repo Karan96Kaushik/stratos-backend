@@ -22,6 +22,7 @@ let clientPaymentFields = {
         {label:"Type", id: "clientType"},
         {label:"Total", id: "totalAmount"},
         {label:"Balance", id: "balanceAmount"},
+        {label:"Task List", id:"taskList"},
         {label:"Promoter", id:"promoter"},
         {label:"Remarks", id:"remarks"},
     ],
