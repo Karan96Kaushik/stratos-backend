@@ -16,4 +16,16 @@ let paymentFields = {
     }
 }
 
-module.exports = {paymentFields}
+let clientPaymentFields = {
+    texts:[
+        {label:"Client Name", id: "name"},
+        {label:"Type", id: "clientType"},
+        {label:"Total", id: "totalAmount"},
+        {label:"Balance", id: "balanceAmount"},
+        {label:"Promoter", id:"promoter"},
+        {label:"Remarks", id:"remarks"},
+    ],
+    checkboxes:[]
+}
+
+module.exports = {paymentFields, clientPaymentFields}

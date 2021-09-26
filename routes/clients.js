@@ -7,6 +7,7 @@ const {Clients} = require("../models/Clients");
 const {Members} = require("../models/Members");
 const {generateExcel} = require("../modules/excelProcessor");
 const clientFields = require("../statics/clientFields");
+const {clientPaymentFields} = require("../statics/paymentFields")
 const {getID, updateID} = require("../models/Utils");
 const {
 	getAllFiles,
@@ -365,7 +366,7 @@ router.post("/api/clients/payments/search", async (req, res) => {
 	}
 })
 
-router.post("/api/clients/export", async (req, res) => {
+router.post("/api/clients/payments/export", async (req, res) => {
 	try{
 
 		req.query = req.body
@@ -381,9 +382,9 @@ router.post("/api/clients/export", async (req, res) => {
 		let results = await Clients.find(query)
 			.collation({locale: "en" })
 
-		results = commonPaymentsProcessor(results)
+		results = await commonPaymentsProcessor(results)
 
-		let file = await generateExcel(results, clientFields["all"], "clientAccountsExport" + (+new Date))
+		let file = await generateExcel(results, clientPaymentFields, "clientAccountsExport" + (+new Date))
 
 		res.download("/tmp/" + file,(err) => {
 			fs.unlink("/tmp/" + file, () => {})
