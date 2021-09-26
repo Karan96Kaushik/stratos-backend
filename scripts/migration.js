@@ -169,8 +169,21 @@ const migrateTasksReceivedAmount = async () => {
 
 }
 
+const migrateTasksArchived = async () => {
+	let _ = await Tasks.updateMany(
+		{}, 
+		{
+			archived: false
+		}
+	)
 
-migrateTasksReceivedAmount()
+	console.log("Done")
+}
+
+
+
+// migrateTasksArchived()
+// migrateTasksReceivedAmount()
 // migrateTaskPromoter()
 // migrateQuotes()
 // migrateLeads()

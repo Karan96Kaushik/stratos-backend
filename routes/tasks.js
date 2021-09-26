@@ -78,6 +78,9 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 		// 	return
 		// }
 
+		if(!req.body.archived)
+			req.body.archived = false
+
 		req.body.totalAmount = calculateTotal(req.body)
 		req.body.balanceAmount = req.body.totalAmount
 
@@ -143,22 +146,25 @@ const generateQuery = (req) => {
 
 	let query = {
 		$and:[
-			{
-				$or:[
-					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ membersAssigned: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					// { memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ totalAmount: Number(req.query.text)},
-					{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ ca: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ engineer: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ status: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				]
-			}
 		],
+	}
+
+	if(req.query.text) {
+		query.$and.push({
+			$or:[
+				{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ membersAssigned: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				// { memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ totalAmount: Number(req.query.text)},
+				{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ ca: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ engineer: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ status: { $regex: new RegExp(req.query.text) , $options:"i" }},
+			]
+		})
 	}
 
 	// search only the tasks that are permitted
@@ -168,6 +174,13 @@ const generateQuery = (req) => {
 				serviceType: svc
 			}))
 		})
+
+	// search only the non-archived tasks if not specified exclusively
+	if(!req.query.filters.archived)
+		query['$and'].push({
+			archived:false
+		})
+	delete req.query.filters.archived
 
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
