@@ -14,7 +14,6 @@ let Payments = new Schema(
     clientName:String,
 
     remarks:String,
-    rating:Number,
 
     addedBy: {
       required:true,

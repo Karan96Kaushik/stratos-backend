@@ -392,6 +392,7 @@ let taskPayments = {
             {label:"Government Fees", id:"govtFees", type:"number"},
             {label:"Received", id:"received", type:"number"},
             {label:"Total", id:"total", type:"number"},
+            {label:"Payment Rating", id:"rating"},
             {label:"Balance", id:"balance", type:"number"},
         // {label:"Files", id:"files", type:"file"},
         ], 

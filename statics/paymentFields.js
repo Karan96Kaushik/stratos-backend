@@ -9,7 +9,6 @@ let paymentFields = {
             {label:"Invoice ID", id:"invoiceID"},
             {label:"Received Amount", id:"receivedAmount", type:"number", isRequired:true},
             {label:"Mode", id:"mode", options:modeOptions, isRequired:true},
-            {label:"Rating", id:"rating"},
             {label:"Remarks", id:"remarks", isRequired:true},
         ],
         checkboxes: []
