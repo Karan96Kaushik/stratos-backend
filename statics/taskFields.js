@@ -394,6 +394,7 @@ let taskPayments = {
             {label:"Total", id:"total", type:"number"},
             {label:"Payment Rating", id:"rating"},
             {label:"Balance", id:"balance", type:"number"},
+            {label:"Archived", id:"archived"},
         // {label:"Files", id:"files", type:"file"},
         ], 
         checkboxes:[]
