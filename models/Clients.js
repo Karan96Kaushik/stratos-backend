@@ -37,6 +37,8 @@ let Clients = new Schema(
     bookedUnits:Number,
 
     receivedAmount:Number,
+    totalAmount:Number,
+    balanceAmount:Number,
 
     extension:Boolean,
     proBono:Boolean,

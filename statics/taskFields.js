@@ -60,6 +60,7 @@ let commonTextFields = [
 let commonTextFieldsEnd = [
     {label:"Remarks", id:"remarks"},
     {label:"Notes", id:"notes"},
+    {label:"Archived", id:"archived"},
 ]
 
 let allStatuses = new Set([...statuses, ...statusSet1, ...statusSet2, ...statusSet3, ...statusSet4, ...statusSet5])

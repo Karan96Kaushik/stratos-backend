@@ -180,6 +180,46 @@ const migrateTasksArchived = async () => {
 	console.log("Done")
 }
 
+const migrateClientAmounts = async () => {
+
+	let allClients = await Clients.find()
+
+	for (client of allClients) {
+
+		let tasks = await Tasks.find({clientID: client.clientID})
+		tasks = tasks.map(t => t._doc)
+		if(!tasks.length)
+			continue
+
+		let totalAmount = tasks.reduce((t, curr) => Number(curr.totalAmount || 0) + t,0)
+		let receivedAmount = tasks.reduce((t, curr) => Number(curr.receivedAmount || 0) + t,0)
+		let balanceAmount = tasks.reduce((t, curr) => Number(curr.balanceAmount || 0) + t,0)
+
+		// if(!client.promoter) {
+		// 	console.log(String(client.clientID))
+		// 	continue
+		// }
+
+		console.log(client.clientID)
+
+		let _ = await Clients.updateOne(
+			{_id: String(client._id)}, 
+			{
+				receivedAmount,
+				balanceAmount,
+				totalAmount,
+			}
+			// {promoter: client.promoter}
+		)
+
+	}
+
+	console.log("Done")
+
+}
+
+migrateClientAmounts()
+
 
 
 // migrateTasksArchived()

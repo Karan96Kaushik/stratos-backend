@@ -284,7 +284,7 @@ router.post("/api/tasks/search", async (req, res) => {
 		res.json(results)
 	}
 	catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err.message)
 	}
 })
@@ -313,7 +313,7 @@ router.post("/api/tasks/export", async (req, res) => {
 		})
 
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err.message)
 	}
 })
@@ -327,27 +327,31 @@ const calculateTotal = (val) => (
 
 const generateQueryPayments = async (req) => {
 
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ receivedAmount: Number(req.query.text)},
-					{ balanceAmount: Number(req.query.text)},
-					{ totalAmount: Number(req.query.text)},
-					{ billAmount: Number(req.query.text)},
-					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				]
-			}
-		],
-	}
+	let query = {}
 
-	// if(Number(req.query.text)) {
-	// 	const taskIDs = await searchBillAmount(req.query.text)
-	// 	query["$and"][0]["$or"].push({taskID: {"$in": taskIDs}})		
-	// }
+	if(req.query.text || req.query.filters.length || !req.query.filters.archived)
+		query.$and = []
+
+	if(req.query.text)
+		query.$and.push({
+			$or:[
+				{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ receivedAmount: Number(req.query.text)},
+				{ balanceAmount: Number(req.query.text)},
+				{ totalAmount: Number(req.query.text)},
+				{ billAmount: Number(req.query.text)},
+				{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
+			]
+		})
+
+	// search only the non-archived tasks if not specified exclusively
+	if(!req.query.filters.archived)
+		query['$and'].push({
+			archived:false
+		})
+	delete req.query.filters.archived
 
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
@@ -585,7 +589,7 @@ router.post("/api/tasks/update", async (req, res) => {
 		}
 		res.send("OK")
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err.message)
 	}
 })
