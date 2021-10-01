@@ -73,9 +73,17 @@ const generateQuery = (req) => {
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
 
+		// multi select filters
+		if(req.query.filters[filter].multiSelect) {
+			query['$and'].push({
+				[filter]: {
+					$in: req.query.filters[filter].values
+				}
+			})
+		}
 		// filter is range - date/number
-		if(typeof req.query.filters[filter] == "object") {
-			req.query.filters[filter].forEach((val,i) => {
+		else if(req.query.filters[filter].range) {
+			req.query.filters[filter].values.forEach((val,i) => {
 				if(val == null)
 					return
 
