@@ -15,6 +15,7 @@ const {
 } = require("../modules/useS3");
 const crypto = require('crypto');
 const {Members} = require("../models/Members");
+const { QueryGenerator } = require("../modules/QueryGenerator")
 
 const serviceCodes = {
 	"Agent Registration": "AR",
@@ -144,85 +145,14 @@ router.delete("/api/tasks/", checkW, async (req, res) => {
 
 const generateQuery = (req) => {
 
-	let query = {
-		$and:[
-		],
-	}
 
-	if(req.query.text) {
-		query.$and.push({
-			$or:[
-				{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ membersAssigned: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				// { memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ totalAmount: Number(req.query.text)},
-				{ billAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ ca: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ engineer: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ status: { $regex: new RegExp(req.query.text) , $options:"i" }},
-			]
-		})
-	}
+	let queryGen = new QueryGenerator(req, "Tasks", {debug:false})
 
-	// search only the tasks that are permitted
-	if(!req.query.serviceType)
-		query['$and'].push({'$or':
-			req.permissions.service.map((svc) => ({
-				serviceType: svc
-			}))
-		})
+	queryGen.setArchived()
+	queryGen.applyFilters()
+	queryGen.setServiceType()
 
-	// search only the non-archived tasks if not specified exclusively
-	if(!req.query.filters.archived)
-		query['$and'].push({
-			archived:false
-		})
-	delete req.query.filters.archived
-
-	// add filters to the query, if present
-	Object.keys(req.query.filters ?? []).forEach(filter => {
-
-		if(filter == "balanceStatus") {
-			if(req.query.filters[filter] == "Nil") 
-				query['$and'].push({
-					balanceAmount: {$lte:0}
-				})
-			else if(req.query.filters[filter] == "Pending") 
-				query['$and'].push({
-					balanceAmount: {$gt:0}
-				})
-
-			return
-		}
-		// filter is range - date/number
-		if(typeof req.query.filters[filter] == "object") {
-			req.query.filters[filter].forEach((val,i) => {
-				if(val == null)
-					return
-
-				let operator = i == 0 ? "$lt" : "$gt"
-				query['$and'].push({
-					[filter]: {
-						[operator]: val
-					}
-				})	
-			})
-		} 
-		// filter is normal value
-		else {
-			query['$and'].push({
-				[filter]: req.query.filters[filter]
-			})	
-		}
-	})
-	if(!req.query.searchAll) {
-		query['$and'].push({
-			serviceType: req.query.serviceType
-		})
-	}
+	let query = queryGen.query
 
 	if(!checkR(req))
 		query['$and'].push({
@@ -239,7 +169,7 @@ const generateQuery = (req) => {
 const commonProcessor = (results) => {
 
 	results = results.map(val => ({
-		...val._doc, 
+		...val._doc,
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		billAmount: undefined,
 		gst: undefined,
@@ -327,70 +257,12 @@ const calculateTotal = (val) => (
 
 const generateQueryPayments = async (req) => {
 
-	let query = {}
+	let queryGen = new QueryGenerator(req, "TaskPayments", {debug:false})
 
-	if(req.query.text || req.query.filters.length || !req.query.filters.archived)
-		query.$and = []
+	queryGen.setArchived()
+	queryGen.applyFilters()
 
-	if(req.query.text)
-		query.$and.push({
-			$or:[
-				{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ receivedAmount: Number(req.query.text)},
-				{ balanceAmount: Number(req.query.text)},
-				{ totalAmount: Number(req.query.text)},
-				{ billAmount: Number(req.query.text)},
-				{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
-			]
-		})
-
-	// search only the non-archived tasks if not specified exclusively
-	if(!req.query.filters.archived)
-		query['$and'].push({
-			archived:false
-		})
-	delete req.query.filters.archived
-
-	// add filters to the query, if present
-	Object.keys(req.query.filters ?? []).forEach(filter => {
-
-		if(filter == "balanceStatus") {
-			if(req.query.filters[filter] == "Nil") 
-				query['$and'].push({
-					balanceAmount: {$lte:0}
-				})
-			else if(req.query.filters[filter] == "Pending") 
-				query['$and'].push({
-					balanceAmount: {$gt:0}
-				})
-
-			return
-		}
-
-		// filter is range - date/number
-		if(typeof req.query.filters[filter] == "object") {
-			req.query.filters[filter].forEach((val,i) => {
-				if(val == null)
-					return
-
-				let operator = i == 0 ? "$lt" : "$gt"
-				query['$and'].push({
-					[filter]: {
-						[operator]: val
-					}
-				})	
-			})
-		} 
-		// filter is normal value
-		else {
-			query['$and'].push({
-				[filter]: req.query.filters[filter]
-			})	
-		}
-	})
-	return query
+	return queryGen.query
 
 }
 
@@ -418,24 +290,6 @@ const commonProcessorPayments = async (results) => {
 	}))
 
 	return results
-}
-
-const searchBillAmount = async (amount) => {
-
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ receivedAmount: { $regex: new RegExp(amount) , $options:"i" }},
-				]
-			}
-		],
-	}
-
-	let result = await Payments.find(query)
-
-	result = result.map(val => val.taskID)
-
 }
 
 router.post("/api/tasks/payments/search", async (req, res) => {

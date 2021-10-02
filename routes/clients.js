@@ -16,6 +16,7 @@ const {
 } = require("../modules/useS3");
 const fs = require('fs');
 const crypto = require('crypto');
+const { QueryGenerator } = require("../modules/QueryGenerator")
 
 const tmpdir = "/tmp/"
 
@@ -90,65 +91,12 @@ router.post("/api/clients/add", checkW, async (req, res) => {
 
 const generateQuery = (req, ignorePermissions=false) => {
 
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ userID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ email: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ mobile: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				]
-			}
-		],
-	}
+	let queryGen = new QueryGenerator(req, "Clients", {debug:false})
 
-	// add filters to the query, if present
-	Object.keys(req.query.filters ?? []).forEach(filter => {
+	queryGen.applyFilters()
+	queryGen.setClientType()
 
-		if(filter == "balanceStatus") {
-			if(req.query.filters[filter] == "Nil") 
-				query['$and'].push({
-					balanceAmount: {$lte:0}
-				})
-			else if(req.query.filters[filter] == "Pending") 
-				query['$and'].push({
-					balanceAmount: {$gt:0}
-				})
-
-			return
-		}
-
-		// filter is range - date/number
-		if(typeof req.query.filters[filter] == "object") {
-			req.query.filters[filter].forEach((val,i) => {
-				if(val == null)
-					return
-
-				let operator = i == 0 ? "$lt" : "$gt"
-				query['$and'].push({
-					[filter]: {
-						[operator]: val
-					}
-				})	
-			})
-		} 
-		// filter is normal value
-		else {
-			query['$and'].push({
-				[filter]: req.query.filters[filter]
-			})	
-		}
-	})
-
-	if(!req.query.searchAll) {
-		query['$and'].push({
-			clientType: req.query.clientType
-		})
-	}
+	let query = queryGen.query
 
 	if(!checkR(req) && !req.query.ignorePermissions)
 		query['$and'].push({
@@ -156,6 +104,7 @@ const generateQuery = (req, ignorePermissions=false) => {
 		})
 
 	return query
+
 }
 
 const processDate = (compDate) => {
@@ -247,61 +196,11 @@ router.post("/api/clients/export", async (req, res) => {
 
 const generatePaymentsQuery = (req) => {
 
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ userID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ email: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ mobile: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				]
-			}
-		],
-	}
+	let queryGen = new QueryGenerator(req, "ClientPayments", {debug:false})
 
-	// add filters to the query, if present
-	Object.keys(req.query.filters ?? []).forEach(filter => {
+	queryGen.applyFilters()
 
-		if(filter == "balanceStatus") {
-			if(req.query.filters[filter] == "Nil") 
-				query['$and'].push({
-					balanceAmount: {$lte:0}
-				})
-			else if(req.query.filters[filter] == "Pending") 
-				query['$and'].push({
-					balanceAmount: {$gt:0}
-				})
-
-			return
-		}
-
-		// filter is range - date/number
-		if(typeof req.query.filters[filter] == "object") {
-			req.query.filters[filter].forEach((val,i) => {
-				if(val == null)
-					return
-
-				let operator = i == 0 ? "$lt" : "$gt"
-				query['$and'].push({
-					[filter]: {
-						[operator]: val
-					}
-				})	
-			})
-		} 
-		// filter is normal value
-		else {
-			query['$and'].push({
-				[filter]: req.query.filters[filter]
-			})	
-		}
-	})
-
-	return query
+	return queryGen.query
 }
 
 const commonPaymentsProcessor = async (results) => {
