@@ -10,6 +10,7 @@ const {getID, updateID} = require("../models/Utils");
 const {generateExcel} = require("../modules/excelProcessor");
 const leadFields = require("../statics/leadFields");
 const crypto = require('crypto');
+const { QueryGenerator } = require("../modules/QueryGenerator")
 
 const {
 	getAllFiles,
@@ -70,72 +71,18 @@ router.post("/api/leads/add", async (req, res) => {
 
 const generateQuery = (req) => {
 
-	let others = {}
+	if(!req.query.leadType && !req.query.searchAll)
+		return res.send()
 
-	if(!req.query.leadType && !req.query.searchAll) {
-		res.send()
-		return
-	}
+	let queryGen = new QueryGenerator(req, "Leads", {debug:false})
 
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ leadID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ leadResponsibility: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					// { memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					// { memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ mobile: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ email: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ location: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ companyName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ office: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				]
-			}
-		],
-	}
-
-	if(!req.query.searchAll) {
-		query['$and'].push({
-			leadType: req.query.leadType
-		})
-	}
-
-	// add filters to the query, if present
-	Object.keys(req.query.filters ?? []).forEach(filter => {
-
-		// filter is range - date/number
-		if(typeof req.query.filters[filter] == "object") {
-			req.query.filters[filter].forEach((val,i) => {
-				if(val == null)
-					return
-
-				let operator = i == 0 ? "$lt" : "$gt"
-				query['$and'].push({
-					[filter]: {
-						[operator]: val
-					}
-				})	
-			})
-		} 
-		// filter is normal value
-		else {
-			query['$and'].push({
-				[filter]: req.query.filters[filter]
-			})	
-		}
-	})
+	queryGen.applyFilters()
+	queryGen.setAddedBy("Leads R")
+	queryGen.setSearchAll("leadType")
 
 	// non leads-read user can only view their own added leads
-	if(!req.permissions.page.includes("Leads R")) {
-		query['$and'].push({
-			addedBy: req.user.id
-		})
-	}
 
-	return query
+	return queryGen.query
 }
 
 const commonProcessor = (results) => {

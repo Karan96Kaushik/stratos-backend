@@ -144,26 +144,15 @@ router.delete("/api/tasks/", checkW, async (req, res) => {
 })
 
 const generateQuery = (req) => {
-
-
+	
 	let queryGen = new QueryGenerator(req, "Tasks", {debug:false})
 
 	queryGen.setArchived()
 	queryGen.applyFilters()
 	queryGen.setServiceType()
+	queryGen.setAddedBy("Tasks R")
 
-	let query = queryGen.query
-
-	if(!checkR(req))
-		query['$and'].push({
-			$or:[
-				{addedBy: req.user.id},
-				{_memberID: req.user.id},
-				{_membersAssigned: req.user.id},
-			]
-		})
-	
-	return query
+	return queryGen.query
 }
 
 const commonProcessor = (results) => {

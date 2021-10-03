@@ -51,9 +51,17 @@ class QueryGenerator {
 				return
 			}
 
+			// multi select filters
+			if(this.req.query.filters[filter].multiSelect) {
+				this._query['$and'].push({
+					[filter]: {
+						$in: this.req.query.filters[filter].values
+					}
+				})
+			}
 			// filter is range - date/number
-			if(typeof this.req.query.filters[filter] == "object") {
-				this.req.query.filters[filter].forEach((val,i) => {
+			else if(this.req.query.filters[filter].range) {
+				this.req.query.filters[filter].values.forEach((val,i) => {
 					if(val == null)
 						return
 
@@ -103,13 +111,34 @@ class QueryGenerator {
 
 	}
 
-	setClientType () {
+	setAddedBy (permission) {
 
-		if(!this.req.query.searchAll) {
-			this._query['$and'].push({
-				clientType: this.req.query.clientType
+		if (this.req.permissions.page.includes(permission) || this.req.query.ignorePermissions)
+			return
+
+		if (permission == "Tasks R")
+			return this._query.$and.push({
+				$or: [
+					{addedBy: this.req.user.id},
+					{_memberID: this.req.user.id},
+					{_membersAssigned: this.req.user.id},
+				]
 			})
-		}
+
+		this._query.$and.push(
+			{ addedBy: this.req.user.id }
+		)
+
+	}
+
+	setSearchAll (typeField) {
+
+		if(this.req.query.searchAll)
+			return
+
+		this._query.$and.push({ 
+			[typeField]: this.req.query[typeField] 
+		})
 
 	}
 

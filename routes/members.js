@@ -15,6 +15,7 @@ const {
 	getFilePath
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
+const { QueryGenerator } = require("../modules/QueryGenerator")
 
 const tmpdir = "/tmp/"
 
@@ -84,20 +85,9 @@ router.post("/api/members/add", checkW, async (req, res) => {
 
 const generateQuery = (req) => {
 
-	let others = {}
+	let queryGen = new QueryGenerator(req, "Members", {debug:false})
 
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ email: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ userName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				]
-			}
-		],
-	}
-
-	return query
+	return queryGen.query
 }
 
 router.get("/api/members/search", checkR, async (req, res) => {

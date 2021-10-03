@@ -89,21 +89,15 @@ router.post("/api/clients/add", checkW, async (req, res) => {
 	}
 })
 
-const generateQuery = (req, ignorePermissions=false) => {
+const generateQuery = (req) => {
 
 	let queryGen = new QueryGenerator(req, "Clients", {debug:false})
 
 	queryGen.applyFilters()
-	queryGen.setClientType()
+	queryGen.setAddedBy("Clients R")
+	queryGen.setSearchAll("clientType")
 
-	let query = queryGen.query
-
-	if(!checkR(req) && !req.query.ignorePermissions)
-		query['$and'].push({
-			addedBy : req.user.id
-		})
-
-	return query
+	return queryGen.query
 
 }
 

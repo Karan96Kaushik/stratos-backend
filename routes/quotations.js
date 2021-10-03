@@ -15,7 +15,7 @@ const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 const _ = require('lodash');
 const crypto = require('crypto');
-
+const { QueryGenerator } = require("../modules/QueryGenerator")
 
 const checkQuotationR = (req, res, next) => {
 	if(req.permissions.page.includes("Quotations R"))
@@ -55,67 +55,17 @@ router.post("/api/quotations/add", checkQuotationW, async (req, res) => {
 })
 
 const generateQuery = (req) => {
-	let others = {}
 
-	if(!req.permissions.page.includes("Quotations R"))
-		others.addedBy = req.user.id
+	let queryGen = new QueryGenerator(req, "Quotations", {debug:false})
 
-	let query = {
-		$and:[
-			{
-				...others
-			}
-		]
-	}
+	queryGen.applyFilters()
+	queryGen.setAddedBy("Quotations R")
 
-	if(req.query.text) {
-		query.$and[0].$or = [
-			{ serviceType: { $regex: new RegExp(req.query.text) , $options:"i" }},
-			{ memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-			{ quotationID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-			{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-			{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-			{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-			{ relatedProject: { $regex: new RegExp(req.query.text) , $options:"i" }},
-		]
-	}
-
-	// add filters to the query, if present
-	Object.keys(req.query.filters ?? []).forEach(filter => {
-
-		// filter is range - date/number
-		if(typeof req.query.filters[filter] == "object") {
-			req.query.filters[filter].forEach((val,i) => {
-				if(val == null)
-					return
-
-				let operator = i == 0 ? "$lt" : "$gt"
-				query['$and'].push({
-					[filter]: {
-						[operator]: val
-					}
-				})	
-			})
-		} 
-		// filter is normal value
-		else {
-			query['$and'].push({
-				[filter]: req.query.filters[filter]
-			})	
-		}
-	})
-
-	// console.log(JSON.stringify(query, null, 4))
-
-	return query
+	return queryGen.query
 }
 
 const commonProcessor = async (results) => {
 
-	// let userIds = results.map(val => val._doc.addedBy)
-
-	// userIds = await Members.find({_id: {$in: userIds}})
-	
 	results = results.map(val => {
 		// let user = userIds.find(v => String(v._id) == String(val.addedBy))
 		let serviceType = _.attempt(JSON.parse.bind(null, val.serviceType))

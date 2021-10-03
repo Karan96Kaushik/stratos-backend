@@ -51,6 +51,49 @@ const modelFunctions = {
 			{ email: { $regex: new RegExp(text) , $options:"i" }},
 			{ mobile: { $regex: new RegExp(text) , $options:"i" }},
 		]
+	),
+
+	Invoices: (text) => (
+		[
+			{ invoiceID: { $regex: new RegExp(text) , $options:"i" }},
+			{ memberID: { $regex: new RegExp(text) , $options:"i" }},
+			{ projectName: { $regex: new RegExp(text) , $options:"i" }},
+		]
+	),
+
+	Leads: (text) => (
+		[
+			{ leadID: { $regex: new RegExp(text) , $options:"i" }},
+			{ leadResponsibility: { $regex: new RegExp(text) , $options:"i" }},
+			// { memberName: { $regex: new RegExp(text) , $options:"i" }},
+			{ name: { $regex: new RegExp(text) , $options:"i" }},
+			// { memberID: { $regex: new RegExp(text) , $options:"i" }},
+			{ projectName: { $regex: new RegExp(text) , $options:"i" }},
+			{ mobile: { $regex: new RegExp(text) , $options:"i" }},
+			{ email: { $regex: new RegExp(text) , $options:"i" }},
+			{ location: { $regex: new RegExp(text) , $options:"i" }},
+			{ companyName: { $regex: new RegExp(text) , $options:"i" }},
+			{ office: { $regex: new RegExp(text) , $options:"i" }},
+		]
+	),
+
+	Quotations: (text) => (
+		[
+			{ serviceType: { $regex: new RegExp(text) , $options:"i" }},
+			{ memberName: { $regex: new RegExp(text) , $options:"i" }},
+			{ quotationID: { $regex: new RegExp(text) , $options:"i" }},
+			{ clientName: { $regex: new RegExp(text) , $options:"i" }},
+			{ clientID: { $regex: new RegExp(text) , $options:"i" }},
+			{ memberID: { $regex: new RegExp(text) , $options:"i" }},
+			{ relatedProject: { $regex: new RegExp(text) , $options:"i" }},
+		]
+	),
+
+	Members: (text) => (
+		[
+			{ email: { $regex: new RegExp(text) , $options:"i" }},
+			{ userName: { $regex: new RegExp(text) , $options:"i" }},
+		]
 	)
 
 }

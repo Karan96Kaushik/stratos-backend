@@ -12,7 +12,7 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
-const crypto = require('crypto');
+const { QueryGenerator } = require("../modules/QueryGenerator")
 
 const checkInvoiceR = (req, res, next) => {
 	if(req.permissions.page.includes("Invoices R"))
@@ -52,58 +52,13 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 })
 
 const generateQuery = (req) => {
-	let others = {}
 
-	if(!req.permissions.page.includes("Invoices R"))
-		others.addedBy = req.user.id
+	let queryGen = new QueryGenerator(req, "Invoices", {debug:false})
 
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ invoiceID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				],
-				...others
-			}
-		],
-	}
+	queryGen.applyFilters()
+	queryGen.setAddedBy("Invoices R")
 
-	// add filters to the query, if present
-	Object.keys(req.query.filters ?? []).forEach(filter => {
-
-		// multi select filters
-		if(req.query.filters[filter].multiSelect) {
-			query['$and'].push({
-				[filter]: {
-					$in: req.query.filters[filter].values
-				}
-			})
-		}
-		// filter is range - date/number
-		else if(req.query.filters[filter].range) {
-			req.query.filters[filter].values.forEach((val,i) => {
-				if(val == null)
-					return
-
-				let operator = i == 0 ? "$lt" : "$gt"
-				query['$and'].push({
-					[filter]: {
-						[operator]: val
-					}
-				})	
-			})
-		} 
-		// filter is normal value
-		else {
-			query['$and'].push({
-				[filter]: req.query.filters[filter]
-			})	
-		}
-	})
-
-	return query
+	return queryGen.query
 }
 
 const commonProcessor = (results) => {
