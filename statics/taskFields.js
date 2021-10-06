@@ -228,7 +228,8 @@ const taskFields = {
             {label:"Service Requested", id:"serviceReq"},
             {label:"Service Description", id:"serviceDesc"},
             {label:"Status", id:"status", options:[...statuses, ...statusSet2]},
-            ...commonTextFields
+            ...commonTextFields,
+            ...commonTextFieldsEnd
         ],
         checkboxes:[
         ]
