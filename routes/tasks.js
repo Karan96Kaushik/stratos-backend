@@ -329,7 +329,7 @@ const generateQueryPayments = async (req) => {
 
 	let query = {}
 
-	if(req.query.text || req.query.filters.length || !req.query.filters.archived)
+	if(req.query.text || Object.keys(req.query.filters).length || !req.query.filters.archived)
 		query.$and = []
 
 	if(req.query.text)
