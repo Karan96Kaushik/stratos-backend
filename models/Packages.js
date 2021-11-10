@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // Define collection and schema
-let Payments = new Schema(
+let Packages = new Schema(
   {
-    taskID:String,
+    packageID:String,
     
     _clientID:{
       required:true,
@@ -22,11 +22,11 @@ let Payments = new Schema(
   },
   {
     timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },
-    collection: "Payments",
+    collection: "Packages",
     strict:false
   }
 );
 
 module.exports = {
-  Payments: mongoose.model("Payments", Payments),
+  Packages: mongoose.model("Packages", Packages),
 };

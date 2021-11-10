@@ -1,11 +1,7 @@
 const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
-const {Payments} = require("../models/Payments");Payments
-const {Members} = require("../models/Members");
-const {Tasks} = require("../models/Tasks");
-const {Clients} = require("../models/Clients");
-const {paymentFields} = require("../statics/paymentFields")
+const {Packages} = require("../models/Packages");
 const {generateExcel} = require("../modules/excelProcessor")
 const {getID, updateID} = require("../models/Utils");
 const {
@@ -16,24 +12,22 @@ const {
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 
-router.post("/api/payments/add", async (req, res) => {
+router.post("/api/packages/add", async (req, res) => {
 	// const memberInfo = await Members.findOne({_id: req.user.id})
 
-	if(!req.permissions.page.includes("Payments W")) {
-		res.status(401).send("Unauthorized")
-		return
-	}
+	// if(!req.permissions.page.includes("Packages W")) {
+	// 	res.status(401).send("Unauthorized")
+	// 	return
+	// }
 
-	await handlePayment(req.body, null)
-
-    let paymentID = "AC" + await getID("account")
-	let _ = await Payments.create({
+    let packageID = "AC" + await getID("package")
+	let _ = await Packages.create({
 		...req.body,
 		// memberID:memberInfo.memberID,
-		paymentID,
+		packageID,
 		addedBy: req.user.id
 	});
-	_ = await updateID("account")
+	_ = await updateID("package")
 
 	if(req.body.docs?.length) {
 		let files = await saveFilesToLocal(req.body.docs)
@@ -106,7 +100,7 @@ const commonProcessor = (results) => {
 	return results
 }
 
-router.post("/api/payments/search", async (req, res) => {
+router.post("/api/packages/search", async (req, res) => {
 	try{
 		req.query = req.body
 
@@ -118,7 +112,7 @@ router.post("/api/payments/search", async (req, res) => {
 
 		let query = generateQuery(req)
 
-		let results = await Payments.find(query)
+		let results = await Packages.find(query)
 			.collation({locale: "en" })
 			.limit(rowsPerPage)
 			.skip(rowsPerPage * page)
@@ -133,7 +127,7 @@ router.post("/api/payments/search", async (req, res) => {
 	}
 })
 
-router.post("/api/payments/export", async (req, res) => {
+router.post("/api/packages/export", async (req, res) => {
 	try{
 		req.query = req.body
 
@@ -145,12 +139,12 @@ router.post("/api/payments/export", async (req, res) => {
 
 		let query = generateQuery(req)
 
-		let results = await Payments.find(query)
+		let results = await Packages.find(query)
 			.collation({locale: "en" })
 
 		results = commonProcessor(results)
 
-		let file = await generateExcel(results, paymentFields["all"], "paymentsExport" + (+new Date))
+		let file = await generateExcel(results, paymentFields["all"], "packagesExport" + (+new Date))
 
 		res.download("/tmp/" + file,(err) => {
 			fs.unlink("/tmp/" + file, () => {})
@@ -162,11 +156,11 @@ router.post("/api/payments/export", async (req, res) => {
 	}
 })
 
-router.get("/api/payments/", async (req, res) => {
+router.get("/api/packages/", async (req, res) => {
 	try{
 		const _id = req.query._id
 		delete req.query._id
-		let invoices = await Payments.findOne({_id});
+		let invoices = await Packages.findOne({_id});
 		invoices = invoices._doc
 
 		let files = await getAllFiles(invoices.invoiceID + "/")
@@ -181,7 +175,7 @@ router.get("/api/payments/", async (req, res) => {
 	}
 })
 
-router.delete("/api/payments/", async (req, res) => {
+router.delete("/api/packages/", async (req, res) => {
 	try{
 
 		if(req.query.password != (process.env.DeletePassword ?? "delete45678")) {
@@ -193,9 +187,7 @@ router.delete("/api/payments/", async (req, res) => {
 		let _
 		const _id = req.query._id
 
-		await handlePayment(req.query, _id, true)
-
-		await Payments.deleteOne({_id});
+		await Packages.deleteOne({_id});
 
 		res.send("OK")
 	} catch (err) {
@@ -204,65 +196,18 @@ router.delete("/api/payments/", async (req, res) => {
 	}
 })
 
-router.get("/api/payments/search/all", async (req, res) => {
+router.get("/api/packages/search/all", async (req, res) => {
 	let query = req.query
 
-	const payments = await Payments.find(query);
+	const packages = await Packages.find(query);
 
-	res.json(payments)
+	res.json(packages)
 })
 
-const calculateTotal = (val) => (
-	Number(val.billAmount ?? 0) +
-	Number(val.gst ?? 0) +
-	Number(val.govtFees ?? 0) +
-	Number(val.sroFees ?? 0)
-)
-
-// manages denormalised balance/received amount in Clients/Tasks
-const handlePayment = async (body, originalPaymentId, isDelete=false) => {
-	let originalPayment, 
-		_, 
-		paymentAmount = 0
-
-	if(originalPaymentId) {
-		originalPayment = await Payments.findOne({_id: originalPaymentId});
-		originalPayment = originalPayment._doc
-
-		body._taskID = originalPayment._taskID
-		body._clientID = originalPayment._clientID
-	}
-
-	if(isDelete)
-		paymentAmount = - Number(originalPayment?.receivedAmount || 0) 
-	else
-		paymentAmount = ((Number(body.receivedAmount) || 0)) - Number(originalPayment?.receivedAmount || 0) 
-
-	let task = await Tasks.findOne({_id: body._taskID})
-	let client = await Clients.findOne({_id: body._clientID})
-
-	if(!task || !client)
-		throw new Error("Linked client or task not found - contact admin")
-
-	task = task._doc
-	client = client._doc
-
-	let totalAmount = calculateTotal(task)
-
-	_ = await Tasks.updateOne({
-		_id: body._taskID}, 
-		{
-			receivedAmount: paymentAmount + (Number(task.receivedAmount || 0)),
-			balanceAmount: totalAmount - (paymentAmount + (Number(task.receivedAmount || 0)))
-		})
-	_ = await Clients.updateOne({_id: body._clientID}, {receivedAmount: paymentAmount + (Number(client.receivedAmount) || 0)})
-
-}
-
-router.post("/api/payments/update", async (req, res) => {
+router.post("/api/packages/update", async (req, res) => {
 	try {
 
-		if(!req.permissions.page.includes("Payments W")) {
+		if(!req.permissions.page.includes("Packages W")) {
 			res.status(401).send("Unauthorized")
 			return
 		}
@@ -275,7 +220,7 @@ router.post("/api/payments/update", async (req, res) => {
 
 		await handlePayment(req.body, _id)
 
-		_ = await Payments.updateOne(
+		_ = await Packages.updateOne(
 			{
 				_id
 			},
