@@ -13,26 +13,31 @@ const {Quotations} = require("../models/Quotations");
 const migrateTaskPromoter = async () => {
 
 	let allClients = await Clients.find()
-	let allTasks = await Tasks.find({})
+	let allTasks = await Tasks.find({serviceType:"Litigation"})
 
 	console.log(allTasks.length)
 
 	for (task of allTasks) {
 
-		let client = allClients.find(val => String(val._id) == String(task._clientID))
-		if(!client) {
-			console.log(String(task.clientID))
-			continue
-		}
+		task = task._doc
+		// console.log(String(task.clientID))
+		if(!task.clientID)
+			console.log(task)
 
-		if(!client.promoter) {
-			console.log(String(task.clientID))
+		let client = allClients.find(val => String(val.clientID) == String(task.clientID))
+		if(!client) {
+			console.log(client)
 			continue
 		}
 
 		let _ = await Tasks.updateOne(
 			{_id: String(task._id)}, 
-			{promoter: client.promoter}
+			{
+				promoter: client.promoter ?? "",
+				_clientID: client._id,
+				clientName: client.name,
+				_membersAssigned: typeof task._membersAssigned == "string" ? JSON.parse(task._membersAssigned) : task._membersAssigned
+			}
 		)
 
 	}
@@ -218,13 +223,24 @@ const migrateClientAmounts = async () => {
 
 }
 
-migrateClientAmounts()
+const removeTasks = async () => {
+	let query = {
+		serviceType:"Litigation", 
+		__v:{$not:{$lte:0}}
+	}
 
+	let _ = await Tasks.deleteMany(query)
 
+	console.log(_)
 
+}
+
+migrateTaskPromoter()
+
+// removeTasks()
+// migrateClientAmounts()
 // migrateTasksArchived()
 // migrateTasksReceivedAmount()
-// migrateTaskPromoter()
 // migrateQuotes()
 // migrateLeads()
 // migratePayments()

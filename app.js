@@ -48,6 +48,7 @@ app.use(routes.invoices)
 app.use(routes.utils)
 app.use(routes.accounts)
 app.use(routes.payments)
+app.use(routes.packages)
 app.use(routes.dashboard)
 
 /*****************  ***********************/
