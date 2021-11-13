@@ -2,6 +2,7 @@ const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
 const {Packages} = require("../models/Packages");
+const {PackagePayments} = require("../models/PackagePayments");
 const {generateExcel} = require("../modules/excelProcessor")
 const {getID, updateID} = require("../models/Utils");
 const {
@@ -13,17 +14,15 @@ const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 
 router.post("/api/packages/add", async (req, res) => {
-	// const memberInfo = await Members.findOne({_id: req.user.id})
 
-	// if(!req.permissions.page.includes("Packages W")) {
-	// 	res.status(401).send("Unauthorized")
-	// 	return
-	// }
+	if(!req.permissions.page.includes("Packages W")) {
+		res.status(401).send("Unauthorized")
+		return
+	}
 
-    let packageID = "AC" + await getID("package")
+    let packageID = "RT" + await getID("package")
 	let _ = await Packages.create({
 		...req.body,
-		// memberID:memberInfo.memberID,
 		packageID,
 		addedBy: req.user.id
 	});
@@ -31,7 +30,29 @@ router.post("/api/packages/add", async (req, res) => {
 
 	if(req.body.docs?.length) {
 		let files = await saveFilesToLocal(req.body.docs)
-		await uploadFiles(files, invoiceID)
+		await uploadFiles(files, packageID)
+	}
+	res.send("OK")
+})
+
+router.post("/api/packages/payments/add", async (req, res) => {
+
+	if(!req.permissions.page.includes("Payments W")) {
+		res.status(401).send("Unauthorized")
+		return
+	}
+
+    let paymentID = "RA" + await getID("packagepayments")
+	let _ = await PackagePayments.create({
+		...req.body,
+		paymentID,
+		addedBy: req.user.id
+	});
+	_ = await updateID("packagepayments")
+
+	if(req.body.docs?.length) {
+		let files = await saveFilesToLocal(req.body.docs)
+		await uploadFiles(files, paymentID)
 	}
 	res.send("OK")
 })
@@ -46,13 +67,7 @@ const generateQuery = (req) => {
 		$and:[
 			{
 				$or:[
-					{ invoiceID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ remarks: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ receivedAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				],
 				...others
 			}
@@ -217,8 +232,6 @@ router.post("/api/packages/update", async (req, res) => {
 		delete req.body._id
 		delete req.body.memberID
 		delete req.body.addedBy
-
-		await handlePayment(req.body, _id)
 
 		_ = await Packages.updateOne(
 			{
