@@ -5,6 +5,7 @@ const {Payments} = require("../models/Payments");Payments
 const {Members} = require("../models/Members");
 const {Tasks} = require("../models/Tasks");
 const {Clients} = require("../models/Clients");
+const {Packages} = require("../models/Packages");
 const {paymentFields} = require("../statics/paymentFields")
 const {generateExcel} = require("../modules/excelProcessor")
 const {getID, updateID} = require("../models/Utils");
@@ -17,7 +18,6 @@ const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 
 router.post("/api/payments/add", async (req, res) => {
-	// const memberInfo = await Members.findOne({_id: req.user.id})
 
 	if(!req.permissions.page.includes("Payments W")) {
 		res.status(401).send("Unauthorized")
@@ -29,7 +29,6 @@ router.post("/api/payments/add", async (req, res) => {
     let paymentID = "AC" + await getID("account")
 	let _ = await Payments.create({
 		...req.body,
-		// memberID:memberInfo.memberID,
 		paymentID,
 		addedBy: req.user.id
 	});
@@ -54,6 +53,7 @@ const generateQuery = (req) => {
 				$or:[
 					{ invoiceID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ packageID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ clientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ remarks: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ receivedAmount: { $regex: new RegExp(req.query.text) , $options:"i" }},
@@ -90,18 +90,15 @@ const generateQuery = (req) => {
 		}
 	})
 
-	// console.log(JSON.stringify(query, null, 4))
-
 	return query
 }
 
 const commonProcessor = (results) => {
-	// console.log(JSON.stringify(results, null, 4))
 	results = results.map(val => ({
 		...val._doc, 
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
-		paymentDate: val._doc.paymentDate ? moment(new Date(val._doc.paymentDate)).format("DD-MM-YYYY") : ""
-		// a:console.log(val)
+		paymentDate: val._doc.paymentDate ? moment(new Date(val._doc.paymentDate)).format("DD-MM-YYYY") : "",
+		taskID: val._doc.taskID ?? val._doc.packageID,
 	}))
 	return results
 }
@@ -166,15 +163,15 @@ router.get("/api/payments/", async (req, res) => {
 	try{
 		const _id = req.query._id
 		delete req.query._id
-		let invoices = await Payments.findOne({_id});
-		invoices = invoices._doc
+		let payments = await Payments.findOne({_id});
+		payments = payments._doc
 
-		let files = await getAllFiles(invoices.invoiceID + "/")
+		let files = await getAllFiles(payments.invoiceID + "/")
 		files = files.map(({Key}) => (Key))
 
-		invoices.files = files
+		payments.files = files
 
-		res.json(invoices)
+		res.json(payments)
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
@@ -223,7 +220,10 @@ const calculateTotal = (val) => (
 const handlePayment = async (body, originalPaymentId, isDelete=false) => {
 	let originalPayment, 
 		_, 
-		paymentAmount = 0
+		paymentAmount = 0,
+		task,
+		client,
+		package
 
 	if(originalPaymentId) {
 		originalPayment = await Payments.findOne({_id: originalPaymentId});
@@ -238,23 +238,42 @@ const handlePayment = async (body, originalPaymentId, isDelete=false) => {
 	else
 		paymentAmount = ((Number(body.receivedAmount) || 0)) - Number(originalPayment?.receivedAmount || 0) 
 
-	let task = await Tasks.findOne({_id: body._taskID})
-	let client = await Clients.findOne({_id: body._clientID})
+	client = await Clients.findOne({_id: body._clientID})
+	if(!client)
+		throw new Error("Linked client not found - contact admin")
+	client = client?._doc
 
-	if(!task || !client)
-		throw new Error("Linked client or task not found - contact admin")
+	if (body.taskID) {
+		let totalAmount = calculateTotal(task)
 
-	task = task._doc
-	client = client._doc
+		task = await Tasks.findOne({_id: body._taskID})
+		if(!task)
+			throw new Error("Linked task not found - contact admin")
 
-	let totalAmount = calculateTotal(task)
+		task = task?._doc
 
-	_ = await Tasks.updateOne({
-		_id: body._taskID}, 
-		{
-			receivedAmount: paymentAmount + (Number(task.receivedAmount || 0)),
-			balanceAmount: totalAmount - (paymentAmount + (Number(task.receivedAmount || 0)))
-		})
+		_ = await Tasks.updateOne({
+			_id: body._taskID}, 
+			{
+				receivedAmount: paymentAmount + (Number(task.receivedAmount || 0)),
+				balanceAmount: totalAmount - (paymentAmount + (Number(task.receivedAmount || 0)))
+			})
+
+	} else if (body.packageID) {
+		package = await Packages.findOne({_id: body._packageID})
+		if(!package)
+			throw new Error("Linked package not found - contact admin")
+
+		package = package?._doc
+
+		_ = await Packages.updateOne({
+			_id: body._packageID}, 
+			{
+				receivedAmount: paymentAmount + (Number(package.receivedAmount || 0)),
+				balanceAmount: package.due - (paymentAmount + (Number(package.receivedAmount || 0)))
+			})
+	}
+
 	_ = await Clients.updateOne({_id: body._clientID}, {receivedAmount: paymentAmount + (Number(client.receivedAmount) || 0)})
 
 }

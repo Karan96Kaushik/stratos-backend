@@ -19,6 +19,7 @@ const pagePermissions = [
 	"Payments W",
 	"Packages R",
 	"Packages W",
+	"Packages Services R",
 	"Packages Services W",
 ]
 

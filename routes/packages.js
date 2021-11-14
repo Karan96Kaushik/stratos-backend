@@ -2,16 +2,15 @@ const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
 const {Packages} = require("../models/Packages");
-const {PackagePayments} = require("../models/PackagePayments");
+const {Payments} = require("../models/Payments");
 const {generateExcel} = require("../modules/excelProcessor")
 const {getID, updateID} = require("../models/Utils");
 const {
 	getAllFiles,
-	uploadToS3,
-	getFilePath
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
+const {serviceMapping} = require('../modules/packageHelpers')
 
 router.post("/api/packages/add", async (req, res) => {
 
@@ -35,28 +34,6 @@ router.post("/api/packages/add", async (req, res) => {
 	res.send("OK")
 })
 
-router.post("/api/packages/payments/add", async (req, res) => {
-
-	if(!req.permissions.page.includes("Payments W")) {
-		res.status(401).send("Unauthorized")
-		return
-	}
-
-    let paymentID = "RA" + await getID("packagepayments")
-	let _ = await PackagePayments.create({
-		...req.body,
-		paymentID,
-		addedBy: req.user.id
-	});
-	_ = await updateID("packagepayments")
-
-	if(req.body.docs?.length) {
-		let files = await saveFilesToLocal(req.body.docs)
-		await uploadFiles(files, paymentID)
-	}
-	res.send("OK")
-})
-
 const generateQuery = (req) => {
 	let others = {}
 
@@ -68,6 +45,7 @@ const generateQuery = (req) => {
 			{
 				$or:[
 					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ packageID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				],
 				...others
 			}
@@ -105,14 +83,32 @@ const generateQuery = (req) => {
 }
 
 const commonProcessor = (results) => {
-	// console.log(JSON.stringify(results, null, 4))
 	results = results.map(val => ({
 		...val._doc, 
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
-		paymentDate: val._doc.paymentDate ? moment(new Date(val._doc.paymentDate)).format("DD-MM-YYYY") : ""
-		// a:console.log(val)
+		startDate:moment(new Date(val._doc.startDate)).format("DD-MM-YYYY"),
+		...serviceMapping(val._doc, true)
 	}))
 	return results
+}
+
+const mapPayments = async (results) => {
+	let packageIDs = results.map(v => v.packageID)
+	let payments = await Payments.find({
+		packageID: {$in: packageIDs}
+	})
+	payments = payments.map(v => v._doc)
+	return results.map(val => ({
+		...val, 
+		receivedAmount: payments.filter(v => val.packageID == v.packageID).reduce((t, curr) => t + Number(curr.receivedAmount),0),
+		payments: payments
+			.filter(v => val.packageID == v.packageID)
+			.map(v => (
+				(v.paymentDate ? moment(new Date(v.paymentDate)).format("DD-MM-YYYY") + " - " : v.createdTime ? (moment(new Date(v.createdTime)).format("DD-MM-YYYY") + " - ") : " - ") +
+				"₹" + v.receivedAmount + " - " +
+				v.mode
+			))
+	}))
 }
 
 router.post("/api/packages/search", async (req, res) => {
@@ -135,6 +131,20 @@ router.post("/api/packages/search", async (req, res) => {
 
 		results = commonProcessor(results)
 
+		if(req.query.accounts)
+			results = await mapPayments(results)
+
+		res.json(results)
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.get("/api/packages/payments/search", async (req, res) => {
+	try {
+		let results = await Packages.find(req.query).limit(5)
+		results = results.map(v => v._doc)
 		res.json(results)
 	} catch (err) {
 		console.log(err)
@@ -143,7 +153,7 @@ router.post("/api/packages/search", async (req, res) => {
 })
 
 router.post("/api/packages/export", async (req, res) => {
-	try{
+	try {
 		req.query = req.body
 
 		if(req.query.password != (process.env.ExportPassword ?? "export45678")) {
@@ -173,17 +183,17 @@ router.post("/api/packages/export", async (req, res) => {
 
 router.get("/api/packages/", async (req, res) => {
 	try{
-		const _id = req.query._id
-		delete req.query._id
-		let invoices = await Packages.findOne({_id});
-		invoices = invoices._doc
+		delete req.query.service
+		let package = await Packages.findOne(req.query);
+		package = package._doc
+		package = {...package, ...serviceMapping(package)}
 
-		let files = await getAllFiles(invoices.invoiceID + "/")
+		let files = await getAllFiles(package.invoiceID + "/")
 		files = files.map(({Key}) => (Key))
 
-		invoices.files = files
+		package.files = files
 
-		res.json(invoices)
+		res.json(package)
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)

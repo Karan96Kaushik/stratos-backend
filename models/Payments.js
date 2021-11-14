@@ -12,6 +12,7 @@ let Payments = new Schema(
     },
 
     clientName:String,
+    // receivedAmount:Number,
 
     remarks:String,
 
