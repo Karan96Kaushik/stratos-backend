@@ -82,6 +82,7 @@ const updatePackage = async (package) => {
 		{ _id: String(package._id) },
 		{
 			due,
+			balanceAmount: due - (package.receivedAmount || 0),
 			pending
 		}
 	)

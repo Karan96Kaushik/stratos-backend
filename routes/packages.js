@@ -10,7 +10,8 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
-const {serviceMapping, updatePackage} = require('../modules/packageHelpers')
+const {serviceMapping, updatePackage} = require('../modules/packageHelpers');
+const { packageFields } = require('../statics/packageFields');
 
 router.post("/api/packages/add", async (req, res) => {
 
@@ -170,7 +171,7 @@ router.post("/api/packages/export", async (req, res) => {
 
 		results = commonProcessor(results)
 
-		let file = await generateExcel(results, paymentFields["all"], "packagesExport" + (+new Date))
+		let file = await generateExcel(results, packageFields["all"], "packagesExport" + (+new Date))
 
 		res.download("/tmp/" + file,(err) => {
 			fs.unlink("/tmp/" + file, () => {})
