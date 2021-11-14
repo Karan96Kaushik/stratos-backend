@@ -10,7 +10,7 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
-const {serviceMapping} = require('../modules/packageHelpers')
+const {serviceMapping, updatePackage} = require('../modules/packageHelpers')
 
 router.post("/api/packages/add", async (req, res) => {
 
@@ -20,12 +20,13 @@ router.post("/api/packages/add", async (req, res) => {
 	}
 
     let packageID = "RT" + await getID("package")
-	let _ = await Packages.create({
+	let package = await Packages.create({
 		...req.body,
 		packageID,
 		addedBy: req.user.id
 	});
-	_ = await updateID("package")
+	let _ = await updateID("package")
+	await updatePackage(package)
 
 	if(req.body.docs?.length) {
 		let files = await saveFilesToLocal(req.body.docs)
