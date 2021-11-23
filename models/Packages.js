@@ -14,6 +14,7 @@ let Packages = new Schema(
     clientName:String,
     due:Number,
     receivedAmount:Number,
+    amount:Number,
     startDate:Date,
 
     remarks:String,

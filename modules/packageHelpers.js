@@ -1,10 +1,10 @@
 const {Packages} = require("../models/Packages");
 
 const services = [
-    'Consultation',
+    // 'Consultation',
     'Site Updation',
-    'Proof Reading',
-    'Legal Documents',
+    // 'Proof Reading',
+    // 'Legal Documents',
     'Form 1',
     'Form 2',
     'Form 2A',
@@ -12,11 +12,12 @@ const services = [
     // 'Form 5',			// Yearly
     'Format D',
     'Disclosure of Sold',
+    'Cersai Undertaking',
     // 'Other Services', 
 ]
 
 const getQuarters = (startDate) => {
-	const quarters = [1,4,7,10]
+	const quarters = [3,5,9,12]
 	const checkDate = new Date
 	checkDate.setUTCHours(0,0,0,0)
 	checkDate.setDate(1)
@@ -37,7 +38,7 @@ const getYears = (startDate) => {
 	const dates = []
 	while (startDate < checkDate) {
 		dates.push(new Date(checkDate))
-		checkDate.setYear(checkDate.getYear() - 1)
+		checkDate.setMonth(checkDate.getMonth() - 12)
 	}
 	return dates
 }
@@ -47,7 +48,7 @@ const serviceMapping = (package, isTable) => {
 	let serviceStatus = {}
 	let quarters 	= getQuarters(startDate)
 	let years 		= getYears(startDate)
-
+	
 	// Quarterly Services
 	services.forEach(s => {
 		if (package[s]) {
