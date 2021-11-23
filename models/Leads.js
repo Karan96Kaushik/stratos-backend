@@ -40,7 +40,7 @@ let Leads = new Schema(
     remarks: String,
     closureStatus: String,
 
-    quoteAmount: Number,
+    quoteAmount: String,
 
     addedBy: {
       required:true,
