@@ -253,6 +253,10 @@ router.post("/api/packages/update", async (req, res) => {
 				...req.body
 			});
 
+		let package = await Packages.findOne({_id});
+		
+		_ = await updatePackage(package._doc)
+
 		if(req.body.docs?.length) {
 			let files = await saveFilesToLocal(req.body.docs)
 			await uploadFiles(files, invoiceID)

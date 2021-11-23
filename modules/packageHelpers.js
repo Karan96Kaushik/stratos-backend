@@ -9,7 +9,7 @@ const services = [
     'Form 2',
     'Form 2A',
     'Form 3',
-    'Form 5',
+    // 'Form 5',			// Yearly
     'Format D',
     'Disclosure of Sold',
     // 'Other Services', 
@@ -29,11 +29,26 @@ const getQuarters = (startDate) => {
 	return dates
 }
 
+const getYears = (startDate) => {
+	const checkDate = new Date
+	checkDate.setUTCHours(0,0,0,0)
+	checkDate.setDate(1)
+	checkDate.setMonth(0)
+	const dates = []
+	while (startDate < checkDate) {
+		dates.push(new Date(checkDate))
+		checkDate.setYear(checkDate.getYear() - 1)
+	}
+	return dates
+}
+
 const serviceMapping = (package, isTable) => {
 	let startDate = new Date(package.startDate)
 	let serviceStatus = {}
-	let quarters = getQuarters(startDate)
+	let quarters 	= getQuarters(startDate)
+	let years 		= getYears(startDate)
 
+	// Quarterly Services
 	services.forEach(s => {
 		if (package[s]) {
 			serviceStatus[s] = quarters.map(q => ({date: q, pending:!(package?.completed?.[s] ?? []).includes(q.toISOString())}))
@@ -41,7 +56,18 @@ const serviceMapping = (package, isTable) => {
 				serviceStatus[s] = serviceStatus[s].find(v => v.pending) ? 'Pending' : ''
 				// serviceStatus[s] = serviceStatus[s].map((q) => moment(q.date).format('MMM-YY')).join('\n')
 		}
+	});
+
+	// Yearly Services
+	['Form 5'].forEach(s => {
+		if (package[s]) {
+			serviceStatus[s] = years.map(y => ({date: y, pending:!(package?.completed?.[s] ?? []).includes(y.toISOString())}))
+			if (isTable)
+				serviceStatus[s] = serviceStatus[s].find(v => v.pending) ? 'Pending' : ''
+				// serviceStatus[s] = serviceStatus[s].map((q) => moment(q.date).format('MMM-YY')).join('\n')
+		}
 	})
+
 	return serviceStatus
 }
 
@@ -76,7 +102,7 @@ const updatePackage = async (package) => {
 	let pending = []
 	Object.keys(packageServices).forEach(s => packageServices[s].find(v => v.pending) && pending.push(s))
 
-	let due = (package.amount / (12 / additiveMonths)) * cyclesPassed
+	let due = (Number(package.amount) / (12 / additiveMonths)) * (1 + cyclesPassed)
 
 	let _ = await Packages.updateOne(
 		{ _id: String(package._id) },
