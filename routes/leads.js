@@ -36,36 +36,44 @@ const checkLeadW = (req, res, next) => {
 const tmpdir = "/tmp/"
 
 router.post("/api/leads/add", async (req, res) => {
-	const memberInfo = await Members.findOne({_id: req.user.id})
+	try {
 
-	let leadIdPrefix = ""
-	switch (req.body.leadType) {
-		case ("developer"):
-			leadIdPrefix = "LD"
-			break;
-		case ("litigation"):
-			leadIdPrefix = "LL"
-			break;
-		case ("agent"):
-			leadIdPrefix = "LA"
-			break;
+		const memberInfo = await Members.findOne({_id: req.user.id})
+
+		let leadIdPrefix = ""
+		switch (req.body.leadType) {
+			case ("developer"):
+				leadIdPrefix = "LD"
+				break;
+			case ("litigation"):
+				leadIdPrefix = "LL"
+				break;
+			case ("agent"):
+				leadIdPrefix = "LA"
+				break;
+		}
+
+		let leadID = leadIdPrefix + await getID(leadIdPrefix)
+		let _ = await Leads.create({
+			...req.body,
+			memberID:memberInfo.memberID,
+			memberName:memberInfo.userName,
+			leadID,
+			addedBy: req.user.id
+		});
+		_ = await updateID(leadIdPrefix)
+
+		if(req.body.docs?.length) {
+			let files = await saveFilesToLocal(req.body.docs)
+			await uploadFiles(files, leadID)
+		}
+
+		res.send("OK")
+		
+	} catch (err) {
+		res.status(500).send(err.message)
 	}
 
-	let leadID = leadIdPrefix + await getID(leadIdPrefix)
-	let _ = await Leads.create({
-		...req.body,
-		memberID:memberInfo.memberID,
-		memberName:memberInfo.userName,
-		leadID,
-		addedBy: req.user.id
-	});
-	_ = await updateID(leadIdPrefix)
-
-	if(req.body.docs?.length) {
-		let files = await saveFilesToLocal(req.body.docs)
-		await uploadFiles(files, leadID)
-	}
-	res.send("OK")
 })
 
 const generateQuery = (req) => {
