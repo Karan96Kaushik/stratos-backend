@@ -17,7 +17,7 @@ const services = [
 ]
 
 const getQuarters = (startDate) => {
-	const quarters = [3,5,9,12]
+	const quarters = [2,5,8,11]
 	const checkDate = new Date
 	checkDate.setUTCHours(0,0,0,0)
 	checkDate.setDate(1)
@@ -53,9 +53,6 @@ const serviceMapping = (package, isTable) => {
 	services.forEach(s => {
 		if (package[s]) {
 			serviceStatus[s] = quarters.map(q => ({date: q, pending:!(package?.completed?.[s] ?? []).includes(q.toISOString())}))
-			if (isTable)
-				serviceStatus[s] = serviceStatus[s].find(v => v.pending) ? 'Pending' : ''
-				// serviceStatus[s] = serviceStatus[s].map((q) => moment(q.date).format('MMM-YY')).join('\n')
 		}
 	});
 
@@ -63,11 +60,37 @@ const serviceMapping = (package, isTable) => {
 	['Form 5'].forEach(s => {
 		if (package[s]) {
 			serviceStatus[s] = years.map(y => ({date: y, pending:!(package?.completed?.[s] ?? []).includes(y.toISOString())}))
-			if (isTable)
-				serviceStatus[s] = serviceStatus[s].find(v => v.pending) ? 'Pending' : ''
-				// serviceStatus[s] = serviceStatus[s].map((q) => moment(q.date).format('MMM-YY')).join('\n')
 		}
 	})
+
+	return serviceStatus
+}
+
+const lastUpdatedMapping = (package) => {
+	let startDate = new Date(package.startDate)
+	let serviceStatus = {}
+	let quarters 	= getQuarters(startDate)
+	let years 		= getYears(startDate)
+	
+	// Quarterly Services
+	services.forEach(s => {
+		if (package[s]) {
+			serviceStatus[s] = package.lastUpdated?.[s] ?? '-'
+		}
+		else {
+			serviceStatus[s] = 'N' 
+		}
+	});
+
+	// Yearly Services
+	['Form 5'].forEach(s => {
+		if (package[s]) {
+			serviceStatus[s] = package.lastUpdated?.[s] ?? '-'
+		}
+		else {
+			serviceStatus[s] = 'N' 
+		}
+	});
 
 	return serviceStatus
 }
@@ -115,4 +138,4 @@ const updatePackage = async (package) => {
 	)
 }
 
-module.exports = { serviceMapping, updatePackage }
+module.exports = { serviceMapping, updatePackage, lastUpdatedMapping }

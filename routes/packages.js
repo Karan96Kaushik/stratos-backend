@@ -10,7 +10,7 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
-const {serviceMapping, updatePackage} = require('../modules/packageHelpers');
+const {serviceMapping, updatePackage, lastUpdatedMapping} = require('../modules/packageHelpers');
 const { packageFields } = require('../statics/packageFields');
 
 router.post("/api/packages/add", async (req, res) => {
@@ -27,6 +27,7 @@ router.post("/api/packages/add", async (req, res) => {
 		addedBy: req.user.id
 	});
 	let _ = await updateID("package")
+
 	await updatePackage(package)
 
 	if(req.body.docs?.length) {
@@ -89,7 +90,7 @@ const commonProcessor = (results) => {
 		...val._doc, 
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		startDate:moment(new Date(val._doc.startDate)).format("DD-MM-YYYY"),
-		...serviceMapping(val._doc, true)
+		...lastUpdatedMapping(val._doc, true)
 	}))
 	return results
 }
