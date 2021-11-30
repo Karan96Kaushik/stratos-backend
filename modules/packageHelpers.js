@@ -23,7 +23,7 @@ const getQuarters = (startDate) => {
 	checkDate.setDate(1)
 	const dates = []
 	while (startDate < checkDate) {
-		if (quarters.includes(checkDate.getMonth() + 1))
+		if (quarters.includes(checkDate.getMonth()))
 			dates.push(new Date(checkDate))
 		checkDate.setMonth(checkDate.getMonth() - 1)
 	}
