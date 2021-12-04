@@ -518,9 +518,10 @@ router.get("/api/tasks/payments/search/add", async (req, res) => {
 		task = task._doc
 		task._taskID = task._id
 
-		if(!task.clientID) {
+		if(!task.clientID || !task.clientName) {
 			let client = await Clients.findOne({_id: task._clientID})
 			task.clientID = client.clientID
+			task.clientName = client.name
 		}
 
 		res.json(task)
