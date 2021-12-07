@@ -569,7 +569,12 @@ router.post("/api/tasks/update", async (req, res) => {
 
 		req.body.totalAmount = calculateTotal(req.body)
 
-		if(task.addedBy != req.user.id && !(task._membersAssigned ?? []).includes(String(req.user.id)) && !adminIDs.includes(req.user.id)) {
+		if(
+			task.addedBy != req.user.id && 
+			!(task._membersAssigned ?? []).includes(String(req.user.id)) && 
+			!adminIDs.includes(req.user.id) && 
+			!req.permissions.page.includes("Payments W")
+		) {
 			res.status(401).send("Unauthorized to update this task")
 			return
 		}
