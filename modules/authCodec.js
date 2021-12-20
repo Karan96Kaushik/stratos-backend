@@ -21,6 +21,8 @@ const pagePermissions = [
 	"Packages W",
 	"Packages Services R",
 	"Packages Services W",
+	"Packages Accounts R",
+	"Packages Accounts W",
 ]
 
 let servicePermissions = [

@@ -126,7 +126,7 @@ const updatePackage = async (package) => {
 	let pending = []
 	Object.keys(packageServices).forEach(s => packageServices[s].find(v => v.pending) && pending.push(s))
 
-	let due = (Number(package.amount) / (12 / additiveMonths)) * (1 + cyclesPassed)
+	let due = ((Number(package.amount) / (12 / additiveMonths)) * (1 + cyclesPassed)) + Number(package.gstamount)
 
 	let _ = await Packages.updateOne(
 		{ _id: String(package._id) },

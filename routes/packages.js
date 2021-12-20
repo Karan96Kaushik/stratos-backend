@@ -40,7 +40,7 @@ router.post("/api/packages/add", async (req, res) => {
 const generateQuery = (req) => {
 	let others = {}
 
-	if(!req.permissions.page.includes("Payments R"))
+	if(!req.permissions.page.includes("Packages Accounts R"))
 		others.addedBy = req.user.id
 
 	let query = {
@@ -135,7 +135,10 @@ router.post("/api/packages/search", async (req, res) => {
 		results = commonProcessor(results)
 
 		if(req.query.accounts)
-			results = await mapPayments(results)
+			if (req.permissions.page.includes('Packages Accounts R'))
+				results = await mapPayments(results)
+			else 
+				throw new Error('Unauthorized to view accounts')
 
 		res.json(results)
 	} catch (err) {
@@ -144,6 +147,7 @@ router.post("/api/packages/search", async (req, res) => {
 	}
 })
 
+// Route to search packages while adding payments
 router.get("/api/packages/payments/search", async (req, res) => {
 	try {
 		let results = await Packages.find(req.query).limit(5)
