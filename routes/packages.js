@@ -71,6 +71,15 @@ const generateQuery = (req) => {
 			return
 		}
 
+		if(filter == "Form 5") {
+			if(req.query.filters[filter]) 
+				query['$and'].push({
+					"Form 5": true
+				})
+
+			return
+		}
+
 		// filter is range - date/number
 		if(typeof req.query.filters[filter] == "object") {
 			req.query.filters[filter].forEach((val,i) => {
