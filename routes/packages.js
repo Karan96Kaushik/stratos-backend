@@ -72,9 +72,22 @@ const generateQuery = (req) => {
 		}
 
 		if(filter == "Form 5") {
+
 			if(req.query.filters[filter]) 
 				query['$and'].push({
-					"Form 5": true
+					$or : [
+						{ "Form 5": true },
+						{ "Form 5": { $exists : true }}
+					]
+				})
+
+			else
+				query['$and'].push({
+					$or : [
+						{ "Form 5": false },
+						{ "Form 5": { $exists : false }},
+						// { "Form 5.0": { $exists : false }}
+					]
 				})
 
 			return
