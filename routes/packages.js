@@ -2,6 +2,7 @@ const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
 const {Packages} = require("../models/Packages");
+const {Clients} = require("../models/Clients");
 const {Payments} = require("../models/Payments");
 const {generateExcel} = require("../modules/excelProcessor")
 const {getID, updateID} = require("../models/Utils");
@@ -120,7 +121,7 @@ const generateQuery = (req) => {
 	return query
 }
 
-const commonProcessor = (results) => {
+const commonProcessor = async (results) => {
 	results = results.map(val => ({
 			...val._doc, 
 			...lastUpdatedMapping(val._doc, true)
@@ -128,6 +129,16 @@ const commonProcessor = (results) => {
 		// Color code flags
 		.map(mapFlags)
 		// Date format
+
+	const clientIDs = results.map(p => p.clientID)
+
+	let clients = await Clients.find({clientID: {$in: clientIDs}})
+	clients = clients.map(c => c._doc)
+
+	results = results.map(v => ({
+			...v,
+			completionDate: clients.find(c => c.clientID == v.clientID).completionDate ?? ""
+		}))
 		.map(formatDates)
 
 	return results
@@ -170,7 +181,7 @@ router.post("/api/packages/search", async (req, res) => {
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
-		results = commonProcessor(results)
+		results = await commonProcessor(results)
 
 		if(req.query.accounts)
 			if (req.permissions.page.includes('Packages Accounts R'))
