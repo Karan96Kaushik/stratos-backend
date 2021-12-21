@@ -10,7 +10,7 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
-const {serviceMapping, updatePackage, lastUpdatedMapping} = require('../modules/packageHelpers');
+const { serviceMapping, updatePackage, lastUpdatedMapping, mapFlags } = require('../modules/packageHelpers');
 const { packageFields } = require('../statics/packageFields');
 
 router.post("/api/packages/add", async (req, res) => {
@@ -133,6 +133,10 @@ router.post("/api/packages/search", async (req, res) => {
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = commonProcessor(results)
+
+		// flag color mapping
+		// if (req.query.services)
+			results = mapFlags(results)
 
 		if(req.query.accounts)
 			if (req.permissions.page.includes('Packages Accounts R'))

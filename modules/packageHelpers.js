@@ -126,7 +126,7 @@ const updatePackage = async (package) => {
 	let pending = []
 	Object.keys(packageServices).forEach(s => packageServices[s].find(v => v.pending) && pending.push(s))
 
-	let due = ((Number(package.amount) / (12 / additiveMonths)) * (1 + cyclesPassed)) + Number(package.gstamount)
+	let due = ((Number(package.amount) / (12 / additiveMonths)) * (1 + cyclesPassed)) + Number(package.gstamount ?? 0)
 
 	let _ = await Packages.updateOne(
 		{ _id: String(package._id) },
@@ -138,4 +138,35 @@ const updatePackage = async (package) => {
 	)
 }
 
-module.exports = { serviceMapping, updatePackage, lastUpdatedMapping }
+let getDiffDays = (a, b) => Math.round( (+b - +a) / (1000*60*60*24) )
+
+// Map flag colors according to days passed since the service was last updated
+const mapFlags = (packages) => {
+	packages = packages.map(p => {
+
+		services.forEach(s => {
+			
+			if ((new Date(p[s]) + "") == "Invalid Date")
+				return
+
+			const lastUpd = getDiffDays(new Date(p[s]), new Date)
+
+			p[s + "Color"] = 0
+			if (lastUpd >= 90 && lastUpd < 180)
+				p[s + "Color"] = 1
+			else if (lastUpd >= 180)
+				p[s + "Color"] = 2
+
+		})
+
+		return p
+	})
+
+	return packages
+}
+
+module.exports = { serviceMapping, updatePackage, lastUpdatedMapping, mapFlags }
+
+
+
+
