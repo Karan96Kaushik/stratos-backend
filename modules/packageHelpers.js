@@ -1,3 +1,4 @@
+const moment = require("moment");
 const {Packages} = require("../models/Packages");
 
 const services = [
@@ -15,6 +16,8 @@ const services = [
     'Cersai Undertaking',
     // 'Other Services', 
 ]
+
+const servicesYearly = ['Form 5']
 
 const getQuarters = (startDate) => {
 	const quarters = [2,5,8,11]
@@ -57,7 +60,7 @@ const serviceMapping = (package, isTable) => {
 	});
 
 	// Yearly Services
-	['Form 5'].forEach(s => {
+	servicesYearly.forEach(s => {
 		if (package[s]) {
 			serviceStatus[s] = years.map(y => ({date: y, pending:!(package?.completed?.[s] ?? []).includes(y.toISOString())}))
 		}
@@ -83,7 +86,7 @@ const lastUpdatedMapping = (package) => {
 	});
 
 	// Yearly Services
-	['Form 5'].forEach(s => {
+	servicesYearly.forEach(s => {
 		if (package[s]) {
 			serviceStatus[s] = package.lastUpdated?.[s] ?? '-'
 		}
@@ -141,31 +144,47 @@ const updatePackage = async (package) => {
 let getDiffDays = (a, b) => Math.round( (+b - +a) / (1000*60*60*24) )
 
 // Map flag colors according to days passed since the service was last updated
-const mapFlags = (packages) => {
-	packages = packages.map(p => {
+const mapFlags = p => {
+	services.forEach(s => {
 
-		services.forEach(s => {
-			
-			if ((new Date(p[s]) + "") == "Invalid Date")
-				return
+		if ((new Date(p[s]) + "") == "Invalid Date")
+			return
 
-			const lastUpd = getDiffDays(new Date(p[s]), new Date)
+		const lastUpd = getDiffDays(new Date(p[s]), new Date)
 
-			p[s + "Color"] = 0
-			if (lastUpd >= 90 && lastUpd < 180)
-				p[s + "Color"] = 1
-			else if (lastUpd >= 180)
-				p[s + "Color"] = 2
+		p[s + "Color"] = 0
+		if (lastUpd >= 90 && lastUpd < 180)
+			p[s + "Color"] = 1
+		else if (lastUpd >= 180)
+			p[s + "Color"] = 2
 
-		})
-
-		return p
 	})
 
-	return packages
+	return p
 }
 
-module.exports = { serviceMapping, updatePackage, lastUpdatedMapping, mapFlags }
+// Change format of dates to DD-MM-YYYY
+const formatDates = p => {
+	services.forEach(s => {
+		if ((new Date(p[s]) + "") == "Invalid Date")
+			return
+		p[s] = moment(new Date(p[s])).format("DD-MM-YYYY")
+	})
+
+	servicesYearly.forEach(s => {
+		if ((new Date(p[s]) + "") == "Invalid Date")
+			return
+		p[s] = moment(new Date(p[s])).format("DD-MM-YYYY")
+	})
+
+	p.createdTime = moment(new Date(p.createdTime)).format("DD-MM-YYYY")
+	if (p.startDate)
+		p.startDate = moment(new Date(p.startDate)).format("DD-MM-YYYY")
+
+	return p
+}
+
+module.exports = { serviceMapping, updatePackage, lastUpdatedMapping, mapFlags, formatDates }
 
 
 

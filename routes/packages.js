@@ -10,7 +10,7 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
-const { serviceMapping, updatePackage, lastUpdatedMapping, mapFlags } = require('../modules/packageHelpers');
+const { serviceMapping, updatePackage, lastUpdatedMapping, mapFlags, formatDates } = require('../modules/packageHelpers');
 const { packageFields } = require('../statics/packageFields');
 
 router.post("/api/packages/add", async (req, res) => {
@@ -70,7 +70,7 @@ const generateQuery = (req) => {
 
 			return
 		}
-		
+
 		// filter is range - date/number
 		if(typeof req.query.filters[filter] == "object") {
 			req.query.filters[filter].forEach((val,i) => {
@@ -100,11 +100,14 @@ const generateQuery = (req) => {
 
 const commonProcessor = (results) => {
 	results = results.map(val => ({
-		...val._doc, 
-		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
-		startDate:moment(new Date(val._doc.startDate)).format("DD-MM-YYYY"),
-		...lastUpdatedMapping(val._doc, true)
-	}))
+			...val._doc, 
+			...lastUpdatedMapping(val._doc, true)
+		}))
+		// Color code flags
+		.map(mapFlags)
+		// Date format
+		.map(formatDates)
+
 	return results
 }
 
@@ -146,10 +149,6 @@ router.post("/api/packages/search", async (req, res) => {
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = commonProcessor(results)
-
-		// flag color mapping
-		// if (req.query.services)
-			results = mapFlags(results)
 
 		if(req.query.accounts)
 			if (req.permissions.page.includes('Packages Accounts R'))
