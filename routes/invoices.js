@@ -104,6 +104,7 @@ const commonProcessor = (results) => {
 		totalAmount: calculateTotal(val),
 		balanceAmount: calculateTotal(val) - Number(val.paidAmount ?? 0),
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		date:moment(new Date(val.date)).format("DD-MM-YYYY"),
 		paymentDate:moment(new Date(val.paymentDate)).format("DD-MM-YYYY"),
 	}))
 	return results
