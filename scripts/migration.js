@@ -8,6 +8,7 @@ const {Leads} = require("../models/Leads");
 const {Clients} = require("../models/Clients");
 const {Payments} = require("../models/Payments");
 const {Tasks} = require("../models/Tasks");
+const {Invoices} = require("../models/Invoices");
 const {Quotations} = require("../models/Quotations");
 
 const migrateTaskPromoter = async () => {
@@ -223,6 +224,30 @@ const migrateClientAmounts = async () => {
 
 }
 
+const updateInvoices = async () => {
+	let query = {
+		__v: {$exists: false}
+	}
+
+	let allInvoices = await Invoices.find(query)
+
+	for (invoice of allInvoices) {
+
+		invoice = invoice._doc
+		console.log(invoice.date)
+		if(invoice?.date?.includes("."))
+			invoice.date = invoice.date.split('.').reverse().join('-')
+		else
+			continue
+
+		await Invoices.updateOne({_id: invoice._id}, {date: invoice.date})
+
+	}
+
+	console.log("Done")
+
+}
+
 const removeTasks = async () => {
 	let query = {
 		serviceType:"Litigation", 
@@ -235,7 +260,21 @@ const removeTasks = async () => {
 
 }
 
-migrateTaskPromoter()
+const removeInvoices = async () => {
+	let query = {
+		__v: {$exists: false}
+	}
+
+	let _ = await Invoices.deleteMany(query)
+
+	console.log(_)
+
+}
+
+updateInvoices()
+
+// removeInvoices()
+// migrateTaskPromoter()
 
 // removeTasks()
 // migrateClientAmounts()
