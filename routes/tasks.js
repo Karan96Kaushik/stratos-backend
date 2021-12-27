@@ -405,7 +405,6 @@ const commonProcessorPayments = async (results) => {
 	results = results.map(val => ({...val, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
 	results = results.map(val => ({...val, total: calculateTotal(val)}))
 	results = results.map(val => ({...val, balance: val.total - val.received}))
-
 	results = results.map(val => ({
 		...val,
 		payments: taskIDs
@@ -416,26 +415,7 @@ const commonProcessorPayments = async (results) => {
 				v._doc.mode
 			))
 	}))
-
 	return results
-}
-
-const searchBillAmount = async (amount) => {
-
-	let query = {
-		$and:[
-			{
-				$or:[
-					{ receivedAmount: { $regex: new RegExp(amount) , $options:"i" }},
-				]
-			}
-		],
-	}
-
-	let result = await Payments.find(query)
-
-	result = result.map(val => val.taskID)
-
 }
 
 router.post("/api/tasks/payments/search", async (req, res) => {

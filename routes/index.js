@@ -8,6 +8,7 @@ module.exports = {
 	quotations: require('./quotations'),
 	invoices: require('./invoices'),
 	payments: require('./payments'),
+	packages: require('./packages'),
 	utils: require('./utils'),
 	accounts: require('./accounts'),
 	dashboard: require('./dashboard'),

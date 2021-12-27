@@ -6,4 +6,7 @@ const outPath = process.env.outPath ?? "dbBackups"
 
 uploadFiles([{name, path}], outPath)
 	.then(() => process.exit(0))
-	.catch(console.log)
+	.catch((e) => {
+		console.error(e)
+		process.exit(0)
+	})
