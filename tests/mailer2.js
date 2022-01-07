@@ -9,12 +9,7 @@ var transporter = nodemailer.createTransport({
     }
 });
 
-// let options = { format: 'A4' };
-// Example of options with args //
-// let options = { format: 'A4', args: ['--no-sandbox', '--disable-setuid-sandbox'] };
-
-let file = { content: `
-
+let f1 = `
 <div style="padding: 8px 0;
 border-width: 20px 0 0;
 border-top-style: solid;
@@ -136,7 +131,224 @@ border-width: 20px 0 0;
 border-top-style: solid;
      border-image: linear-gradient(139deg, #fb8817, #ff4b01, #c12127, #e02aff) 3;">
 </div>
-    ` };
+`
+
+let f2 = `
+<table border="0" cellspacing="0" style="border-collapse:collapse; border-style:hidden; height:439px; width:100%">
+    <tbody>
+        <tr>
+            <td style="height:147px; width:58.561%"><img alt="" src="https://user-images.githubusercontent.com/44289074/148599687-1426045b-729f-492e-95c3-b2c5cd0d43e4.png" style="height:79px; width:253px" /></td>
+            <td style="height:147px; width:41.439%">
+            <p><strong><u>BILL FROM:</u></strong></p>
+
+            <p><strong>Osha Technologies</strong></p>
+
+            <p>909, The Landmark, Plot No 26A, Sector- 7, Kharghar- 410210 +91 76780 81406</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="height:128px; width:58.561%">
+            <p><u><strong>BILL TO:</strong></u></p>
+            Maharashtra Developers
+
+            <p><strong><u>PROJECT NAME:</u></strong></p>
+            JVMS Corner Stone</td>
+            <td style="height:128px; width:41.439%">
+            <table border="0" cellspacing="0" style="border-collapse:collapse; border-style:hidden; height:108px; width:100%">
+                <tbody>
+                    <tr>
+                        <td style="height:18px; width:50%">Type</td>
+                        <td style="height:18px; width:50%">Proforma Invoice</td>
+                    </tr>
+                    <tr>
+                        <td style="height:36px; width:50%">Date</td>
+                        <td style="height:36px; width:50%">14th Dec 2021</td>
+                    </tr>
+                    <tr>
+                        <td style="height:18px; width:50%">PAN No</td>
+                        <td style="height:18px; width:50%">AAFFO8457Q</td>
+                    </tr>
+                    <tr>
+                        <td style="height:18px; width:50%">Ref No</td>
+                        <td style="height:18px; width:50%">RERA001959</td>
+                    </tr>
+                    <tr>
+                        <td style="height:18px; width:50%">GSTIN</td>
+                        <td style="height:18px; width:50%">27AAFFO8457Q1ZB</td>
+                    </tr>
+                </tbody>
+            </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="height:110px; width:58.561%">
+            <p><u>Bill Details</u></p>
+
+            <table border="0" cellspacing="0" style="border-collapse:collapse; border-style:hidden; width:100%">
+                <tbody>
+                    <tr>
+                        <td style="width:50%">Bill Period:</td>
+                        <td style="width:50%">NA</td>
+                    </tr>
+                    <tr>
+                        <td style="width:50%">Quotation No:</td>
+                        <td style="width:50%">NA</td>
+                    </tr>
+                    <tr>
+                        <td style="width:50%">Quotation Date:</td>
+                        <td style="width:50%">NA</td>
+                    </tr>
+                </tbody>
+            </table>
+            </td>
+            <td style="height:110px; width:41.439%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:58.561%">&nbsp;</td>
+            <td style="height:18px; width:41.439%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:58.561%">&nbsp;</td>
+            <td style="height:18px; width:41.439%">&nbsp;</td>
+        </tr>
+    </tbody>
+</table>
+
+<table border="1" cellspacing="0" style="border-collapse:collapse; height:72px; width:100%">
+    <tbody>
+        <tr>
+            <td style="height:18px; width:20%"><strong>SR NO</strong></td>
+            <td style="height:18px; width:36.2113%"><strong>SERVICE</strong></td>
+            <td style="height:18px; width:22.1858%"><strong>AMOUNT</strong></td>
+            <td style="height:18px; width:8.88886%"><strong>GST</strong></td>
+            <td style="height:18px; width:12.714%"><strong>TOTAL</strong></td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:20%">1</td>
+            <td style="height:18px; width:36.2113%">RERA Consultation Fees</td>
+            <td style="height:18px; width:22.1858%">50000</td>
+            <td style="height:18px; width:8.88886%">9000</td>
+            <td style="height:18px; width:12.714%">59000</td>
+        </tr>
+        <tr>
+            <td style="background-color:#dddddd; height:18px; width:20%">&nbsp;</td>
+            <td style="background-color:#dddddd; height:18px; width:36.2113%">1st November 2021 to 30th April 2022</td>
+            <td style="background-color:#dddddd; height:18px; width:22.1858%">&nbsp;</td>
+            <td style="background-color:#dddddd; height:18px; width:8.88886%">&nbsp;</td>
+            <td style="background-color:#dddddd; height:18px; width:12.714%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:20%">&nbsp;</td>
+            <td style="height:18px; width:36.2113%">&nbsp;</td>
+            <td style="height:18px; width:22.1858%">&nbsp;</td>
+            <td style="height:18px; width:8.88886%">&nbsp;</td>
+            <td style="height:18px; width:12.714%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:20%">&nbsp;</td>
+            <td style="height:18px; width:36.2113%">&nbsp;</td>
+            <td style="height:18px; width:22.1858%">&nbsp;</td>
+            <td style="height:18px; width:8.88886%">&nbsp;</td>
+            <td style="height:18px; width:12.714%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:20%">&nbsp;</td>
+            <td style="height:18px; width:36.2113%">&nbsp;</td>
+            <td style="height:18px; width:22.1858%">&nbsp;</td>
+            <td style="height:18px; width:8.88886%">&nbsp;</td>
+            <td style="height:18px; width:12.714%">&nbsp;</td>
+        </tr>
+    </tbody>
+</table>
+
+<p></p>
+
+<table border="0" cellspacing="0" style="border-collapse:collapse; width:100%">
+    <tbody>
+        <tr>
+            <td style="width:56.102%"><strong>Special Notes</strong></td>
+            <td style="width:24.0436%"><strong>SUBTOTAL</strong></td>
+            <td style="width:19.8543%">50000</td>
+        </tr>
+        <tr>
+            <td style="width:56.102%">NA</td>
+            <td style="width:24.0436%"><strong>TAX RATE</strong></td>
+            <td style="width:19.8543%">18%</td>
+        </tr>
+        <tr>
+            <td style="width:56.102%">&nbsp;</td>
+            <td style="width:24.0436%"><strong>TOTAL TAX</strong></td>
+            <td style="width:19.8543%">9000</td>
+        </tr>
+        <tr>
+            <td style="width:56.102%">&nbsp;</td>
+            <td style="width:24.0436%"><strong>TOTAL AMOUNT</strong></td>
+            <td style="width:19.8543%">59000</td>
+        </tr>
+        <tr>
+            <td style="width:56.102%">&nbsp;</td>
+            <td style="width:24.0436%"><strong>PAYMENT MADE</strong></td>
+            <td style="width:19.8543%">0</td>
+        </tr>
+        <tr>
+            <td style="width:56.102%">&nbsp;</td>
+            <td style="width:24.0436%"><strong>BALANCE PAYABLE</strong></td>
+            <td style="width:19.8543%"><u><strong>59000</strong></u></td>
+        </tr>
+    </tbody>
+</table>
+
+<table border="0" cellspacing="0" style="border-collapse:collapse; height:108px; width:100%">
+    <tbody>
+        <tr>
+            <td style="height:18px;     font-weight: bold; width:326px"><u><strong>PAYMENT INFORMATION</strong></u></td>
+            <td style="height:18px; width:589px">&nbsp;</td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:326px">Payment / Cheque to be made in the name of:</td>
+            <td style="height:18px; width:589px">OSHA Technologie</td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:326px"><strong>For NEFT/RTGS/IMPS:-</strong></td>
+            <td style="height:18px; width:589px">&nbsp;</td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:326px">Account Name :</td>
+            <td style="height:18px; width:589px">OSHA TECHNOLOGIES</td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:326px">Account Number :</td>
+            <td style="height:18px; width:589px">50200030428962</td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width:326px">IFSC Code :</td>
+            <td style="width:589px">HDFC0001102</td>
+            <td style="width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:326px">Name of Bank :</td>
+            <td style="height:18px; width:589px">HDFC Bank</td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width:326px">Bank Branch :</td>
+            <td style="width:589px">Kharghar</td>
+            <td style="width:22.9508%">&nbsp;</td>
+        </tr>
+    </tbody>
+</table>
+`
+
+// let options = { format: 'A4' };
+// Example of options with args //
+// let options = { format: 'A4', args: ['--no-sandbox', '--disable-setuid-sandbox'] };
+
+let file = { content: f2};
 // or //
 // file = { url: "https://www.npmjs.com/package/html-pdf-node" };
 
@@ -174,25 +386,35 @@ options = {
 }
 
 pdf.create(file.content, options).toBuffer(function(err, pdfBuffer){
-    const mailOptions1 = {
-        from: 'rentikamailer@gmail.com', // sender address
-        to: 'karankaushik69@gmail.com', // list of receivers
-        subject: 'Subject of your email', // Subject line
-        html: '<p>Your html here</p>',// plain text body
-        attachments: [
-            {   // utf-8 string as an attachment
-                filename: 'test.pdf',
-                content: pdfBuffer
-            }
-        ]
-    };
+
+    const fs = require('fs');
+
+    fs.writeFile("test.pdf", pdfBuffer, function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        console.log("The file was saved!");
+    }); 
+
+    // const mailOptions1 = {
+    //     from: 'rentikamailer@gmail.com', // sender address
+    //     to: 'karankaushik69@gmail.com', // list of receivers
+    //     subject: 'Subject of your email', // Subject line
+    //     html: '<p>Your html here</p>',// plain text body
+    //     attachments: [
+    //         {   // utf-8 string as an attachment
+    //             filename: 'test.pdf',
+    //             content: pdfBuffer
+    //         }
+    //     ]
+    // };
     
-    transporter.sendMail(mailOptions1, function (err, info) {
-        if (err)
-            console.log(err)
-        else
-            console.log(info);
-    });
+    // transporter.sendMail(mailOptions1, function (err, info) {
+    //     if (err)
+    //         console.log(err)
+    //     else
+    //         console.log(info);
+    // });
   });
 
 if(false)
