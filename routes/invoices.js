@@ -61,6 +61,7 @@ const generateQuery = (req) => {
 		$and:[
 			{
 				$or:[
+					{ billTo: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ invoiceID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ memberID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ projectName: { $regex: new RegExp(req.query.text) , $options:"i" }},
