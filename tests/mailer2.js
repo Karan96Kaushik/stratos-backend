@@ -134,193 +134,205 @@ border-top-style: solid;
 `
 
 let f2 = `
-<table style="border-collapse: collapse; border-style: hidden; height: 439px; width: 100%;" border="0" cellspacing="0">
-<tbody>
-<tr>
-<td style="height: 147px; width: 58.561%;"><img style="height: 79px; width: 253px;" src="https://user-images.githubusercontent.com/44289074/148599687-1426045b-729f-492e-95c3-b2c5cd0d43e4.png" alt="" /></td>
-<td style="height: 147px; width: 41.439%;">
-<p><strong><u>BILL FROM:</u></strong></p>
-<p><strong>Osha Technologies</strong></p>
-<p>909, The Landmark, Plot No 26A, Sector- 7, Kharghar- 410210 +91 76780 81406</p>
-</td>
-</tr>
-<tr>
-<td style="height: 128px; width: 58.561%;">
-<p><u><strong>BILL TO:</strong></u></p>
-Maharashtra Developers
-<p><strong><u>PROJECT NAME:</u></strong></p>
-JVMS Corner Stone</td>
-<td style="height: 128px; width: 41.439%;">
-<table style="border-collapse: collapse; border-style: hidden; height: 108px; width: 100%;" border="0" cellspacing="0">
-<tbody>
-<tr>
-<td style="height: 18px; width: 50%;">Type</td>
-<td style="height: 18px; width: 50%;">Proforma Invoice</td>
-</tr>
-<tr>
-<td style="height: 36px; width: 50%;">Date</td>
-<td style="height: 36px; width: 50%;">14th Dec 2021</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 50%;">PAN No</td>
-<td style="height: 18px; width: 50%;">AAFFO8457Q</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 50%;">Ref No</td>
-<td style="height: 18px; width: 50%;">RERA001959</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 50%;">GSTIN</td>
-<td style="height: 18px; width: 50%;">27AAFFO8457Q1ZB</td>
-</tr>
-</tbody>
+<table border="0" cellspacing="0" style="border-collapse:collapse; border-style:hidden; height:439px; width:100%">
+    <tbody>
+        <tr>
+            <td style="height:147px; width:58.561%"><span style="font-family:Tahoma,Geneva,sans-serif"><img alt="" src="https://user-images.githubusercontent.com/44289074/148599687-1426045b-729f-492e-95c3-b2c5cd0d43e4.png" style="height:79px; width:253px" /></span></td>
+            <td style="height:147px; width:41.439%">
+            <p><span style="font-family:Tahoma,Geneva,sans-serif"><strong><u>BILL FROM:</u></strong></span></p>
+
+            <p><span style="font-family:Tahoma,Geneva,sans-serif"><strong>Osha Technologies</strong></span></p>
+
+            <p><span style="font-family:Tahoma,Geneva,sans-serif">909, The Landmark, Plot No 26A, Sector- 7, Kharghar- 410210 +91 76780 81406</span></p>
+            </td>
+        </tr>
+        <tr>
+            <td style="height:128px; width:58.561%">
+            <p><span style="font-family:Tahoma,Geneva,sans-serif"><u><strong>BILL TO:</strong></u></span></p>
+            <span style="font-family:Tahoma,Geneva,sans-serif">Maharashtra Developers</span>
+
+            <p><span style="font-family:Tahoma,Geneva,sans-serif"><strong><u>PROJECT NAME:</u></strong></span></p>
+            <span style="font-family:Tahoma,Geneva,sans-serif"> JVMS Corner Stone</span></td>
+            <td style="height:128px; width:41.439%">
+            <table border="0" cellspacing="0" style="border-collapse:collapse; border-style:hidden; height:108px; width:100%">
+                <tbody>
+                    <tr>
+                        <td style="height:18px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">Type</span></td>
+                        <td style="height:18px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">Proforma Invoice</span></td>
+                    </tr>
+                    <tr>
+                        <td style="height:36px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">Date</span></td>
+                        <td style="height:36px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">14th Dec 2021</span></td>
+                    </tr>
+                    <tr>
+                        <td style="height:18px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">PAN No</span></td>
+                        <td style="height:18px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">AAFFO8457Q</span></td>
+                    </tr>
+                    <tr>
+                        <td style="height:18px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">Ref No</span></td>
+                        <td style="height:18px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">RERA001959</span></td>
+                    </tr>
+                    <tr>
+                        <td style="height:18px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">GSTIN</span></td>
+                        <td style="height:18px; width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">27AAFFO8457Q1ZB</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="height:110px; width:58.561%"><span style="font-family:Tahoma,Geneva,sans-serif"><u>Bill Details</u></span>
+            <table border="0" cellspacing="0" style="border-collapse:collapse; border-style:hidden; width:100%">
+                <tbody>
+                    <tr>
+                        <td style="width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">Bill Period:</span></td>
+                        <td style="width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">NA</span></td>
+                    </tr>
+                    <tr>
+                        <td style="width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">Quotation No:</span></td>
+                        <td style="width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">NA</span></td>
+                    </tr>
+                    <tr>
+                        <td style="width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">Quotation Date:</span></td>
+                        <td style="width:50%"><span style="font-family:Tahoma,Geneva,sans-serif">NA</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            </td>
+            <td style="height:110px; width:41.439%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:58.561%">&nbsp;</td>
+            <td style="height:18px; width:41.439%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:58.561%">&nbsp;</td>
+            <td style="height:18px; width:41.439%">&nbsp;</td>
+        </tr>
+    </tbody>
 </table>
-</td>
-</tr>
-<tr>
-<td style="height: 110px; width: 58.561%;">
-<u>Bill Details</u>
-<table style="border-collapse: collapse; border-style: hidden; width: 100%;" border="0" cellspacing="0">
-<tbody>
-<tr>
-<td style="width: 50%;">Bill Period:</td>
-<td style="width: 50%;">NA</td>
-</tr>
-<tr>
-<td style="width: 50%;">Quotation No:</td>
-<td style="width: 50%;">NA</td>
-</tr>
-<tr>
-<td style="width: 50%;">Quotation Date:</td>
-<td style="width: 50%;">NA</td>
-</tr>
-</tbody>
+
+<table border="1" cellspacing="0" style="border-collapse:collapse; height:72px; width:100%">
+    <tbody>
+        <tr>
+            <td style="height:18px; width:20%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>SR NO</strong></span></td>
+            <td style="height:18px; width:36.2113%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>SERVICE</strong></span></td>
+            <td style="height:18px; width:22.1858%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>AMOUNT</strong></span></td>
+            <td style="height:18px; width:8.88886%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>GST</strong></span></td>
+            <td style="height:18px; width:12.714%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>TOTAL</strong></span></td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:20%"><span style="font-family:Tahoma,Geneva,sans-serif">1</span></td>
+            <td style="height:18px; width:36.2113%"><span style="font-family:Tahoma,Geneva,sans-serif">RERA Consultation Fees</span></td>
+            <td style="height:18px; width:22.1858%"><span style="font-family:Tahoma,Geneva,sans-serif">50000</span></td>
+            <td style="height:18px; width:8.88886%"><span style="font-family:Tahoma,Geneva,sans-serif">9000</span></td>
+            <td style="height:18px; width:12.714%"><span style="font-family:Tahoma,Geneva,sans-serif">59000</span></td>
+        </tr>
+        <tr>
+            <td style="background-color:#dddddd; height:18px; width:20%">&nbsp;</td>
+            <td style="background-color:#dddddd; height:18px; width:36.2113%"><span style="font-family:Tahoma,Geneva,sans-serif">1st November 2021 to 30th April 2022</span></td>
+            <td style="background-color:#dddddd; height:18px; width:22.1858%">&nbsp;</td>
+            <td style="background-color:#dddddd; height:18px; width:8.88886%">&nbsp;</td>
+            <td style="background-color:#dddddd; height:18px; width:12.714%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:20%">&nbsp;</td>
+            <td style="height:18px; width:36.2113%">&nbsp;</td>
+            <td style="height:18px; width:22.1858%">&nbsp;</td>
+            <td style="height:18px; width:8.88886%">&nbsp;</td>
+            <td style="height:18px; width:12.714%">&nbsp;</td>
+        </tr>
+    </tbody>
 </table>
-</td>
-<td style="height: 110px; width: 41.439%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 58.561%;">&nbsp;</td>
-<td style="height: 18px; width: 41.439%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 58.561%;">&nbsp;</td>
-<td style="height: 18px; width: 41.439%;">&nbsp;</td>
-</tr>
-</tbody>
+
+<p>&nbsp;</p>
+
+<table border="0" cellspacing="0" style="border-collapse:collapse; width:100%">
+    <tbody>
+        <tr>
+            <td style="width:56.102%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>Special Notes</strong></span></td>
+            <td style="width:24.0436%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>SUBTOTAL</strong></span></td>
+            <td style="width:19.8543%"><span style="font-family:Tahoma,Geneva,sans-serif">50000</span></td>
+        </tr>
+        <tr>
+            <td style="width:56.102%"><span style="font-family:Tahoma,Geneva,sans-serif">NA</span></td>
+            <td style="width:24.0436%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>TAX RATE</strong></span></td>
+            <td style="width:19.8543%"><span style="font-family:Tahoma,Geneva,sans-serif">18%</span></td>
+        </tr>
+        <tr>
+            <td style="width:56.102%">&nbsp;</td>
+            <td style="width:24.0436%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>TOTAL TAX</strong></span></td>
+            <td style="width:19.8543%"><span style="font-family:Tahoma,Geneva,sans-serif">9000</span></td>
+        </tr>
+        <tr>
+            <td style="width:56.102%">&nbsp;</td>
+            <td style="width:24.0436%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>TOTAL AMOUNT</strong></span></td>
+            <td style="width:19.8543%"><span style="font-family:Tahoma,Geneva,sans-serif">59000</span></td>
+        </tr>
+        <tr>
+            <td style="width:56.102%">&nbsp;</td>
+            <td style="width:24.0436%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>PAYMENT MADE</strong></span></td>
+            <td style="width:19.8543%"><span style="font-family:Tahoma,Geneva,sans-serif">0</span></td>
+        </tr>
+        <tr>
+            <td style="width:56.102%">&nbsp;</td>
+            <td style="width:24.0436%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>BALANCE PAYABLE</strong></span></td>
+            <td style="width:19.8543%"><span style="font-family:Tahoma,Geneva,sans-serif"><u><strong>59000</strong></u></span></td>
+        </tr>
+    </tbody>
 </table>
-<table style="border-collapse: collapse; height: 72px; width: 100%;" border="1" cellspacing="0">
-<tbody>
-<tr>
-<td style="height: 18px; width: 20%;"><strong>SR NO</strong></td>
-<td style="height: 18px; width: 36.2113%;"><strong>SERVICE</strong></td>
-<td style="height: 18px; width: 22.1858%;"><strong>AMOUNT</strong></td>
-<td style="height: 18px; width: 8.88886%;"><strong>GST</strong></td>
-<td style="height: 18px; width: 12.714%;"><strong>TOTAL</strong></td>
-</tr>
-<tr>
-<td style="height: 18px; width: 20%;">1</td>
-<td style="height: 18px; width: 36.2113%;">RERA Consultation Fees</td>
-<td style="height: 18px; width: 22.1858%;">50000</td>
-<td style="height: 18px; width: 8.88886%;">9000</td>
-<td style="height: 18px; width: 12.714%;">59000</td>
-</tr>
-<tr>
-<td style="background-color: #dddddd; height: 18px; width: 20%;">&nbsp;</td>
-<td style="background-color: #dddddd; height: 18px; width: 36.2113%;">1st November 2021 to 30th April 2022</td>
-<td style="background-color: #dddddd; height: 18px; width: 22.1858%;">&nbsp;</td>
-<td style="background-color: #dddddd; height: 18px; width: 8.88886%;">&nbsp;</td>
-<td style="background-color: #dddddd; height: 18px; width: 12.714%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 20%;">&nbsp;</td>
-<td style="height: 18px; width: 36.2113%;">&nbsp;</td>
-<td style="height: 18px; width: 22.1858%;">&nbsp;</td>
-<td style="height: 18px; width: 8.88886%;">&nbsp;</td>
-<td style="height: 18px; width: 12.714%;">&nbsp;</td>
-</tr>
-</tbody>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<table border="0" cellspacing="0" style="border-collapse:collapse; height:108px; width:100%">
+    <tbody>
+        <tr>
+            <td style="height:18px; width:51.0018%"><span style="font-family:Tahoma,Geneva,sans-serif"><u><strong>PAYMENT INFORMATION</strong></u></span></td>
+            <td style="height:18px; width:25.8652%">&nbsp;</td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:51.0018%"><span style="font-family:Tahoma,Geneva,sans-serif">Payment / Cheque to be made in the name of:</span></td>
+            <td style="height:18px; width:25.8652%"><span style="font-family:Tahoma,Geneva,sans-serif">OSHA Technologie</span></td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:51.0018%"><span style="font-family:Tahoma,Geneva,sans-serif"><u><strong>For NEFT/RTGS/IMPS:-</strong></u></span></td>
+            <td style="height:18px; width:25.8652%">&nbsp;</td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:51.0018%"><span style="font-family:Tahoma,Geneva,sans-serif"><strong>Account Name</strong>:</span></td>
+            <td style="height:18px; width:25.8652%"><span style="font-family:Tahoma,Geneva,sans-serif">OSHA TECHNOLOGIES</span></td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:51.0018%"><span style="font-family:Tahoma,Geneva,sans-serif">Account Number:</span></td>
+            <td style="height:18px; width:25.8652%"><span style="font-family:Tahoma,Geneva,sans-serif">50200030428962</span></td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width:51.0018%"><span style="font-family:Tahoma,Geneva,sans-serif">IFSC Code:</span></td>
+            <td style="width:25.8652%"><span style="font-family:Tahoma,Geneva,sans-serif">HDFC0001102</span></td>
+            <td style="width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="height:18px; width:51.0018%"><span style="font-family:Tahoma,Geneva,sans-serif">Name of Bank:</span></td>
+            <td style="height:18px; width:25.8652%"><span style="font-family:Tahoma,Geneva,sans-serif">HDFC Bank</span></td>
+            <td style="height:18px; width:22.9508%">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width:51.0018%"><span style="font-family:Tahoma,Geneva,sans-serif">Bank Branch:</span></td>
+            <td style="width:25.8652%"><span style="font-family:Tahoma,Geneva,sans-serif">Kharghar</span></td>
+            <td style="width:22.9508%">&nbsp;</td>
+        </tr>
+    </tbody>
 </table>
-<br>
-<table style="border-collapse: collapse; width: 100%;" border="0" cellspacing="0">
-<tbody>
-<tr>
-<td style="width: 56.102%;"><strong>Special Notes</strong></td>
-<td style="width: 24.0436%;"><strong>SUBTOTAL</strong></td>
-<td style="width: 19.8543%;">50000</td>
-</tr>
-<tr>
-<td style="width: 56.102%;">NA</td>
-<td style="width: 24.0436%;"><strong>TAX RATE</strong></td>
-<td style="width: 19.8543%;">18%</td>
-</tr>
-<tr>
-<td style="width: 56.102%;">&nbsp;</td>
-<td style="width: 24.0436%;"><strong>TOTAL TAX</strong></td>
-<td style="width: 19.8543%;">9000</td>
-</tr>
-<tr>
-<td style="width: 56.102%;">&nbsp;</td>
-<td style="width: 24.0436%;"><strong>TOTAL AMOUNT</strong></td>
-<td style="width: 19.8543%;">59000</td>
-</tr>
-<tr>
-<td style="width: 56.102%;">&nbsp;</td>
-<td style="width: 24.0436%;"><strong>PAYMENT MADE</strong></td>
-<td style="width: 19.8543%;">0</td>
-</tr>
-<tr>
-<td style="width: 56.102%;">&nbsp;</td>
-<td style="width: 24.0436%;"><strong>BALANCE PAYABLE</strong></td>
-<td style="width: 19.8543%;"><u><strong>59000</strong></u></td>
-</tr>
-</tbody>
-</table>
-<br>
-<table style="border-collapse: collapse; height: 108px; width: 100%;" border="0" cellspacing="0">
-<tbody>
-<tr>
-<td style="height: 18px; width: 51.0018%;"><u><strong>PAYMENT INFORMATION</strong></u></td>
-<td style="height: 18px; width: 25.8652%;">&nbsp;</td>
-<td style="height: 18px; width: 22.9508%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 51.0018%;">Payment / Cheque to be made in the name of:</td>
-<td style="height: 18px; width: 25.8652%;">OSHA Technologie</td>
-<td style="height: 18px; width: 22.9508%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 51.0018%;"><span style="text-decoration: underline;"><strong>For NEFT/RTGS/IMPS:-</strong></span></td>
-<td style="height: 18px; width: 25.8652%;">&nbsp;</td>
-<td style="height: 18px; width: 22.9508%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 51.0018%;"><strong>Account Name</strong>:</td>
-<td style="height: 18px; width: 25.8652%;">OSHA TECHNOLOGIES</td>
-<td style="height: 18px; width: 22.9508%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 51.0018%;">Account Number:</td>
-<td style="height: 18px; width: 25.8652%;">50200030428962</td>
-<td style="height: 18px; width: 22.9508%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="width: 51.0018%;">IFSC Code:</td>
-<td style="width: 25.8652%;">HDFC0001102</td>
-<td style="width: 22.9508%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="height: 18px; width: 51.0018%;">Name of Bank:</td>
-<td style="height: 18px; width: 25.8652%;">HDFC Bank</td>
-<td style="height: 18px; width: 22.9508%;">&nbsp;</td>
-</tr>
-<tr>
-<td style="width: 51.0018%;">Bank Branch:</td>
-<td style="width: 25.8652%;">Kharghar</td>
-<td style="width: 22.9508%;">&nbsp;</td>
-</tr>
-</tbody>
-</table>
+
+<p>&nbsp;</p>
+
 `
 
 // let options = { format: 'A4' };
