@@ -41,7 +41,7 @@ router.post("/api/packages/add", async (req, res) => {
 const generateQuery = (req) => {
 	let others = {}
 
-	if(!req.permissions.page.includes("Packages Accounts R"))
+	if(!req.permissions.page.includes("Packages R"))
 		others.addedBy = req.user.id
 
 	let query = {
