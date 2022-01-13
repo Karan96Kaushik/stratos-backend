@@ -48,6 +48,7 @@ const generateQuery = (req) => {
 		$and:[
 			{
 				$or:[
+					{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ packageID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				],
