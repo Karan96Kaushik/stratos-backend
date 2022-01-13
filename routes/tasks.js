@@ -327,10 +327,7 @@ const calculateTotal = (val) => (
 
 const generateQueryPayments = async (req) => {
 
-	let query = {}
-
-	if(req.query.text || Object.keys(req.query.filters).length || !req.query.filters.archived)
-		query.$and = []
+	let query = {$and : []}
 
 	if(req.query.text)
 		query.$and.push({
@@ -390,6 +387,10 @@ const generateQueryPayments = async (req) => {
 			})	
 		}
 	})
+
+	if (!query.$and.length)
+		delete query.$and
+	
 	return query
 
 }
