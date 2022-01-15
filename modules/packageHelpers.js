@@ -134,7 +134,7 @@ const updatePackage = async (package) => {
 	let gstamount = null
 
 	if(package.gstEnabled) {
-		gstamount = Math.round((due * 0.18) * 100) / 100
+		gstamount = Math.ceil((due * 0.18))
 		due = due + gstamount
 	}
 
