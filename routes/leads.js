@@ -18,21 +18,6 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 
-const checkLeadR = (req, res, next) => {
-	if(req.permissions.page.includes("Leads R"))
-		next()
-	else
-		res.status(401).send("Unauthorized")
-}
-
-const checkLeadW = (req, res, next) => {
-	// console.log(req.permissions)
-	if(req.permissions.page.includes("Leads W"))
-		next()
-	else
-		res.status(401).send("Unauthorized")
-}
-
 const tmpdir = "/tmp/"
 
 router.post("/api/leads/add", async (req, res) => {
@@ -137,7 +122,7 @@ const generateQuery = (req) => {
 	})
 
 	// non leads-read user can only view their own added leads
-	if(!req.permissions.page.includes("Leads R")) {
+	if(!req.permissions.isAdmin && !req.permissions.page.includes("Leads R")) {
 		query['$and'].push({
 			addedBy: req.user.id
 		})
@@ -235,7 +220,7 @@ router.get("/api/leads/", async (req, res) => {
 	try{
 		const query = req.query
 
-		if(!req.permissions.page.includes("Leads R")) {
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Leads R")) {
 			query.addedBy = req.user.id
 		}
 
@@ -265,7 +250,7 @@ router.delete("/api/leads/", async (req, res) => {
 		const _id = req.query._id
 		delete req.query._id
 
-		if(!req.permissions.page.includes("Leads R")) {
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Leads R")) {
 			let result = await Leads.findOne({_id})
 			if (String(result.addedBy) != req.user.id) {
 				res.status(401).send("Unauthorized to delete this task")
@@ -293,7 +278,7 @@ router.post("/api/leads/update", async (req, res) => {
 		delete req.body.memberID
 		delete req.body.addedBy
 
-		if(!req.permissions.page.includes("Leads R")) {
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Leads R")) {
 			let result = await Leads.findOne({_id})
 			if (String(result.addedBy) != req.user.id) {
 				res.status(401).send("Unauthorized to update this task")

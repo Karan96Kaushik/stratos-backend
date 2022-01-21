@@ -14,16 +14,9 @@ const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 const crypto = require('crypto');
 
-const checkInvoiceR = (req, res, next) => {
-	if(req.permissions.page.includes("Invoices R"))
-		next()
-	else
-		res.status(401).send("Unauthorized")
-}
-
 const checkInvoiceW = (req, res, next) => {
 	// console.log(req.permissions)
-	if(req.permissions.page.includes("Invoices W"))
+	if(req.permissions.isAdmin || req.permissions.page.includes("Invoices W"))
 		next()
 	else
 		res.status(401).send("Unauthorized")
@@ -54,7 +47,7 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 const generateQuery = (req) => {
 	let others = {}
 
-	if(!req.permissions.page.includes("Invoices R"))
+	if(!req.permissions.isAdmin && !req.permissions.page.includes("Invoices R"))
 		others.addedBy = req.user.id
 
 	let query = {
@@ -123,6 +116,11 @@ router.post("/api/invoices/search", async (req, res) => {
 	try{
 
 		req.query = req.body
+
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Invoices R")) {
+			res.status(401).send("Unauthorized to view Invoices")
+			return
+		}
 
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)

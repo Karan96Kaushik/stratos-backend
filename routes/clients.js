@@ -20,7 +20,7 @@ const crypto = require('crypto');
 const tmpdir = "/tmp/"
 
 const checkR = (req, res, next) => {
-	const isPermitted = req.permissions.page.includes("Clients R")
+	const isPermitted = req.permissions.isAdmin || req.permissions.page.includes("Clients R")
 
 	if(typeof next !== "function") {
 		return isPermitted
@@ -33,7 +33,7 @@ const checkR = (req, res, next) => {
 }
 
 const checkW = (req, res, next) => {
-	const isPermitted = req.permissions.page.includes("Clients W")
+	const isPermitted = req.permissions.isAdmin || req.permissions.page.includes("Clients W")
 
 	if(typeof next !== "function") {
 		return isPermitted
@@ -338,10 +338,11 @@ router.post("/api/clients/payments/search", async (req, res) => {
 	try{
 		req.query = req.body
 
-		if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
-			res.status(401).send("Unauthorized access")
-			return
-		}
+		if(!req.permissions.isAdmin)
+			if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+				res.status(401).send("Unauthorized access")
+				return
+			}
 
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage ?? 10)

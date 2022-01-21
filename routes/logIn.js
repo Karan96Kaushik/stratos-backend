@@ -15,12 +15,18 @@ router.post('/api/login', async (req, res) => {
 		let user = await Members.findOne(req.body.creds)
 
 		if(user) {
-			let token = generate({
+			const tokenObj = {
 				id:user._id, 
 				perm:[
 					user.permissions.page, 
 					user.permissions.service
-				]})
+				]
+			}
+			
+			if (!!user._doc.isAdmin)
+				tokenObj.admin = 1
+			
+			let token = generate(tokenObj)
 
 			user = user._doc
 

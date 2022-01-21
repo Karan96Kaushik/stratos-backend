@@ -19,7 +19,7 @@ const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const tmpdir = "/tmp/"
 
 const checkR = (req, res, next) => {
-	const isPermitted = req.permissions.page.includes("Members R")
+	const isPermitted = req.permissions.isAdmin || req.permissions.page.includes("Members R")
 
 	if(typeof next !== "function") {
 		return isPermitted
@@ -32,7 +32,7 @@ const checkR = (req, res, next) => {
 }
 
 const checkW = (req, res, next) => {
-	const isPermitted = req.permissions.page.includes("Members W")
+	const isPermitted = req.permissions.isAdmin || req.permissions.page.includes("Members W")
 
 	if(typeof next !== "function") {
 		return isPermitted
