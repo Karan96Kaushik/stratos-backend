@@ -183,7 +183,6 @@ router.post("/api/packages/search", async (req, res) => {
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = await commonProcessor(results)
-
 		if(req.query.accounts)
 			if (req.permissions.isAdmin || req.permissions.page.includes('Packages Accounts R'))
 				results = await mapPayments(results)

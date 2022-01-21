@@ -112,6 +112,11 @@ router.post("/api/payments/search", async (req, res) => {
 	try{
 		req.query = req.body
 
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Payments R")) {
+			res.status(401).send("Unauthorized")
+			return
+		}
+
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
 		const sortID = req.query.sortID

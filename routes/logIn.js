@@ -23,9 +23,9 @@ router.post('/api/login', async (req, res) => {
 				]
 			}
 			
-			if (!!user.isAdmin)
+			if (!!user._doc.isAdmin)
 				tokenObj.admin = 1
-
+			
 			let token = generate(tokenObj)
 
 			user = user._doc
