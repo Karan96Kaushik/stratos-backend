@@ -39,7 +39,12 @@ const serviceCodes = {
 }
 
 const checkR = (req, res, next) => {
-	const isPermitted = req.permissions.page.includes("Tasks R")
+	let isPermitted
+
+	if(!req.permissions.isAdmin)
+		isPermitted = true
+	else
+		isPermitted = req.permissions.page.includes("Tasks R")
 
 	if(typeof next !== "function") {
 		return isPermitted
@@ -52,7 +57,12 @@ const checkR = (req, res, next) => {
 }
 
 const checkW = (req, res, next) => {
-	const isPermitted = req.permissions.page.includes("Tasks W")
+	let isPermitted
+
+	if(!req.permissions.isAdmin)
+		isPermitted = true
+	else
+		isPermitted = req.permissions.page.includes("Tasks W")
 
 	if(typeof next !== "function") {
 		return isPermitted
@@ -168,7 +178,7 @@ const generateQuery = (req) => {
 	}
 
 	// search only the tasks that are permitted
-	if(!req.query.serviceType)
+	if(!req.query.serviceType && !req.permissions.isAdmin)
 		query['$and'].push({'$or':
 			req.permissions.service.map((svc) => ({
 				serviceType: svc
@@ -267,10 +277,11 @@ router.post("/api/tasks/search", async (req, res) => {
 			return
 		}
 
-		if(req.query.serviceType && !checkTaskPermission(req, req.query.serviceType)) {
-			res.status(401).send("Unauthorized to view this task type")
-			return
-		}
+		if(req.permissions.isAdmin)
+			if(req.query.serviceType && !checkTaskPermission(req, req.query.serviceType)) {
+				res.status(401).send("Unauthorized to view this task type")
+				return
+			}
 
 		let query = generateQuery(req)
 		let results = await Tasks.find(query)
@@ -423,10 +434,11 @@ router.post("/api/tasks/payments/search", async (req, res) => {
 
 	req.query = req.body
 
-	if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
-		res.status(401).send("Unauthorized access")
-		return
-	}
+	if(!req.permissions.isAdmin)
+		if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+			res.status(401).send("Unauthorized access")
+			return
+		}
 
 	let others = {}
 	const rowsPerPage = parseInt(req.query.rowsPerPage)
@@ -456,10 +468,11 @@ router.post("/api/tasks/payments/export", async (req, res) => {
 	}
 	delete req.query.password
 
-	if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
-		res.status(401).send("Unauthorized access")
-		return
-	}
+	if(!req.permissions.isAdmin)
+		if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+			res.status(401).send("Unauthorized access")
+			return
+		}
 
 	let query = await generateQueryPayments(req)
 	
@@ -486,10 +499,11 @@ router.get("/api/tasks/search/all", async (req, res) => {
 router.get("/api/tasks/payments/search/add", async (req, res) => {
 	try {
 
-		if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
-			res.status(401).send("Unauthorized access")
-			return
-		}
+		if(!req.permissions.isAdmin)
+			if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+				res.status(401).send("Unauthorized access")
+				return
+			}
 		
 		let query = req.query
 
@@ -516,10 +530,11 @@ router.get("/api/tasks/payments/search/add", async (req, res) => {
 router.get("/api/clients/payments/search/add", async (req, res) => {
 	try {
 
-		if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
-			res.status(401).send("Unauthorized access")
-			return
-		}
+		if(!req.permissions.isAdmin)
+			if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+				res.status(401).send("Unauthorized access")
+				return
+			}
 		
 		let query = req.query
 
@@ -551,6 +566,7 @@ router.post("/api/tasks/update", async (req, res) => {
 		req.body.totalAmount = calculateTotal(req.body)
 
 		if(
+			!req.permissions.isAdmin && 
 			task.addedBy != req.user.id && 
 			!(task._membersAssigned ?? []).includes(String(req.user.id)) && 
 			!adminIDs.includes(req.user.id) && 

@@ -20,11 +20,11 @@ const fs = require('fs');
 // Route to add payemnts for tasks and packages
 router.post("/api/payments/add", async (req, res) => {
 
-	if(req.body.taskID && !req.permissions.page.includes("Payments W")) {
+	if(req.body.taskID && !req.permissions.isAdmin && !req.permissions.page.includes("Payments W")) {
 		res.status(401).send("Unauthorized to add payments for tasks")
 		return
 	} 
-	else if(req.body.packageID && !req.permissions.page.includes("Packages Accounts W")) {
+	else if(req.body.packageID && !req.permissions.isAdmin && !req.permissions.page.includes("Packages Accounts W")) {
 		res.status(401).send("Unauthorized to add payments for packages")
 		return
 	}
@@ -49,7 +49,7 @@ router.post("/api/payments/add", async (req, res) => {
 const generateQuery = (req) => {
 	let others = {}
 
-	if(!req.permissions.page.includes("Payments R") && !req.permissions.page.includes("Packages Accounts R"))
+	if(!req.permissions.isAdmin && !req.permissions.page.includes("Payments R") && !req.permissions.page.includes("Packages Accounts R"))
 		others.addedBy = req.user.id
 
 	let query = {
@@ -285,7 +285,7 @@ const handlePayment = async (body, originalPaymentId, isDelete=false) => {
 router.post("/api/payments/update", async (req, res) => {
 	try {
 
-		if(!req.permissions.page.includes("Payments W")) {
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Payments W")) {
 			res.status(401).send("Unauthorized")
 			return
 		}

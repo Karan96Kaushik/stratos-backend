@@ -16,7 +16,7 @@ const { packageFields } = require('../statics/packageFields');
 
 router.post("/api/packages/add", async (req, res) => {
 
-	if(!req.permissions.page.includes("Packages W")) {
+	if(!req.permissions.isAdmin && !req.permissions.page.includes("Packages W")) {
 		res.status(401).send("Unauthorized")
 		return
 	}
@@ -41,7 +41,7 @@ router.post("/api/packages/add", async (req, res) => {
 const generateQuery = (req) => {
 	let others = {}
 
-	if(!req.permissions.page.includes("Packages R"))
+	if(!req.permissions.isAdmin && !req.permissions.page.includes("Packages R"))
 		others.addedBy = req.user.id
 
 	let query = {
@@ -185,7 +185,7 @@ router.post("/api/packages/search", async (req, res) => {
 		results = await commonProcessor(results)
 
 		if(req.query.accounts)
-			if (req.permissions.page.includes('Packages Accounts R'))
+			if (req.permissions.isAdmin || req.permissions.page.includes('Packages Accounts R'))
 				results = await mapPayments(results)
 			else 
 				throw new Error('Unauthorized to view accounts')
@@ -292,7 +292,7 @@ router.get("/api/packages/search/all", async (req, res) => {
 router.post("/api/packages/update", async (req, res) => {
 	try {
 
-		if(!req.permissions.page.includes("Packages W")) {
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Packages W")) {
 			res.status(401).send("Unauthorized")
 			return
 		}

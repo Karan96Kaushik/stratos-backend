@@ -16,17 +16,9 @@ const fs = require('fs');
 const _ = require('lodash');
 const crypto = require('crypto');
 
-
-const checkQuotationR = (req, res, next) => {
-	if(req.permissions.page.includes("Quotations R"))
-		next()
-	else
-		res.status(401).send("Unauthorized")
-}
-
 const checkQuotationW = (req, res, next) => {
-	console.log(req.permissions)
-	if(req.permissions.page.includes("Quotations W"))
+
+	if(req.permissions.isAdmin || req.permissions.page.includes("Quotations W"))
 		next()
 	else
 		res.status(401).send("Unauthorized")
@@ -57,7 +49,7 @@ router.post("/api/quotations/add", checkQuotationW, async (req, res) => {
 const generateQuery = (req) => {
 	let others = {}
 
-	if(!req.permissions.page.includes("Quotations R"))
+	if(!req.permissions.isAdmin && !req.permissions.page.includes("Quotations R"))
 		others.addedBy = req.user.id
 
 	let query = {

@@ -12,6 +12,7 @@ const auth = (req, res, next) => {
 					page: decoded.perm[0],
 					service: decoded.perm[1],
 				})
+				req.permissions.isAdmin = Boolean(decoded.admin)
 				next()
 			} else {
 				res.status(401).json({message:"Invalid Auth"})
