@@ -45,7 +45,7 @@ let f2 = `
 <table style="border-collapse: collapse; border-style: hidden; width: 100.671%; height: 98px;" border="0" cellspacing="0">
 <tbody>
 <tr>
-<td style="width: 50%;"><strong><u style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">Bill Details</u></strong></td>
+<td style="width: 50%;"><span style="font-family: Leelawadee UI,sans-serif;"><strong><u style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">Bill Details</u></strong></span></td>
 <td style="width: 50%;"><span style="font-family: Leelawadee UI,sans-serif;">&nbsp;</span></td>
 </tr>
 <tr>
@@ -75,50 +75,50 @@ let f2 = `
 </tr>
 </tbody>
 </table>
-<table style="border-collapse: collapse; height: 72px; width: 100%;" border="1" cellspacing="0">
+<table style="border-collapse: collapse; height: 64px; width: 100%;" border="1" cellspacing="0">
 <tbody>
-<tr>
-<td style="height: 18px; width: 20%;">
+<tr style="height: 10px;">
+<td style="height: 10px; width: 11.474%; text-align: center;">
 <h4><span style="font-family: Leelawadee UI,sans-serif;"><strong>SR NO</strong></span></h4>
 </td>
-<td style="height: 18px; width: 36.2113%;">
+<td style="height: 10px; width: 48.2055%; text-align: center;">
 <h4><span style="font-family: Leelawadee UI,sans-serif;"><strong>SERVICE</strong></span></h4>
 </td>
-<td style="height: 18px; width: 22.1858%;">
+<td style="height: 10px; width: 18.7176%; text-align: center;">
 <h4><span style="font-family: Leelawadee UI,sans-serif;"><strong>AMOUNT</strong></span></h4>
 </td>
-<td style="height: 18px; width: 8.88886%;">
+<td style="height: 10px; width: 8.88886%; text-align: center;">
 <h4><span style="font-family: Leelawadee UI,sans-serif;"><strong>GST</strong></span></h4>
 </td>
-<td style="height: 18px; width: 12.714%;">
+<td style="height: 10px; width: 12.714%; text-align: center;">
 <h4><span style="font-family: Leelawadee UI,sans-serif;"><strong>TOTAL</strong></span></h4>
 </td>
 </tr>
-<tr>
-<td style="height: 18px; width: 20%;"><span style="font-family: Leelawadee UI,sans-serif;">1</span></td>
-<td style="height: 18px; width: 36.2113%;"><span style="font-family: Leelawadee UI,sans-serif;">RERA Consultation Fees</span></td>
-<td style="height: 18px; width: 22.1858%;"><span style="font-family: Leelawadee UI,sans-serif;">50000</span></td>
-<td style="height: 18px; width: 8.88886%;"><span style="font-family: Leelawadee UI,sans-serif;">9000</span></td>
-<td style="height: 18px; width: 12.714%;"><span style="font-family: Leelawadee UI,sans-serif;">59000</span></td>
+<tr style="height: 18px;">
+<td style="height: 18px; width: 11.474%; text-align: center;"><span style="font-family: Leelawadee UI,sans-serif;">1</span></td>
+<td style="height: 18px; width: 48.2055%; text-align: center;"><span style="font-family: Leelawadee UI,sans-serif;">RERA Consultation Fees</span></td>
+<td style="height: 18px; width: 18.7176%; text-align: center;"><span style="font-family: Leelawadee UI,sans-serif;">50000</span></td>
+<td style="height: 18px; width: 8.88886%; text-align: center;"><span style="font-family: Leelawadee UI,sans-serif;">9000</span></td>
+<td style="height: 18px; width: 12.714%; text-align: center;"><span style="font-family: Leelawadee UI,sans-serif;">59000</span></td>
 </tr>
-<tr>
-<td style="background-color: #dddddd; height: 18px; width: 20%;">&nbsp;</td>
-<td style="background-color: #dddddd; height: 18px; width: 36.2113%;"><span style="font-family: Leelawadee UI,sans-serif;">1st November 2021 to 30th April 2022</span></td>
-<td style="background-color: #dddddd; height: 18px; width: 22.1858%;">&nbsp;</td>
-<td style="background-color: #dddddd; height: 18px; width: 8.88886%;">&nbsp;</td>
-<td style="background-color: #dddddd; height: 18px; width: 12.714%;">&nbsp;</td>
+<tr style="height: 18px;">
+<td style="background-color: #dddddd; height: 18px; width: 11.474%; text-align: center;">&nbsp;</td>
+<td style="background-color: #dddddd; height: 18px; width: 48.2055%; text-align: center;"><span style="font-family: Leelawadee UI,sans-serif;">1st November 2021 to 30th April 2022</span></td>
+<td style="background-color: #dddddd; height: 18px; width: 18.7176%; text-align: center;">&nbsp;</td>
+<td style="background-color: #dddddd; height: 18px; width: 8.88886%; text-align: center;">&nbsp;</td>
+<td style="background-color: #dddddd; height: 18px; width: 12.714%; text-align: center;">&nbsp;</td>
 </tr>
-<tr>
-<td style="height: 18px; width: 20%;">&nbsp;</td>
-<td style="height: 18px; width: 36.2113%;">&nbsp;</td>
-<td style="height: 18px; width: 22.1858%;">&nbsp;</td>
-<td style="height: 18px; width: 8.88886%;">&nbsp;</td>
-<td style="height: 18px; width: 12.714%;">&nbsp;</td>
+<tr style="height: 18px;">
+<td style="height: 18px; width: 11.474%; text-align: center;">&nbsp;</td>
+<td style="height: 18px; width: 48.2055%; text-align: center;">&nbsp;</td>
+<td style="height: 18px; width: 18.7176%; text-align: center;">&nbsp;</td>
+<td style="height: 18px; width: 8.88886%; text-align: center;">&nbsp;</td>
+<td style="height: 18px; width: 12.714%; text-align: center;">&nbsp;</td>
 </tr>
 </tbody>
 </table>
 <p>&nbsp;</p>
-<table style="border-collapse: collapse; width: 100%; height: 174px;" border="0" cellspacing="0">
+<table style="border-collapse: collapse; width: 100%; height: 125px;" border="0" cellspacing="0">
 <tbody>
 <tr style="height: 19px;">
 <td style="width: 56.102%; height: 19px;"><u style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span style="font-family: Leelawadee UI,sans-serif;"><strong>Special Notes</strong></span></u></td>
@@ -135,15 +135,15 @@ let f2 = `
 <td style="width: 24.0436%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><strong>TOTAL TAX</strong></span></td>
 <td style="width: 19.8543%; height: 19px;"><u style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span style="font-family: Leelawadee UI,sans-serif;">9000</span></u></td>
 </tr>
-<tr style="height: 39px;">
-<td style="width: 56.102%; height: 39px;">&nbsp;</td>
-<td style="width: 24.0436%; height: 39px;"><span style="font-family: Leelawadee UI,sans-serif;"><strong>TOTAL AMOUNT</strong></span></td>
-<td style="width: 19.8543%; height: 39px;"><u style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span style="font-family: Leelawadee UI,sans-serif;">59000</span></u></td>
+<tr style="height: 19px;">
+<td style="width: 56.102%; height: 19px;">&nbsp;</td>
+<td style="width: 24.0436%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><strong>TOTAL AMOUNT</strong></span></td>
+<td style="width: 19.8543%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><u style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">59000</u></span></td>
 </tr>
-<tr style="height: 39px">
-<td style="width: 56.102%; height: 39px;">&nbsp;</td>
-<td style="width: 24.0436%; height: 39px;border-bottom:solid;"><span style="font-family: Leelawadee UI,sans-serif;"><strong>PAYMENT MADE</strong></span></td>
-<td style="width: 19.8543%; height: 39px;;border-bottom:solid"><span style="font-family: Leelawadee UI,sans-serif;"><u style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">0</u></span></td>
+<tr style="height: 39px;">
+<td style="width: 56.102%; height: 10px;">&nbsp;</td>
+<td style="width: 24.0436%; height: 10px; border-bottom: medium solid;"><span style="font-family: Leelawadee UI,sans-serif;"><strong>PAYMENT MADE</strong></span></td>
+<td style="width: 19.8543%; height: 10px; border-bottom: medium solid;"><span style="font-family: Leelawadee UI,sans-serif;"><u style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">0</u></span></td>
 </tr>
 <tr style="height: 39px;">
 <td style="width: 56.102%; height: 39px;">&nbsp;</td>
@@ -200,8 +200,10 @@ let f2 = `
 </table>
 <p>&nbsp;</p>
 `
-
-let file = { content: f2};
+const fs = require("fs")
+f2 = fs.readFileSync("./tests/invoice.html")
+// console.log(f2)
+let file = { content: f2 + ""};
 
 let options = {   
     "height": "10.5in",        // allowed units: mm, cm, in, px
