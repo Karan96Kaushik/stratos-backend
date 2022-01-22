@@ -143,7 +143,7 @@ router.delete("/api/tasks/", checkW, async (req, res) => {
 	
 	let task = await Tasks.findOne({_id: req.query._id})
 
-	if(task.addedBy != req.user.id) {
+	if(!req.permissions.isAdmin && task.addedBy != req.user.id) {
 		res.status(401).send("Unauthorized to delete this task")
 		return
 	}
