@@ -41,9 +41,6 @@ router.post("/api/packages/add", async (req, res) => {
 const generateQuery = (req) => {
 	let others = {}
 
-	if(!req.permissions.isAdmin && !req.permissions.page.includes("Packages R"))
-		others.addedBy = req.user.id
-
 	let query = {
 		$and:[
 			{
@@ -174,6 +171,15 @@ router.post("/api/packages/search", async (req, res) => {
 		const sortDir = parseInt(req.query.sortDir)
 		const page = parseInt(req.query.page)-1
 
+		if (!req.permissions.isAdmin) {
+			if(req.query.services && !req.permissions.page.includes('Packages Services R'))
+				return res.status(401).send('Unauthorized to view services')
+			else if(req.query.details && !req.permissions.page.includes('Packages R'))
+				return res.status(401).send('Unauthorized to view details')
+			else if(req.query.accounts && !req.permissions.page.includes('Packages Accounts R'))
+				return res.status(401).send('Unauthorized to view accounts')
+		}
+
 		let query = generateQuery(req)
 
 		let results = await Packages.find(query)
@@ -184,10 +190,7 @@ router.post("/api/packages/search", async (req, res) => {
 
 		results = await commonProcessor(results)
 		if(req.query.accounts)
-			if (req.permissions.isAdmin || req.permissions.page.includes('Packages Accounts R'))
-				results = await mapPayments(results)
-			else 
-				throw new Error('Unauthorized to view accounts')
+			results = await mapPayments(results)
 
 		res.json(results)
 	} catch (err) {
@@ -239,6 +242,12 @@ router.post("/api/packages/export", async (req, res) => {
 
 router.get("/api/packages/", async (req, res) => {
 	try{
+
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Packages W") && !req.permissions.page.includes("Packages Services W")) {
+			res.status(401).send("Unauthorized")
+			return
+		}
+		
 		delete req.query.service
 		let package = await Packages.findOne(req.query);
 		package = package._doc
@@ -291,7 +300,7 @@ router.get("/api/packages/search/all", async (req, res) => {
 router.post("/api/packages/update", async (req, res) => {
 	try {
 
-		if(!req.permissions.isAdmin && !req.permissions.page.includes("Packages W")) {
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Packages W") && !req.permissions.page.includes("Packages Services W")) {
 			res.status(401).send("Unauthorized")
 			return
 		}
