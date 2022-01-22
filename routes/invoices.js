@@ -117,6 +117,11 @@ router.post("/api/invoices/search", async (req, res) => {
 
 		req.query = req.body
 
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Invoices R")) {
+			res.status(401).send("Unauthorized to view Invoices")
+			return
+		}
+
 		let others = {}
 		const rowsPerPage = parseInt(req.query.rowsPerPage)
 		const sortID = req.query.sortID

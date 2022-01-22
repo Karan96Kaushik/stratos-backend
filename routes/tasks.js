@@ -41,7 +41,7 @@ const serviceCodes = {
 const checkR = (req, res, next) => {
 	let isPermitted
 
-	if(!req.permissions.isAdmin)
+	if(req.permissions.isAdmin)
 		isPermitted = true
 	else
 		isPermitted = req.permissions.page.includes("Tasks R")
@@ -59,7 +59,7 @@ const checkR = (req, res, next) => {
 const checkW = (req, res, next) => {
 	let isPermitted
 
-	if(!req.permissions.isAdmin)
+	if(req.permissions.isAdmin)
 		isPermitted = true
 	else
 		isPermitted = req.permissions.page.includes("Tasks W")
@@ -233,7 +233,7 @@ const generateQuery = (req) => {
 			serviceType: req.query.serviceType
 		})
 	}
-
+	
 	if(!checkR(req))
 		query['$and'].push({
 			$or:[
@@ -277,7 +277,7 @@ router.post("/api/tasks/search", async (req, res) => {
 			return
 		}
 
-		if(req.permissions.isAdmin)
+		if(!req.permissions.isAdmin)
 			if(req.query.serviceType && !checkTaskPermission(req, req.query.serviceType)) {
 				res.status(401).send("Unauthorized to view this task type")
 				return
@@ -569,7 +569,6 @@ router.post("/api/tasks/update", async (req, res) => {
 			!req.permissions.isAdmin && 
 			task.addedBy != req.user.id && 
 			!(task._membersAssigned ?? []).includes(String(req.user.id)) && 
-			!adminIDs.includes(req.user.id) && 
 			!req.permissions.page.includes("Payments W")
 		) {
 			res.status(401).send("Unauthorized to update this task")
