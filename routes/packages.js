@@ -135,7 +135,7 @@ const commonProcessor = async (results) => {
 
 	results = results.map(v => ({
 			...v,
-			completionDate: clients.find(c => c.clientID == v.clientID).completionDate ?? ""
+			completionDate: clients.find(c => c.clientID == v.clientID)?.completionDate ?? ""
 		}))
 		.map(formatDates)
 
