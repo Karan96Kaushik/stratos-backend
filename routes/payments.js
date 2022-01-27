@@ -234,11 +234,13 @@ const handlePayment = async (body, originalPaymentId, isDelete=false) => {
 		task,
 		client,
 		package
-
+		
 	if(originalPaymentId) {
 		originalPayment = await Payments.findOne({_id: originalPaymentId});
 		originalPayment = originalPayment._doc
 
+		body.packageID = originalPayment.packageID
+		body._packageID = originalPayment._packageID
 		body._taskID = originalPayment._taskID
 		body._clientID = originalPayment._clientID
 	}
