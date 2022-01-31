@@ -207,7 +207,7 @@ router.post("/api/invoices/update", checkInvoiceW, async (req, res) => {
 		let _id = req.body._id
 		let invoiceID = req.body.invoiceID
 
-		delete req.body.invoiceID
+		// delete req.body.invoiceID
 		delete req.body._id
 		delete req.body.memberID
 		delete req.body.addedBy
