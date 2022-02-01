@@ -215,6 +215,15 @@ router.post("/api/packages/export", async (req, res) => {
 	try {
 		req.query = req.body
 
+		if (!req.permissions.isAdmin) {
+			if(req.query.services && !req.permissions.page.includes('Packages Services R'))
+				return res.status(401).send('Unauthorized to export services')
+			else if(req.query.details && !req.permissions.page.includes('Packages R'))
+				return res.status(401).send('Unauthorized to export details')
+			else if(req.query.accounts && !req.permissions.page.includes('Packages Accounts R'))
+				return res.status(401).send('Unauthorized to export accounts')
+		}
+
 		if(req.query.password != (process.env.ExportPassword ?? "export45678")) {
 			res.status(401).send("Incorrect password")
 			return
@@ -226,9 +235,11 @@ router.post("/api/packages/export", async (req, res) => {
 		let results = await Packages.find(query)
 			.collation({locale: "en" })
 
-		results = commonProcessor(results)
+		results = await commonProcessor(results)
+		if(req.query.accounts)
+			results = await mapPayments(results)
 
-		let file = await generateExcel(results, packageFields["all"], "packagesExport" + (+new Date))
+		let file = await generateExcel(results, packageFields[req.query.accounts ? "accounts" : "all"], "packagesExport" + (+new Date))
 
 		res.download("/tmp/" + file,(err) => {
 			fs.unlink("/tmp/" + file, () => {})
