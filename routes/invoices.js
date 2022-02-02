@@ -194,6 +194,23 @@ router.get("/api/invoices/", async (req, res) => {
 	}
 })
 
+router.post("/api/invoices/generate", async (req, res) => {
+	try{
+		const _id = req.query._id
+		delete req.query._id
+		let invoice = await Invoices.findOne({_id});
+		invoice = invoice._doc
+
+		const invoicePdfPath = await generateInvoice(invoice)
+
+		res.download(invoicePdfPath).then(() => fs.unlink(invoicePdfPath))
+
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
 router.get("/api/invoices/search/all", async (req, res) => {
 	let query = req.query
 
