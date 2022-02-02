@@ -1,11 +1,11 @@
 
 const renderParticularsRows = (data) => {
 
-	let rows = data.items.map((item) => {
+	let rows = data.items.map((item,idx) => {
 		return `
 			<tr style="height: 18px;">
 				<td style="height: 18px; width: 11.474%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">1</span></td>
+						style="font-family: Leelawadee UI,sans-serif;">${idx+2}</span></td>
 				<td style="height: 18px; width: 48.2055%; text-align: center;"><span
 						style="font-family: Leelawadee UI,sans-serif;">${item.particulars || "-"}</span></td>
 				<td style="height: 18px; width: 18.7176%; text-align: center;"><span

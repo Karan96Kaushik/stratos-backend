@@ -27,6 +27,10 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
 
 	req.body.totalAmount = calculateTotal(req.body)
+	req.body.items = req.body.items.map(item => {
+		item.totalAmount = calculateTotal(item)
+		return item
+	})
 	req.body.balanceAmount = req.body.totalAmount - (req.body.paidAmount || 0)
 
     // let invoiceID = "IN" + await getID("invoice")
@@ -234,6 +238,10 @@ router.post("/api/invoices/update", checkInvoiceW, async (req, res) => {
 		delete req.body.addedBy
 
 		req.body.totalAmount = calculateTotal(req.body)
+		req.body.items = req.body.items.map(item => {
+			item.totalAmount = calculateTotal(item)
+			return item
+		})
 		req.body.balanceAmount = req.body.totalAmount - Number(req.body.paidAmount || 0)
 
 		let _ = await Invoices.updateOne(
