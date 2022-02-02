@@ -37,21 +37,21 @@ module.exports = (data) => {
 										style="font-family: Leelawadee UI,sans-serif;">Type</span></td>
 								<td style="height: 18px; width: 50%;"><u
 										style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-											style="font-family: Leelawadee UI,sans-serif;">${data.type}</span></u></td>
+											style="font-family: Leelawadee UI,sans-serif;">${data.type ?? "-"}</span></u></td>
 							</tr>
 							<tr>
 								<td style="height: 18px; width: 50%;"><span
 										style="font-family: Leelawadee UI,sans-serif;">Date</span></td>
 								<td style="height: 18px; width: 50%;"><u
 										style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-											style="font-family: Leelawadee UI,sans-serif;">${data.date}</span></u></td>
+											style="font-family: Leelawadee UI,sans-serif;">${data.date ?? "-"}</span></u></td>
 							</tr>
 							<tr>
 								<td style="height: 18px; width: 50%;"><span
 										style="font-family: Leelawadee UI,sans-serif;">PAN No</span></td>
 								<td style="height: 18px; width: 50%;"><u
 										style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-											style="font-family: Leelawadee UI,sans-serif;">${data.panNum}</span></u></td>
+											style="font-family: Leelawadee UI,sans-serif;">${data.panNum ?? "-"}</span></u></td>
 							</tr>
 							<tr>
 								<td style="height: 18px; width: 50%;"><span
@@ -65,7 +65,7 @@ module.exports = (data) => {
 										style="font-family: Leelawadee UI,sans-serif;">GSTIN</span></td>
 								<td style="height: 18px; width: 50%;"><u
 										style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-											style="font-family: Leelawadee UI,sans-serif;">${data.gstNum}</span></u></td>
+											style="font-family: Leelawadee UI,sans-serif;">${data.gstNum ?? "-"}</span></u></td>
 							</tr>
 						</tbody>
 					</table>
@@ -137,7 +137,7 @@ module.exports = (data) => {
 				<td style="height: 18px; width: 11.474%; text-align: center;"><span
 						style="font-family: Leelawadee UI,sans-serif;">1</span></td>
 				<td style="height: 18px; width: 48.2055%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">${data.particulars}</span></td>
+						style="font-family: Leelawadee UI,sans-serif;">${data.particulars || "-"}</span></td>
 				<td style="height: 18px; width: 18.7176%; text-align: center;"><span
 						style="font-family: Leelawadee UI,sans-serif;">${data.billAmount}</span></td>
 				<td style="height: 18px; width: 9.4669%; text-align: center;"><span

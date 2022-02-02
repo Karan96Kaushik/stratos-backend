@@ -4,6 +4,7 @@ const {Invoices} = require("../models/Invoices");
 const {Members} = require("../models/Members");
 const {invoiceFields} = require("../statics/invoiceFields")
 const {generateExcel} = require("../modules/excelProcessor")
+const {generateInvoice} = require("../modules/generateInvoice")
 const {getID, updateID} = require("../models/Utils");
 const {
 	getAllFiles,
@@ -196,14 +197,16 @@ router.get("/api/invoices/", async (req, res) => {
 
 router.post("/api/invoices/generate", async (req, res) => {
 	try{
-		const _id = req.query._id
-		delete req.query._id
+		const _id = req.body._id
+		delete req.body._id
 		let invoice = await Invoices.findOne({_id});
 		invoice = invoice._doc
 
 		const invoicePdfPath = await generateInvoice(invoice)
 
-		res.download(invoicePdfPath).then(() => fs.unlink(invoicePdfPath))
+		res.download(invoicePdfPath,(err) => {
+			fs.unlink(invoicePdfPath, () => {})
+		})
 
 	} catch (err) {
 		console.log(err)
