@@ -105,12 +105,13 @@ const commonProcessor = (results) => {
 	return results
 }
 
-const calculateTotal = (val) => {
-	return (
+const calculateTotal = (inv) => {
+	return inv.items.reduce((prev, val) => (
 		Number(val.taxAmount ?? 0) +
 		Number(val.billAmount ?? 0) +
-		Number(val.govtFees ?? 0)
-	)
+		Number(val.govtFees ?? 0) +
+		prev
+	), 0)
 }
 
 router.post("/api/invoices/search", async (req, res) => {

@@ -234,13 +234,15 @@ const updateInvoices = async () => {
 	for (invoice of allInvoices) {
 
 		invoice = invoice._doc
-		console.log(invoice.date)
-		if(invoice?.date?.includes("."))
-			invoice.date = invoice.date.split('.').reverse().join('-')
-		else
-			continue
+		invoice.items = [{
+			particulars: invoice.particulars,
+			billAmount: invoice.billAmount,
+			taxAmount: invoice.taxAmount,
+			govtFees: invoice.govtFees,
 
-		await Invoices.updateOne({_id: invoice._id}, {date: invoice.date})
+		}]
+		console.log(invoice.invoiceID)
+		await Invoices.updateOne({_id: invoice._id}, invoice)
 
 	}
 
