@@ -1,4 +1,4 @@
-const genrateInvoiceHtml = require("../viewTemplates/invoiceTemplate")
+const generateInvoiceHtml = require("../viewTemplates/invoiceTemplate")
 const pdf = require('html-pdf');
 
 const generateInvoice = (data) => new Promise((resolve, reject) => {
@@ -20,13 +20,11 @@ const generateInvoice = (data) => new Promise((resolve, reject) => {
 	    let path = "/tmp/invoice" + (+new Date) + ".pdf"
 	    fs.writeFile(path, pdfBuffer, function(err) {
 	        if(err) {
-	            return console.log(err);
+	            reject(err);
 	        }
 	        resolve(path)
 	    });
 	});
-
-	return filePath
 })
 
 module.exports = {
