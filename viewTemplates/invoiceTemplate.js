@@ -224,7 +224,7 @@ module.exports = (data) => {
 						style="font-family: Leelawadee UI,sans-serif;"><strong>BALANCE PAYABLE</strong></span></td>
 				<td style="width: 12.4843%; height: 33px; text-align: center;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><u
-							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><strong>₹${data.balanceAmount}</strong></u></span>
+							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><strong>₹${data.balanceAmount ?? 0}</strong></u></span>
 				</td>
 			</tr>
 		</tbody>
