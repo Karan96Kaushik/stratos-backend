@@ -22,6 +22,7 @@ let Invoices = new Schema(
     govtFees:Number,
     paidAmount:Number,
     balanceAmount:Number,
+    items:Array,
 
     addedBy: {
       required:true,
