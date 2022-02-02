@@ -215,7 +215,7 @@ module.exports = (data) => {
 						style="font-family: Leelawadee UI,sans-serif;"><strong>PAYMENT MADE</strong></span></td>
 				<td style="width: 12.4843%; height: 19px; border-bottom: medium solid; text-align: center;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><u
-							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.paidAmount}</u></span>
+							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.paidAmount ?? 0}</u></span>
 				</td>
 			</tr>
 			<tr style="height: 39px;">
