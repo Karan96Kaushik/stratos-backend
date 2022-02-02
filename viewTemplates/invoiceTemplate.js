@@ -1,3 +1,34 @@
+
+const renderParticularsRows = (data) => {
+
+	let rows = data.items.map((item) => {
+		return `
+			<tr style="height: 18px;">
+				<td style="height: 18px; width: 11.474%; text-align: center;"><span
+						style="font-family: Leelawadee UI,sans-serif;">1</span></td>
+				<td style="height: 18px; width: 48.2055%; text-align: center;"><span
+						style="font-family: Leelawadee UI,sans-serif;">${item.particulars || "-"}</span></td>
+				<td style="height: 18px; width: 18.7176%; text-align: center;"><span
+						style="font-family: Leelawadee UI,sans-serif;">${item.billAmount}</span></td>
+				<td style="height: 18px; width: 9.4669%; text-align: center;"><span
+						style="font-family: Leelawadee UI,sans-serif;">${item.taxAmount}</span></td>
+				<td style="height: 18px; width: 12.136%; text-align: center;"><span
+						style="font-family: Leelawadee UI,sans-serif;">${item.totalAmount}</span></td>
+			</tr>
+			<tr style="height: 18px;">
+				<td style="background-color: #dddddd; height: 18px; width: 11.474%; text-align: center;">&nbsp;</td>
+				<td style="background-color: #dddddd; height: 18px; width: 48.2055%; text-align: center;"><span
+						style="font-family: Leelawadee UI,sans-serif;">${" " ?? item.period}</span></td>
+				<td style="background-color: #dddddd; height: 18px; width: 18.7176%; text-align: center;">&nbsp;</td>
+				<td style="background-color: #dddddd; height: 18px; width: 9.4669%; text-align: center;">&nbsp;</td>
+				<td style="background-color: #dddddd; height: 18px; width: 12.136%; text-align: center;">&nbsp;</td>
+			</tr>
+		`
+	})
+
+	return rows.join("")
+}
+
 module.exports = (data) => {
 
 	let html = `<table style="border-collapse: collapse; border-style: hidden; height: 402px; width: 100%;" border="0" cellspacing="0">
@@ -27,6 +58,10 @@ module.exports = (data) => {
 									style="text-decoration: none; border-bottom: 1px solid; border-color: #747474; font-size: 18px; line-height: 1.7;">PROJECT
 									NAME:</u></strong></span><br /><span style="font-family: Leelawadee UI,sans-serif;">
 							${data.projectName ?? "-"}</span></p>
+							${data.clientGST ? `<p><span style="font-family: Leelawadee UI,sans-serif;">
+							${data.clientGST ?? "-"}</span></p>` : ""}
+							<p><span style="font-family: Leelawadee UI,sans-serif;">
+							${data.clientAddress ?? "-"}</span></p>
 				</td>
 				<td style="height: 145px; width: 41.439%;">
 					<table style="border-collapse: collapse; border-style: hidden; height: 108px; width: 100%;" border="0"
@@ -153,6 +188,7 @@ module.exports = (data) => {
 				<td style="background-color: #dddddd; height: 18px; width: 9.4669%; text-align: center;">&nbsp;</td>
 				<td style="background-color: #dddddd; height: 18px; width: 12.136%; text-align: center;">&nbsp;</td>
 			</tr>
+			${renderParticularsRows(data)}
 			<tr style="height: 18px;">
 				<td style="height: 18px; width: 11.474%; text-align: center;">&nbsp;</td>
 				<td style="height: 18px; width: 48.2055%; text-align: center;">&nbsp;</td>
