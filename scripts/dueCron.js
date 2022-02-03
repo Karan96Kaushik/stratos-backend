@@ -17,7 +17,7 @@ const updatePackages = async () => {
 	for (let package of allPackages) {
 
 		package = package._doc
-		if (!package.packageID)
+		if (!package.startDate || !package.paymentCycle)
 			continue
 		await updatePackage(package)
 
