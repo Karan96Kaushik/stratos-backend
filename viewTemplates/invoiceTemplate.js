@@ -5,7 +5,7 @@ const renderParticularsRows = (data) => {
 		return `
 			<tr style="height: 18px;">
 				<td style="height: 18px; width: 11.474%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">${idx+2}</span></td>
+						style="font-family: Leelawadee UI,sans-serif;">${idx+1}</span></td>
 				<td style="height: 18px; width: 48.2055%; text-align: center;"><span
 						style="font-family: Leelawadee UI,sans-serif;">${item.particulars || "-"}</span></td>
 				<td style="height: 18px; width: 18.7176%; text-align: center;"><span
@@ -167,26 +167,6 @@ module.exports = (data) => {
 						style="font-family: Leelawadee UI,sans-serif;"><strong>GST</strong></span></td>
 				<td style="height: 10px; width: 12.136%; text-align: center;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><strong>TOTAL</strong></span></td>
-			</tr>
-			<tr style="height: 18px;">
-				<td style="height: 18px; width: 11.474%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">1</span></td>
-				<td style="height: 18px; width: 48.2055%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">${data.particulars || "-"}</span></td>
-				<td style="height: 18px; width: 18.7176%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">${data.billAmount}</span></td>
-				<td style="height: 18px; width: 9.4669%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">${data.taxAmount}</span></td>
-				<td style="height: 18px; width: 12.136%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">${data.totalAmount}</span></td>
-			</tr>
-			<tr style="height: 18px;">
-				<td style="background-color: #dddddd; height: 18px; width: 11.474%; text-align: center;">&nbsp;</td>
-				<td style="background-color: #dddddd; height: 18px; width: 48.2055%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">${" " ?? data.period}</span></td>
-				<td style="background-color: #dddddd; height: 18px; width: 18.7176%; text-align: center;">&nbsp;</td>
-				<td style="background-color: #dddddd; height: 18px; width: 9.4669%; text-align: center;">&nbsp;</td>
-				<td style="background-color: #dddddd; height: 18px; width: 12.136%; text-align: center;">&nbsp;</td>
 			</tr>
 			${renderParticularsRows(data)}
 			<tr style="height: 18px;">

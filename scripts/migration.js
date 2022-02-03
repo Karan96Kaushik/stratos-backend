@@ -226,7 +226,7 @@ const migrateClientAmounts = async () => {
 
 const updateInvoices = async () => {
 	let query = {
-		__v: {$exists: false}
+		// __v: {$exists: true}
 	}
 
 	let allInvoices = await Invoices.find(query)
@@ -242,7 +242,9 @@ const updateInvoices = async () => {
 
 		}]
 		console.log(invoice.invoiceID)
-		await Invoices.updateOne({_id: invoice._id}, invoice)
+		let _ = await Invoices.updateOne({_id: invoice._id}, invoice)
+
+		console.log(_)
 
 	}
 
