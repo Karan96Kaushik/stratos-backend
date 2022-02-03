@@ -117,6 +117,9 @@ const updatePackage = async (package) => {
 	}
 
 	let checkDate = new Date
+	// Adding 12 hours to compensate for server time in GMT
+	checkDate = new Date(+checkDate + (12 * 60 * 60 * 1000))
+
 	let cyclesPassed = 0
 	checkDate.setMonth(checkDate.getMonth() - additiveMonths)
 	while (startDate < checkDate) {
