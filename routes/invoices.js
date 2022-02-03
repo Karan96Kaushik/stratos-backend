@@ -27,6 +27,9 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
 
 	req.body.totalAmount = calculateTotal(req.body)
+	req.body.billAmount = req.body.items.reduce((prev, item) => (Number(item.billAmount ?? 0) + prev ), 0)
+	req.body.taxAmount = req.body.items.reduce((prev, item) => (Number(item.taxAmount ?? 0) + prev ), 0)
+		
 	req.body.items = req.body.items.map(item => {
 		item.totalAmount = calculateTotal(item)
 		return item
@@ -249,6 +252,9 @@ router.post("/api/invoices/update", checkInvoiceW, async (req, res) => {
 		delete req.body.addedBy
 
 		req.body.totalAmount = calculateTotal(req.body)
+		req.body.billAmount = req.body.items.reduce((prev, item) => (Number(item.billAmount ?? 0) + prev ), 0)
+		req.body.taxAmount = req.body.items.reduce((prev, item) => (Number(item.taxAmount ?? 0) + prev ), 0)
+
 		req.body.items = req.body.items.map(item => {
 			item.totalAmount = calculateTotal(item)
 			return item
