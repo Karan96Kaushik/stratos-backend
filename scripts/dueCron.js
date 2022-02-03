@@ -17,6 +17,8 @@ const updatePackages = async () => {
 	for (let package of allPackages) {
 
 		package = package._doc
+		if (!package.packageID)
+			continue
 		await updatePackage(package)
 
 	}
