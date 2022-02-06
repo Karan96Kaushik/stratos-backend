@@ -27,6 +27,13 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
 
 	req.body.totalAmount = calculateTotal(req.body)
+	req.body.billAmount = req.body.items.reduce((prev, item) => (Number(item.billAmount ?? 0) + prev ), 0)
+	req.body.taxAmount = req.body.items.reduce((prev, item) => (Number(item.taxAmount ?? 0) + prev ), 0)
+		
+	req.body.items = req.body.items.map(item => {
+		item.totalAmount = calculateTotal(item)
+		return item
+	})
 	req.body.balanceAmount = req.body.totalAmount - (req.body.paidAmount || 0)
 
     // let invoiceID = "IN" + await getID("invoice")
@@ -105,12 +112,24 @@ const commonProcessor = (results) => {
 	return results
 }
 
-const calculateTotal = (val) => {
-	return (
-		Number(val.taxAmount ?? 0) +
-		Number(val.billAmount ?? 0) +
-		Number(val.govtFees ?? 0)
-	)
+const calculateTotal = (inv) => {
+	// Total invoice
+	if (inv.items) {
+		return inv.items.reduce((prev, val) => (
+			Number(val.taxAmount ?? 0) +
+			Number(val.billAmount ?? 0) +
+			Number(val.govtFees ?? 0) +
+			prev
+		), 0)
+	}
+	else {
+		return (
+			Number(inv.taxAmount ?? 0) +
+			Number(inv.billAmount ?? 0) +
+			Number(inv.govtFees ?? 0)
+		)
+	}
+
 }
 
 router.post("/api/invoices/search", async (req, res) => {
@@ -233,6 +252,13 @@ router.post("/api/invoices/update", checkInvoiceW, async (req, res) => {
 		delete req.body.addedBy
 
 		req.body.totalAmount = calculateTotal(req.body)
+		req.body.billAmount = req.body.items.reduce((prev, item) => (Number(item.billAmount ?? 0) + prev ), 0)
+		req.body.taxAmount = req.body.items.reduce((prev, item) => (Number(item.taxAmount ?? 0) + prev ), 0)
+
+		req.body.items = req.body.items.map(item => {
+			item.totalAmount = calculateTotal(item)
+			return item
+		})
 		req.body.balanceAmount = req.body.totalAmount - Number(req.body.paidAmount || 0)
 
 		let _ = await Invoices.updateOne(

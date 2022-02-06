@@ -226,7 +226,7 @@ const migrateClientAmounts = async () => {
 
 const updateInvoices = async () => {
 	let query = {
-		__v: {$exists: false}
+		// __v: {$exists: true}
 	}
 
 	let allInvoices = await Invoices.find(query)
@@ -234,13 +234,17 @@ const updateInvoices = async () => {
 	for (invoice of allInvoices) {
 
 		invoice = invoice._doc
-		console.log(invoice.date)
-		if(invoice?.date?.includes("."))
-			invoice.date = invoice.date.split('.').reverse().join('-')
-		else
-			continue
+		invoice.items = [{
+			particulars: invoice.particulars,
+			billAmount: invoice.billAmount,
+			taxAmount: invoice.taxAmount,
+			govtFees: invoice.govtFees,
 
-		await Invoices.updateOne({_id: invoice._id}, {date: invoice.date})
+		}]
+		console.log(invoice.invoiceID)
+		let _ = await Invoices.updateOne({_id: invoice._id}, invoice)
+
+		console.log(_)
 
 	}
 
