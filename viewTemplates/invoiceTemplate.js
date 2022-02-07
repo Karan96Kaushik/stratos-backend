@@ -204,7 +204,7 @@ module.exports = (data) => {
 			</tr>
 			<tr style="height: 19px;">
 				<td style="width: 63.6165%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><u
-							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.notes ?? ""}</u></span>
+							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.notes ?? "NA"}</u></span>
 				</td>
 				<td style="width: 23.8992%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><strong>TAX
 							RATE</strong></span></td>
