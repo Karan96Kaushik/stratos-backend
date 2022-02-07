@@ -2,6 +2,10 @@
 const renderParticularsRows = (data) => {
 
 	let rows = data.items.map((item,idx) => {
+
+		if (!item.totalAmount)
+			item.totalAmount = item.billAmount + item.taxAmount + item.govtFees
+
 		return `
 			<tr style="height: 18px;">
 				<td style="height: 18px; width: 11.474%; text-align: center;"><span
@@ -18,7 +22,7 @@ const renderParticularsRows = (data) => {
 			<tr style="height: 18px;">
 				<td style="background-color: #dddddd; height: 18px; width: 11.474%; text-align: center;">&nbsp;</td>
 				<td style="background-color: #dddddd; height: 18px; width: 48.2055%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">${item.note}</span></td>
+						style="font-family: Leelawadee UI,sans-serif;">${item.note ?? ""}</span></td>
 				<td style="background-color: #dddddd; height: 18px; width: 18.7176%; text-align: center;">&nbsp;</td>
 				<td style="background-color: #dddddd; height: 18px; width: 9.4669%; text-align: center;">&nbsp;</td>
 				<td style="background-color: #dddddd; height: 18px; width: 12.136%; text-align: center;">&nbsp;</td>
@@ -200,7 +204,7 @@ module.exports = (data) => {
 			</tr>
 			<tr style="height: 19px;">
 				<td style="width: 63.6165%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><u
-							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.notes}</u></span>
+							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.notes ?? ""}</u></span>
 				</td>
 				<td style="width: 23.8992%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><strong>TAX
 							RATE</strong></span></td>
