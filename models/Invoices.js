@@ -24,6 +24,10 @@ let Invoices = new Schema(
     balanceAmount:Number,
     notes:String,
     items:Array,
+    billPeriod:String,
+    quotationDate:String,
+    quotationNum:String,
+    specialNotes:String,
 
     addedBy: {
       required:true,

@@ -127,21 +127,21 @@ module.exports = (data) => {
 										Period:</span></td>
 								<td style="width: 50%;"><u
 										style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-											style="font-family: Leelawadee UI,sans-serif;">NA</span></u></td>
+											style="font-family: Leelawadee UI,sans-serif;">${data.billPeriod ?? "NA"}</span></u></td>
 							</tr>
 							<tr>
 								<td style="width: 50%;"><span style="font-family: Leelawadee UI,sans-serif;">Quotation
 										No:</span></td>
 								<td style="width: 50%;"><u
 										style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-											style="font-family: Leelawadee UI,sans-serif;">NA</span></u></td>
+											style="font-family: Leelawadee UI,sans-serif;">${data.quotationNum ?? "NA"}</span></u></td>
 							</tr>
 							<tr>
 								<td style="width: 50%;"><span style="font-family: Leelawadee UI,sans-serif;">Quotation
 										Date:</span></td>
 								<td style="width: 50%;"><u
 										style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-											style="font-family: Leelawadee UI,sans-serif;">NA</span></u></td>
+											style="font-family: Leelawadee UI,sans-serif;">${data.quotationDate ?? "NA"}</span></u></td>
 							</tr>
 						</tbody>
 					</table>
@@ -198,17 +198,17 @@ module.exports = (data) => {
 							style="font-family: Leelawadee UI,sans-serif;"><strong>Special Notes</strong></span></u></td>
 				<td style="width: 23.8992%; height: 19px;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><strong>SUBTOTAL</strong></span></td>
-				<td style="width: 12.4843%; height: 19px; text-align: center;"><u
+				<td style="width: 12.4843%; height: 19px; text-align: right;"><u
 						style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-							style="font-family: Leelawadee UI,sans-serif; text-align: right;">${data.billAmount}</span></u></td>
+							style="font-family: Leelawadee UI,sans-serif;">${data.billAmount}</span></u></td>
 			</tr>
 			<tr style="height: 19px;">
 				<td style="width: 63.6165%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><u
-							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.notes ?? "NA"}</u></span>
+							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.specialNotes ?? "NA"}</u></span>
 				</td>
 				<td style="width: 23.8992%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><strong>TAX
 							RATE</strong></span></td>
-				<td style="width: 12.4843%; height: 19px; text-align: center;"><u
+				<td style="width: 12.4843%; height: 19px; text-align: right;"><u
 						style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
 							style="font-family: Leelawadee UI,sans-serif;">18%</span></u></td>
 			</tr>
@@ -216,16 +216,16 @@ module.exports = (data) => {
 				<td style="width: 63.6165%; height: 19px;">&nbsp;</td>
 				<td style="width: 23.8992%; height: 19px;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><strong>TOTAL TAX</strong></span></td>
-				<td style="width: 12.4843%; height: 19px; text-align: center;"><u
+				<td style="width: 12.4843%; height: 19px; text-align: right;"><u
 						style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-							style="font-family: Leelawadee UI,sans-serif; text-align: right;">${data.taxAmount}</span></u></td>
+							style="font-family: Leelawadee UI,sans-serif;">${data.taxAmount}</span></u></td>
 			</tr>
 			<tr style="height: 19px;">
 				<td style="width: 63.6165%; height: 19px;">&nbsp;</td>
 				<td style="width: 23.8992%; height: 19px;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><strong>TOTAL AMOUNT</strong></span></td>
-				<td style="width: 12.4843%; height: 19px; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif; text-align: right;"><u
+				<td style="width: 12.4843%; height: 19px; text-align: right;"><span
+						style="font-family: Leelawadee UI,sans-serif;"><u
 							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474; ">${data.totalAmount}</u></span>
 				</td>
 			</tr>
@@ -233,8 +233,8 @@ module.exports = (data) => {
 				<td style="width: 63.6165%; height: 19px;">&nbsp;</td>
 				<td style="width: 23.8992%; height: 19px; border-bottom: medium solid;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><strong>PAYMENT MADE</strong></span></td>
-				<td style="width: 12.4843%; height: 19px; border-bottom: medium solid; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif; text-align: right;"><u
+				<td style="width: 12.4843%; height: 19px; border-bottom: medium solid; text-align: right;"><span
+						style="font-family: Leelawadee UI,sans-serif;"><u
 							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.paidAmount ?? 0}</u></span>
 				</td>
 			</tr>
@@ -242,8 +242,8 @@ module.exports = (data) => {
 				<td style="width: 63.6165%; height: 33px;">&nbsp;</td>
 				<td style="width: 23.8992%; height: 33px;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><strong>BALANCE PAYABLE</strong></span></td>
-				<td style="width: 12.4843%; height: 33px; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif; text-align: right;"><u
+				<td style="width: 12.4843%; height: 33px; text-align: right;"><span
+						style="font-family: Leelawadee UI,sans-serif;"><u
 							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><strong>₹${data.balanceAmount ?? 0}</strong></u></span>
 				</td>
 			</tr>
