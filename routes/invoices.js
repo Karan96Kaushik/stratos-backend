@@ -220,6 +220,7 @@ router.post("/api/invoices/generate", async (req, res) => {
 		delete req.body._id
 		let invoice = await Invoices.findOne({_id});
 		invoice = invoice._doc
+		invoice.createdTime = moment(new Date(invoice.createdTime)).format("DD-MM-YYYY"),
 
 		const invoicePdfPath = await generateInvoice(invoice)
 

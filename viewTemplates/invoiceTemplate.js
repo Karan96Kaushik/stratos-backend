@@ -11,7 +11,7 @@ const renderParticularsRows = (data) => {
 				<td style="height: 18px; width: 11.474%; text-align: center;"><span
 						style="font-family: Leelawadee UI,sans-serif;">${idx+1}</span></td>
 				<td style="height: 18px; width: 48.2055%; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;">${item.particulars || "-"}</span></td>
+						style="font-family: Leelawadee UI,sans-serif;"><strong>${item.particulars || "-"}</strong></span></td>
 				<td style="height: 18px; width: 18.7176%; text-align: center;"><span
 						style="font-family: Leelawadee UI,sans-serif;">${item.billAmount}</span></td>
 				<td style="height: 18px; width: 9.4669%; text-align: center;"><span
@@ -200,7 +200,7 @@ module.exports = (data) => {
 						style="font-family: Leelawadee UI,sans-serif;"><strong>SUBTOTAL</strong></span></td>
 				<td style="width: 12.4843%; height: 19px; text-align: center;"><u
 						style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-							style="font-family: Leelawadee UI,sans-serif;">${data.billAmount}</span></u></td>
+							style="font-family: Leelawadee UI,sans-serif; text-align: right;">${data.billAmount}</span></u></td>
 			</tr>
 			<tr style="height: 19px;">
 				<td style="width: 63.6165%; height: 19px;"><span style="font-family: Leelawadee UI,sans-serif;"><u
@@ -218,15 +218,15 @@ module.exports = (data) => {
 						style="font-family: Leelawadee UI,sans-serif;"><strong>TOTAL TAX</strong></span></td>
 				<td style="width: 12.4843%; height: 19px; text-align: center;"><u
 						style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><span
-							style="font-family: Leelawadee UI,sans-serif;">${data.taxAmount}</span></u></td>
+							style="font-family: Leelawadee UI,sans-serif; text-align: right;">${data.taxAmount}</span></u></td>
 			</tr>
 			<tr style="height: 19px;">
 				<td style="width: 63.6165%; height: 19px;">&nbsp;</td>
 				<td style="width: 23.8992%; height: 19px;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><strong>TOTAL AMOUNT</strong></span></td>
 				<td style="width: 12.4843%; height: 19px; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;"><u
-							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.totalAmount}</u></span>
+						style="font-family: Leelawadee UI,sans-serif; text-align: right;"><u
+							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474; ">${data.totalAmount}</u></span>
 				</td>
 			</tr>
 			<tr style="height: 19px;">
@@ -234,7 +234,7 @@ module.exports = (data) => {
 				<td style="width: 23.8992%; height: 19px; border-bottom: medium solid;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><strong>PAYMENT MADE</strong></span></td>
 				<td style="width: 12.4843%; height: 19px; border-bottom: medium solid; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;"><u
+						style="font-family: Leelawadee UI,sans-serif; text-align: right;"><u
 							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">${data.paidAmount ?? 0}</u></span>
 				</td>
 			</tr>
@@ -243,7 +243,7 @@ module.exports = (data) => {
 				<td style="width: 23.8992%; height: 33px;"><span
 						style="font-family: Leelawadee UI,sans-serif;"><strong>BALANCE PAYABLE</strong></span></td>
 				<td style="width: 12.4843%; height: 33px; text-align: center;"><span
-						style="font-family: Leelawadee UI,sans-serif;"><u
+						style="font-family: Leelawadee UI,sans-serif; text-align: right;"><u
 							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><strong>₹${data.balanceAmount ?? 0}</strong></u></span>
 				</td>
 			</tr>
