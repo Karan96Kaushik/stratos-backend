@@ -309,7 +309,7 @@ const fixTasks = async () => {
 				continue
 			}
 		}
-console.log(task.totalAmount, newBalance)
+		console.log(task.totalAmount, newBalance)
 		// let _ = await Tasks.updateOne(
 		// 	{_id: String(task._id)}, 
 		// 	{
@@ -357,7 +357,7 @@ const fixPackages = async () => {
 				continue
 			}
 		}
-console.log(package.due, newBalance)
+		console.log(package.due, newBalance)
 		// let _ = await Tasks.updateOne(
 		// 	{_id: String(task._id)}, 
 		// 	{
@@ -371,8 +371,11 @@ console.log(package.due, newBalance)
 
 }
 
+// Fix tasks and packages balance amount denormalisation
 fixPackages()
 // fixTasks()
+
+// Restructure invoices to handle array of items
 // updateInvoices()
 
 // removeInvoices()

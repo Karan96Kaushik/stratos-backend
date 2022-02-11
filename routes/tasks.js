@@ -242,6 +242,10 @@ const generateQuery = (req) => {
 				{_membersAssigned: req.user.id},
 			]
 		})
+
+	if(!query['$and'].length) {
+		delete query['$and']
+	}
 	
 	return query
 }
