@@ -10,6 +10,7 @@ const {Payments} = require("../models/Payments");
 const {Tasks} = require("../models/Tasks");
 const {Invoices} = require("../models/Invoices");
 const {Quotations} = require("../models/Quotations");
+const {Packages} = require("../models/Packages");
 
 const migrateTaskPromoter = async () => {
 
@@ -275,7 +276,104 @@ const removeInvoices = async () => {
 
 }
 
-updateInvoices()
+const fixTasks = async () => {
+
+	let allTasks = await Tasks.find()
+
+	console.log(allTasks.length)
+
+	for (task of allTasks) {
+
+		task = task._doc
+		if(!task.clientID)
+			console.log(task)
+
+		let newBalance = 0
+
+		let payments = await Payments.find({taskID: task.taskID})
+		if(!payments.length && task.totalAmount > task.balanceAmount) {
+			console.log("no payments", task.taskID, task.totalAmount, task.balanceAmount)
+			newBalance = task.totalAmount
+		} 
+		else if (!payments.length) {
+			continue
+		}
+		else {
+			let totalPayments = payments.map(v => v._doc).reduce((prev,curr) => Number(curr.receivedAmount)+prev,0)
+			if(typeof totalPayments == 'string')
+				console.log(payments)
+			if (totalPayments != (task.totalAmount - task.balanceAmount)) {
+				console.log("uneq pmt", task.taskID, totalPayments, task.totalAmount - task.balanceAmount)
+				newBalance = task.totalAmount - totalPayments
+			} else {
+				continue
+			}
+		}
+console.log(task.totalAmount, newBalance)
+		// let _ = await Tasks.updateOne(
+		// 	{_id: String(task._id)}, 
+		// 	{
+		// 		balanceAmount: newBalance
+		// 	}
+		// )
+
+	}
+
+	console.log("Done")
+
+}
+
+
+const fixPackages = async () => {
+
+	let allPackages = await Packages.find()
+
+	console.log(allPackages.length)
+
+	for (package of allPackages) {
+
+		package = package._doc
+		if(!package.clientID)
+			console.log(package)
+
+		let newBalance = 0
+
+		let payments = await Payments.find({packageID: package.packageID})
+		if(!payments.length && package.due > package.balanceAmount) {
+			console.log("no payments", package.packageID, package.due, package.balanceAmount)
+			newBalance = package.due
+		} 
+		else if (!payments.length) {
+			continue
+		}
+		else {
+			let totalPayments = payments.map(v => v._doc).reduce((prev,curr) => Number(curr.receivedAmount)+prev,0)
+			if(typeof totalPayments == 'string')
+				console.log(payments)
+			if (totalPayments != (package.due - package.balanceAmount)) {
+				console.log("uneq pmt", package.packageID, totalPayments, package.due - package.balanceAmount)
+				newBalance = package.due - totalPayments
+			} else {
+				continue
+			}
+		}
+console.log(package.due, newBalance)
+		// let _ = await Tasks.updateOne(
+		// 	{_id: String(task._id)}, 
+		// 	{
+		// 		balanceAmount: newBalance
+		// 	}
+		// )
+
+	}
+
+	console.log("Done")
+
+}
+
+fixPackages()
+// fixTasks()
+// updateInvoices()
 
 // removeInvoices()
 // migrateTaskPromoter()
