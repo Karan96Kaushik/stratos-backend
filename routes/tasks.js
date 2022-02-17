@@ -177,7 +177,7 @@ const generateQuery = (req) => {
 		})
 	}
 
-	if(!isNaN(Number(req.query.text))) {
+	if(req.query.text && !isNaN(Number(req.query.text))) {
 
 		query.$and[0].$or.push(
 			{ totalAmount: Number(req.query.text)}
