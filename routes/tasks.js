@@ -177,6 +177,14 @@ const generateQuery = (req) => {
 		})
 	}
 
+	if(!isNaN(Number(req.query.text))) {
+
+		query.$and[0].$or.push(
+			{ totalAmount: Number(req.query.text)}
+		)
+
+	}
+
 	// search only the tasks that are permitted
 	if(!req.query.serviceType && !req.permissions.isAdmin)
 		query['$and'].push({'$or':
@@ -350,13 +358,20 @@ const generateQueryPayments = async (req) => {
 				{ name: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-				{ receivedAmount: Number(req.query.text)},
-				{ balanceAmount: Number(req.query.text)},
-				{ totalAmount: Number(req.query.text)},
-				{ billAmount: Number(req.query.text)},
 				{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 			]
 		})
+
+	if(!isNaN(Number(req.query.text))) {
+
+		query.$and[0].$or.push(
+			{ receivedAmount: Number(req.query.text)},
+			{ balanceAmount: Number(req.query.text)},
+			{ totalAmount: Number(req.query.text)},
+			{ billAmount: Number(req.query.text)},
+		)
+
+	}
 
 	// search only the non-archived tasks if not specified exclusively
 	if(!req.query.filters.archived)
@@ -405,7 +420,9 @@ const generateQueryPayments = async (req) => {
 
 	if (!query.$and.length)
 		delete query.$and
-	
+
+	// console.log(JSON.stringify(query, null, 4))
+
 	return query
 
 }
