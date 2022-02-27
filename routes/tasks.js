@@ -91,6 +91,10 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 		if(!req.body.archived)
 			req.body.archived = false
 
+		// Certain tasks don't have to be billed
+		if(!req.body.removeFromAccounts)
+			req.body.removeFromAccounts = false
+
 		req.body.totalAmount = calculateTotal(req.body)
 		req.body.balanceAmount = req.body.totalAmount
 
@@ -417,6 +421,8 @@ const generateQueryPayments = async (req) => {
 			})	
 		}
 	})
+
+	query.$and.push({ removeFromAccounts: false })
 
 	if (!query.$and.length)
 		delete query.$and

@@ -187,6 +187,17 @@ const migrateTasksArchived = async () => {
 	console.log("Done")
 }
 
+const migrateTasksRemoveFromAccounts = async () => {
+	let _ = await Tasks.updateMany(
+		{}, 
+		{
+			removeFromAccounts: false
+		}
+	)
+
+	console.log("Done")
+}
+
 const migrateClientAmounts = async () => {
 
 	let allClients = await Clients.find()
@@ -371,8 +382,12 @@ const fixPackages = async () => {
 
 }
 
+
+// Add remove from accounts property
+migrateTasksRemoveFromAccounts()
+
 // Fix tasks and packages balance amount denormalisation
-fixPackages()
+// fixPackages()
 // fixTasks()
 
 // Restructure invoices to handle array of items
