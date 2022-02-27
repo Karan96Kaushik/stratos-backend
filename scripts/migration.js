@@ -384,14 +384,14 @@ const fixPackages = async () => {
 
 
 // Add remove from accounts property
-migrateTasksRemoveFromAccounts()
+// 	migrateTasksRemoveFromAccounts()
 
 // Fix tasks and packages balance amount denormalisation
-// fixPackages()
-// fixTasks()
+// 	fixPackages()
+// 	fixTasks()
 
 // Restructure invoices to handle array of items
-// updateInvoices()
+// 	updateInvoices()
 
 // removeInvoices()
 // migrateTaskPromoter()
