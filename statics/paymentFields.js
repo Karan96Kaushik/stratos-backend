@@ -6,17 +6,10 @@ let paymentFields = {
     all: {
         texts: [
             {label:"Client ID", id: "clientID"},
-            {label:"Client Name", id: "name"},
-            {label:"Type", id: "clientType"},
-            {label:"Payment Date", id:"date"},
-            {label:"Total", id: "totalAmount"},
+            {label:"Client Name", id: "clientName"},
+            {label:"Payment Date", id:"paymentDate"},
             {label:"Received Amount", id:"receivedAmount", type:"number", isRequired:true},
-            {label:"Balance", id: "balanceAmount"},
-            {label:"Task List", id:"taskList"},
-            {label:"Promoter", id:"promoter"},
-            {label:"Remarks", id:"remarks"},
-            {label:"Invoice ID", id:"invoiceID"},
-
+            {label:"PackageID/TaskID", id:"taskID"},
             {label:"Mode", id:"mode", options:modeOptions, isRequired:true},
             {label:"Remarks", id:"remarks", isRequired:true},
         ],
