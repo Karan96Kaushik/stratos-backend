@@ -5,9 +5,18 @@ const modeOptions = [
 let paymentFields = {
     all: {
         texts: [
+            {label:"Client ID", id: "clientID"},
+            {label:"Client Name", id: "name"},
+            {label:"Type", id: "clientType"},
             {label:"Payment Date", id:"date"},
-            {label:"Invoice ID", id:"invoiceID"},
+            {label:"Total", id: "totalAmount"},
             {label:"Received Amount", id:"receivedAmount", type:"number", isRequired:true},
+            {label:"Balance", id: "balanceAmount"},
+            {label:"Task List", id:"taskList"},
+            {label:"Promoter", id:"promoter"},
+            {label:"Remarks", id:"remarks"},
+            {label:"Invoice ID", id:"invoiceID"},
+
             {label:"Mode", id:"mode", options:modeOptions, isRequired:true},
             {label:"Remarks", id:"remarks", isRequired:true},
         ],
