@@ -198,11 +198,23 @@ const generateQuery = (req) => {
 		})
 
 	// search only the non-archived tasks if not specified exclusively
-	if(!req.query.filters.archived)
+	if(req.query.filters.onlyarchived)
+		query['$and'].push({
+			archived:true
+		})
+	else if(!req.query.filters.archived)
 		query['$and'].push({
 			archived:false
 		})
 	delete req.query.filters.archived
+	delete req.query.filters.onlyarchived
+
+	// search only the removed from accounts tasks if not specified exclusively
+	if(req.query.filters.onlyremovedfromaccounts)
+		query['$and'].push({
+			removeFromAccounts:true
+		})
+	delete req.query.filters.onlyremovedfromaccounts
 
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
@@ -259,6 +271,8 @@ const generateQuery = (req) => {
 		delete query['$and']
 	}
 	
+	// console.log(JSON.stringify(query, null, 4))
+
 	return query
 }
 
@@ -378,11 +392,16 @@ const generateQueryPayments = async (req) => {
 	}
 
 	// search only the non-archived tasks if not specified exclusively
-	if(!req.query.filters.archived)
+	if(req.query.filters.onlyarchived)
+		query['$and'].push({
+			archived:true
+		})
+	else if(!req.query.filters.archived)
 		query['$and'].push({
 			archived:false
 		})
 	delete req.query.filters.archived
+	delete req.query.filters.onlyarchived
 
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
