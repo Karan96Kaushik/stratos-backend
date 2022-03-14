@@ -281,6 +281,8 @@ const commonProcessor = (results) => {
 	results = results.map(val => ({
 		...val._doc, 
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		followupDate: val.followupDate ? moment(new Date(val.followupDate)).format("DD-MM-YYYY") : '-',
+		paymentDate: val.paymentDate ? moment(new Date(val.paymentDate)).format("DD-MM-YYYY") : '-',
 		billAmount: undefined,
 		gst: undefined,
 		govtFees: undefined,
@@ -460,7 +462,12 @@ const commonProcessorPayments = async (results) => {
 
 	results = results.map(val => ({...val._doc, payments: taskIDs.filter((v) => (val.taskID == v.taskID))}))
 	results = results.map(val => ({...val, received: val.payments.reduce((tot, curr) => ((Number(curr._doc.receivedAmount) ?? 0) + tot),0)}))
-	results = results.map(val => ({...val, createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY")}))
+	results = results.map(val => ({
+		...val, 
+		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		followupDate: val.followupDate ? moment(new Date(val.followupDate)).format("DD-MM-YYYY") : '-',
+		paymentDate: val.paymentDate ? moment(new Date(val.paymentDate)).format("DD-MM-YYYY") : '-',
+	}))
 	results = results.map(val => ({...val, total: calculateTotal(val)}))
 	results = results.map(val => ({...val, balance: val.total - val.received}))
 	results = results.map(val => ({

@@ -191,6 +191,10 @@ const formatDates = p => {
 	p.createdTime = moment(new Date(p.createdTime)).format("DD-MM-YYYY")
 	if (p.startDate)
 		p.startDate = moment(new Date(p.startDate)).format("DD-MM-YYYY")
+	if (p.followupDate)
+		p.followupDate = moment(new Date(p.followupDate)).format("DD-MM-YYYY")
+	if (p.paymentDate)
+		p.paymentDate = moment(new Date(p.paymentDate)).format("DD-MM-YYYY")
 
 	return p
 }
