@@ -188,6 +188,17 @@ const formatDates = p => {
 		p[s] = moment(new Date(p[s])).format("DD-MM-YYYY")
 	})
 
+	// followup duration color coding
+	let followupDateColor = +new Date(p.followupDate) - +new Date()
+	if(followupDateColor < 0)										// follow up date passed
+		p.followupDateColor = 2
+
+	// followup duration color coding
+	let paymentDateColor = +new Date(p.paymentDate) - +new Date()
+	if(paymentDateColor < 0)										// payment date passed
+		p.paymentDateColor = 2
+
+
 	p.createdTime = moment(new Date(p.createdTime)).format("DD-MM-YYYY")
 	if (p.startDate)
 		p.startDate = moment(new Date(p.startDate)).format("DD-MM-YYYY")
