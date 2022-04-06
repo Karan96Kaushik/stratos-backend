@@ -100,7 +100,7 @@ const generateQuery = (req) => {
 	return query
 }
 
-const commonProcessor = (results) => {
+const commonProcessor = (results, members) => {
 	results = results.map(val => ({
 		...val._doc, 
 		totalAmount: calculateTotal(val),
@@ -108,6 +108,7 @@ const commonProcessor = (results) => {
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		date:moment(new Date(val.date)).format("DD-MM-YYYY"),
 		paymentDate:moment(new Date(val.paymentDate)).format("DD-MM-YYYY"),
+		addedBy:members.find(m => String(m._id) == String(m.addedBy))?.userName ?? "",
 	}))
 	return results
 }
@@ -156,7 +157,11 @@ router.post("/api/invoices/search", async (req, res) => {
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
-		results = commonProcessor(results)
+
+		let memberIDs = results.map(i => i.addedBy)
+		let members = await Members.find({ _id : {$in:memberIDs}})
+
+		results = commonProcessor(results, members)
 
 		res.json(results)
 	} catch (err) {
@@ -181,7 +186,10 @@ router.post("/api/invoices/export", async (req, res) => {
 		let results = await Invoices.find(query)
 			.collation({locale: "en" })
 
-		results = commonProcessor(results)
+		let memberIDs = results.map(i => i.addedBy)
+		let members = await Members.find({ _id : {$in:memberIDs}})
+
+		results = commonProcessor(results, members)
 
 		let file = await generateExcel(results, invoiceFields["all"], "invoicesExport" + (+new Date))
 
