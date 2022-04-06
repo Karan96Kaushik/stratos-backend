@@ -108,7 +108,7 @@ const commonProcessor = (results, members) => {
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		date:moment(new Date(val.date)).format("DD-MM-YYYY"),
 		paymentDate:moment(new Date(val.paymentDate)).format("DD-MM-YYYY"),
-		addedBy:members.find(m => String(m._id) == String(m.addedBy))?.userName ?? "",
+		addedBy:members.find(m => String(val.memberID) == String(m.memberID))?.userName ?? "",
 	}))
 	return results
 }
