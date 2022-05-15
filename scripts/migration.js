@@ -382,6 +382,35 @@ const fixPackages = async () => {
 
 }
 
+const test = async () => {
+
+	console.time("JKSHAJKHS")
+
+	let data = await Clients.aggregate(
+		[
+			{
+				$lookup: {
+					from: "Tasks",
+					localField:"_id",
+					foreignField:"_clientID",
+					as: "Tasks"
+				}
+			},
+			{ $match: { Tasks:  { $gte: { $size: 1 }}} },
+			{ $project: { 
+					clientID: 1,
+					totalAmount: 1,
+					Total: {$sum: "$Tasks.totalAmount"}
+				}
+			},
+		])
+
+	console.timeEnd("JKSHAJKHS")
+
+}
+
+// Test Aggregation queries
+// test()
 
 // Add remove from accounts property
 // 	migrateTasksRemoveFromAccounts()
@@ -403,3 +432,6 @@ const fixPackages = async () => {
 // migrateQuotes()
 // migrateLeads()
 // migratePayments()
+
+
+
