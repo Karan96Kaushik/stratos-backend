@@ -280,6 +280,8 @@ const commonProcessor = (results) => {
 
 	results = results.map(val => ({
 		...val._doc, 
+		asOnDate: val._doc.asOnDate ? moment(new Date(val._doc.asOnDate)).format("DD-MM-YYYY") : '',
+		deadline: val._doc.deadline ? moment(new Date(val._doc.deadline)).format("DD-MM-YYYY") : '',
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		followupDate: val.followupDate ? moment(new Date(val.followupDate)).format("DD-MM-YYYY") : '-',
 		paymentDate: val.paymentDate ? moment(new Date(val.paymentDate)).format("DD-MM-YYYY") : '-',

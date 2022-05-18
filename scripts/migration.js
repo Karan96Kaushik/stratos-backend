@@ -265,6 +265,7 @@ const updateInvoices = async () => {
 }
 
 const removeTasks = async () => {
+	
 	let query = {
 		serviceType:"Litigation", 
 		__v:{$not:{$lte:0}}
@@ -277,6 +278,7 @@ const removeTasks = async () => {
 }
 
 const removeInvoices = async () => {
+
 	let query = {
 		__v: {$exists: false}
 	}

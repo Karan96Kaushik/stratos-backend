@@ -8,6 +8,7 @@ const statuses = [
     "Awaiting Accounts Confirmation",
 ] 
 
+// AR PR EX CO
 const statusSet1 = [
     "Completed", 
     "Desk 1", 
@@ -19,20 +20,35 @@ const statusSet1 = [
     "Certificate Generated"
 ]
 
+// F2A UP F1 F2 OT TC
 const statusSet2 = [
-    "For Certification",  "Completed" 
+    "Awaiting Client Confirmation",
+    "For Certification",  
+    "Completed", 
+    "Uploaded"
 ]
 
+// LT
 const statusSet3 = [
-    "Awaiting Hearing Date", "Hearing Date Schedule" 
+    "Awaiting Hearing Date", "Hearing Date Schedule", "Closed for order", "Order received"
 ]
 
+// LN
 const statusSet4 = [
-    "Notice Sent", "Period Completed", "Reply Received", "Completed" 
+    "Notice Sent", "Period Completed", "Reply Received", "Closed for order", "Order received", "Completed" 
 ]
 
+// RG
 const statusSet5 = [
     "Appointment Done", "Completed" 
+]
+
+// F5 F3
+const statusSet6 = [
+    "Awaiting Client Confirmation",
+    "For Certification",  
+    "Uploaded",
+    "Certified", 
 ]
 
 const actions = [
@@ -46,54 +62,55 @@ const actions = [
     "Query Solved"
 ]
 
+const caOptions = [
+    "",
+    "Rutuja Narsingh & Associates", 
+    "STP Associates" ,
+    "Gupta Lodha & Co",
+    "MDA Associates",
+    "Others",
+]
+
 let commonTextFields = [
-    {label:"Date", id: "createdTime"},
-    {label:"Task ID", id: "taskID"},
-    {label:"Client ID", id: "clientID"},
-    {label:"Client Name", id: "clientName"},
-    {label:"Promoter", id: "promoter"},
-    {label:"Members Assigned", id: "membersAssigned"},
-    {label:"Type", id: "serviceType"},
     {label:"Priority", id:"priority", options:["", "High", "Medium", "Low"]},
     {label:"Deadline", id:"deadline", type:"date"},
+    // {label:"Files", id:"files", type:"file", isHidden:true},
 ]
 
 let commonTextFieldsEnd = [
+    {label:"Bill Amount", id:"billAmount", type:"number", isHidden:true},
+    {label:"GST", id:"gst", type:"number", isHidden:true},
     {label:"Remarks", id:"remarks"},
     {label:"Notes", id:"notes"},
+    {label:"Payment Rating", id:"rating", type:"number", options: ['',1,2,3,4,4.5,5]},
+    {label:"Payment Date", id:"paymentDate", type:"date"},
+    {label:"FollowUp Date", id:"followupDate", type:"date"},
+    {label:"Files", id:"files", type:"file", isHidden:true},
+]
+
+let commonCheckboxFields = [
     {label:"Archived", id:"archived"},
+    {label:"Remove From Accounts", id:"removeFromAccounts"},
 ]
 
 let allStatuses = new Set([...statuses, ...statusSet1, ...statusSet2, ...statusSet3, ...statusSet4, ...statusSet5])
 
+//4. Fields - In services (form 1,2,3,5,2A, Updation , other technical) - In status , add last option as uploaded
+
 const taskFields = {
-    "all": {
-        texts: [
-            {label:"Date", id: "createdTime"},
-            {label:"Task ID", id: "taskID"},
-            {label:"Client ID", id: "clientID"},
-            {label:"Client Name", id: "clientName"},
-            {label:"Promoter", id: "promoter"},
-            {label:"Members Assigned", id: "membersAssigned"},
-            {label:"Type", id: "serviceType"},
-            {label:"Status", id: "status", options: allStatuses},
-            {label:"Priority", id:"priority", options: ["", "High", "Medium", "Low"]},
-            {label:"Deadline", id:"deadline", type:"date"},
-        ],
-        checkboxes: []
-    },
     "Agent Registration": {
         name:"Agent Registration",
         texts:[
             ...commonTextFields,
             {label:"Status", id:"status", options:[...statuses, ...statusSet1]},
-            // {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
+            {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
             {label:"Letterhead", id:"letterHead"},
             {label:"Receipt Format", id:"receiptFormat"},
             {label:"ITR", id:"itr"},
+            ...commonCheckboxFields
         ]
     },
     "Project Registration": {
@@ -101,8 +118,8 @@ const taskFields = {
         texts:[
             ...commonTextFields,
             {label:"Status", id:"status", options:[...statuses, ...statusSet1]},
-            // {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
-            // {label:"SRO Fees", id:"sroFees", type:"number", isHidden:true},
+            {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
+            {label:"SRO Fees", id:"sroFees", type:"number", isHidden:true},
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
@@ -112,6 +129,7 @@ const taskFields = {
             {label:"Agreement Draft", id:"agreementDraft"},
             {label:"Allotment Letter", id:"allotmentLetter"},
             {label:"SRO", id:"sro"},
+            ...commonCheckboxFields
         ]
     },
 
@@ -124,11 +142,12 @@ const taskFields = {
             {label:"To Be Extended Date", id:"extenstionDate", type:"date"},
             ...commonTextFields,
             {label:"Status", id:"status", options:[...statuses, ...statusSet1]},
-            // {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
-            // {label:"SRO Fees", id:"sroFees", type:"number", isHidden:true},
+            {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
+            {label:"SRO Fees", id:"sroFees", type:"number", isHidden:true},
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Correction": {
@@ -136,11 +155,13 @@ const taskFields = {
         texts:[
             {label:"Correction Details", id:"correctionDetails"},
             {label:"Status", id:"status", options:[...statuses, ...statusSet1]},
+            {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
             ...commonTextFields,
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
             {label:"Consent Required", id:"consentReq"},
+            ...commonCheckboxFields
         ]
     },
     "Form 5 - Audit": {
@@ -148,12 +169,13 @@ const taskFields = {
         texts:[
             {label:"Date of Certification", id:"dateOfCert", type:"date"},
             {label:"Period", id:"period", isRequired:true},
-            {label:"CA Assigned", id:"ca"},
-            {label:"Status", id:"status", options:[...statuses, ...statusSet2]},
+            {label:"CA Assigned", id:"ca", options: caOptions},
+            {label:"Status", id:"status", options:[...statuses, ...statusSet6]},
             ...commonTextFields,
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Form 2A": {
@@ -167,6 +189,7 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Updation": {
@@ -174,7 +197,7 @@ const taskFields = {
         texts:[
             {label:"Work Status", id:"workStatus"},
             {label:"Booked Flats", id:"bookedFlats", type:"number"},
-            {label:"Chabges to be Made", id:"changesReq"},
+            {label:"Changes to be Made", id:"changesReq"},
             {label:"Documents to be Uploaded", id:"docsReq"},
             {label:"As On Date", id:"asOnDate", type:"date", isRequired:true},
             {label:"Date of Certification", id:"dateOfCert", type:"date"},
@@ -183,6 +206,7 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Form 1": {
@@ -196,6 +220,7 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Form 2": {
@@ -209,19 +234,21 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Form 3": {
         name:"Form 3",
         texts:[
-            {label:"CA Assigned", id:"ca"},
+            {label:"CA Assigned", id:"ca", options: caOptions},
             {label:"As On Date", id:"asOnDate", type:"date", isRequired:true},
             {label:"Date of Certification", id:"dateOfCert", type:"date"},
-            {label:"Status", id:"status", options:[...statuses, ...statusSet2]},
+            {label:"Status", id:"status", options:[...statuses, ...statusSet6]},
             ...commonTextFields,
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Others - Tech": {
@@ -232,8 +259,12 @@ const taskFields = {
             {label:"Status", id:"status", options:[...statuses, ...statusSet2]},
             ...commonTextFields,
             ...commonTextFieldsEnd
+            // {label:"Bill Amount", id:"billAmount", type:"number", isHidden:true},
+            // {label:"GST", id:"gst", type:"number", isHidden:true},
+            // {label:"Files", id:"files", type:"file", isHidden:true},
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
 
@@ -255,6 +286,7 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Agreement for Sale Draft": {
@@ -269,6 +301,7 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Litigation": {
@@ -283,15 +316,16 @@ const taskFields = {
             {label:"Project Name", id:"projectName"},
             {label:"RERA Number", id:"reraNumber"},
             {label:"Complaint Number", id:"complaint"},
-            {label:"Hearing Date", id:"hearingDate", type:"date"},
+            {label:"Hearing Date", id:"hearingDate"},
             {label:"Package Description", id:"packageDesc"},
             {label:"Manhours", id:"manhours"},
-            {label:"Status", id:"status"},
             {label:"Result", id:"result"},
+            {label:"Status", id:"status", options:[...statuses, ...statusSet3]},
             ...commonTextFields,
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Hourly Package": {
@@ -301,11 +335,10 @@ const taskFields = {
             {label:"Utilised Hours", id:"utilisedHours", type:"number"},
             {label:"Task Done", id:"task"},
             {label:"Summary", id:"summary"},
-            // {label:"Bill Amount", id:"billAmount", type:"number"},
-            // {label:"GST", id:"gst", type:"number"},,
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Legal Notice": {
@@ -317,13 +350,13 @@ const taskFields = {
             {label:"RERA Number", id:"reraNumber"},
             {label:"Case Brief", id:"caseBrief"},
             {label:"Dispatch Date", id:"dispatchDate", type:"date"},
-            {label:"Status", id:"status"},
-            {label:"Reply Status", id:"replyStatus"},
             {label:"Manhours", id:"manhours"},
+            {label:"Reply Status", id:"replyStatus"},
             {label:"Status", id:"status", options:[...statuses, ...statusSet4]},
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Registration": {
@@ -347,6 +380,7 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Drafting of Documents": {
@@ -360,6 +394,7 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
     "Others - Legal": {
@@ -374,6 +409,7 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
         ]
     },
 }

@@ -117,6 +117,10 @@ const updatePackage = async (package) => {
 	}
 
 	let checkDate = new Date
+
+	if (package.endDate)
+		checkDate = new Date(package.endDate)
+
 	// Adding 12 hours to compensate for server time in GMT
 	checkDate = new Date(+checkDate + (12 * 60 * 60 * 1000))
 
@@ -202,6 +206,8 @@ const formatDates = p => {
 	p.createdTime = moment(new Date(p.createdTime)).format("DD-MM-YYYY")
 	if (p.startDate)
 		p.startDate = moment(new Date(p.startDate)).format("DD-MM-YYYY")
+	if (p.endDate)
+		p.endDate = moment(new Date(p.endDate)).format("DD-MM-YYYY")
 	if (p.followupDate)
 		p.followupDate = moment(new Date(p.followupDate)).format("DD-MM-YYYY")
 	if (p.paymentDate)
