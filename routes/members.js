@@ -130,6 +130,7 @@ router.get("/api/members/list", async (req, res) => {
 		members = members.map((val) => ({
 			_id: val._id,
 			memberID: val.memberID,
+			department: val.department,
 			userName: val.userName,
 		}))
 
