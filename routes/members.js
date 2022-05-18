@@ -15,6 +15,7 @@ const {
 	getFilePath
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
+const client = require('../scripts/redisClient')
 
 const tmpdir = "/tmp/"
 
@@ -232,6 +233,15 @@ router.post("/api/members/update", checkW, async (req, res) => {
 			req.body.password = crypto.createHmac('sha256', "someSalt")
 				.update(req.body.password)
 				.digest('hex')
+
+			try {
+				let allSessions = await client.HGETALL(String(_id))
+				await Promise.allSettled(Object.keys(allSessions).map(s => client.HDEL(String(_id), String(s))))
+			}
+			catch (err) {
+				console.error(err)
+			}
+
 		} else {
 			delete req.body.password
 		}
