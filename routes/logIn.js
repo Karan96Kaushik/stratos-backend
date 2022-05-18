@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const {Members} = require("../models/Members");
 const {generate, decode} = require("../modules/auth");
 const {encodeAuth, decodeAuth} = require("../modules/authCodec");
+const client = require('../scripts/redisClient')
 
 router.post('/api/login', async (req, res) => {
 	try{
@@ -29,6 +30,7 @@ router.post('/api/login', async (req, res) => {
 			let token = generate(tokenObj)
 
 			user = user._doc
+			await client.hSet(String(user._id), String(token), String(true))
 
 			delete user.password
 			delete user.createdTime

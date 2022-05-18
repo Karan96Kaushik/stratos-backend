@@ -1,12 +1,20 @@
 const jwt = require('jsonwebtoken')
 const {encodeAuth, decodeAuth} = require("./authCodec")
+const client = require('../scripts/redisClient')
 
 const auth = (req, res, next) => {
 	const token = req.headers["x-authentication"]
 	if(token) {
-		jwt.verify(token, process.env.authSecretTms || 'authSecretTms', function(err, decoded) {
+		jwt.verify(token, process.env.authSecretTms || 'authSecretTms', async function(err, decoded) {
 			// console.log(decoded)
 			if(!err && decoded.exp*1000 > +new Date) {
+				// console.log(String(decoded.id), String(token))
+				let isValid = await client.hGet(String(decoded.id), String(token))
+
+				if (isValid != "true") {
+					return res.status(401).json({message:"Invalid Session"})
+				}
+
 				req.user = decoded
 				req.permissions = decodeAuth({
 					page: decoded.perm[0],
