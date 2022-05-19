@@ -12,6 +12,7 @@ const auth = (req, res, next) => {
 				let isValid = await client.hGet(String(decoded.id), String(token))
 
 				if (isValid != "true") {
+					console.error(String(decoded.id), String(token))
 					return res.status(401).json({message:"Session Expired - logout and login again"})
 				}
 
