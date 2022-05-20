@@ -30,6 +30,7 @@ router.post('/api/login', async (req, res) => {
 			let token = generate(tokenObj)
 
 			user = user._doc
+			console.log("SAVING", String(user._id), String(token), String(true))
 			await client.hSet(String(user._id), String(token), String(true))
 
 			delete user.password
