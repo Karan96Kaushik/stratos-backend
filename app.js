@@ -3,6 +3,7 @@ const session = require('express-session')
 const app     = express()
 const bodyParser = require('body-parser')
 const timings = require('server-timings')
+const morgan = require('morgan')
 // const passport = require('passport')
 
 const routes  = require('./routes');
@@ -24,6 +25,7 @@ app.use(bodyParser.urlencoded({limit: "25mb",extended: false}));
 
 // app.use(session({ secret: "cats" }));
 
+app.use(morgan('dev'));
 app.use(timings);
 
 app.get('/api/ping', (req, res) => {

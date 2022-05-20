@@ -7,6 +7,7 @@ const {
 const {generate, decode} = require("../modules/auth");
 const {Members} = require("../models/Members");
 const {encodeAuth, decodeAuth} = require("../modules/authCodec");
+const client = require('../scripts/redisClient')
 
 router.post("/api/files", async (req, res) => {
 	try {
@@ -32,6 +33,8 @@ router.post('/api/refresh', async (req, res) => {
 				]})
 			
 			user = user._doc
+			console.log("SAVING R", String(user._id), String(token), String(true))
+			await client.hSet(String(user._id), String(token), String(true))
 
 			delete user.password
 			delete user.createdTime
