@@ -98,6 +98,19 @@ let allStatuses = new Set([...statuses, ...statusSet1, ...statusSet2, ...statusS
 //4. Fields - In services (form 1,2,3,5,2A, Updation , other technical) - In status , add last option as uploaded
 
 const taskFields = {
+    "all": {
+        texts: [ 
+            {label:"Date", id: "createdTime"},
+            {label:"Task ID", id: "taskID"},
+            {label:"Client ID", id: "clientID"},
+            {label:"Client Name", id: "clientName"},
+            {label:"Promoter", id: "promoter"},
+            {label:"Members Assigned", id: "membersAssigned"},
+            {label:"Type", id: "serviceType"},
+            {label:"Status", id: "status", options: allStatuses},
+        ],
+        checkboxes: []
+    },
     "Agent Registration": {
         name:"Agent Registration",
         texts:[
@@ -415,6 +428,26 @@ const taskFields = {
 }
 
 const allTasks = Object.keys(taskFields)
+
+const keyDict = {}
+
+allTasks.forEach(task => {
+    if (task == "all")
+        return 
+    taskFields[task].texts.forEach(field => {
+        if (keyDict[field.id]) 
+            return
+        keyDict[field.id] = true
+        taskFields.all.texts.push(field)
+    })
+
+    taskFields[task]?.checkboxes?.forEach(field => {
+        if (keyDict[field.id]) 
+            return
+        keyDict[field.id] = true
+        taskFields.all.checkboxes?.push(field)
+    })
+})
 
 let taskPayments = {
     "all":{
