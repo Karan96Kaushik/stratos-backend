@@ -1,15 +1,6 @@
-module.exports = {
+const clientFields = {
     all: {
         texts: [
-            {label:"Date Added", id:"createdTime"},
-            {label:"Name", id:"name"},
-            {label:"Client Type", id:"clientType", isRequired:true},
-            {label:"Client ID", id:"clientID", isRequired:true},
-            {label:"UserID", id:"userID"},
-            {label:"Password", id:"password"},
-            {label:"Mobile", id:"mobile"},
-            {label:"Email", id:"email"},
-            {label:"Remarks", id:"remarks"},
         ],
         checkboxes: []
     },
@@ -87,3 +78,26 @@ module.exports = {
         ]
     }
 }
+
+const keyDict = {}
+
+Object.keys(clientFields).forEach(client => {
+    if (client == "all")
+        return 
+    clientFields[client].texts.forEach(field => {
+        if (keyDict[field.id]) 
+            return
+        keyDict[field.id] = true
+        clientFields.all.texts.push(field)
+    })
+
+    clientFields[client]?.checkboxes?.forEach(field => {
+        if (keyDict[field.id]) 
+            return
+        keyDict[field.id] = true
+        clientFields.all.checkboxes?.push(field)
+    })
+})
+
+
+module.exports = clientFields
