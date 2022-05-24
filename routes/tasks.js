@@ -75,6 +75,11 @@ const checkW = (req, res, next) => {
 }
 
 const checkTaskPermission = (req, taskType) => {
+	if (Array.isArray(taskType)) {
+		taskType = taskType.filter(s => !['Legal', 'Technical'].includes(s))
+		// console.log(taskType.find(s => !req.permissions.service.includes(s)))
+		return !taskType.find(s => !req.permissions.service.includes(s))
+	}
 	return req.permissions.service.includes(taskType)
 }
 
