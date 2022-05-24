@@ -291,6 +291,22 @@ const commonProcessor = (results) => {
 		sroFees: undefined
 	}))
 
+	// Confirmation Date duration color coding
+	results = results.map(val => {
+		if (!val.confirmationDate) return val
+
+		let confirmationDateColor = +new Date(val.confirmationDate) - +new Date()
+
+		if(confirmationDateColor > 1000*60*60*24*14) 	// 14 days passed
+			confirmationDateColor = 2
+		else if(confirmationDateColor > 1000*60*60*24*7) 	// 7 days passed
+			confirmationDateColor = 1
+		else 											// more than 3 days
+			confirmationDateColor = 0
+
+		return ({...val, confirmationDateColor})
+	})
+
 	return results
 
 }
