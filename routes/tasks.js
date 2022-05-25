@@ -305,9 +305,9 @@ const commonProcessor = (results) => {
 		if(confirmationDateColor > 1000*60*60*24*14) 	// 14 days passed
 			confirmationDateColor = 2
 		else if(confirmationDateColor > 1000*60*60*24*7) 	// 7 days passed
-			confirmationDateColor = 1
+			confirmationDateColor = 1 					// Yellow
 		else 											// more than 3 days
-			confirmationDateColor = 0
+			confirmationDateColor = null
 
 		return ({...val, confirmationDateColor})
 	})
