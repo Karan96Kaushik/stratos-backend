@@ -465,6 +465,11 @@ const generateQueryPayments = async (req) => {
 			})	
 		}
 	})
+	if(!req.query.searchAll && req.query.serviceType?.length) {
+		query['$and'].push({
+			serviceType: req.query.serviceType
+		})
+	}
 
 	query.$and.push({ removeFromAccounts: false })
 
