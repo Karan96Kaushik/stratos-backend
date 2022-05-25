@@ -33,8 +33,8 @@ const auth = (req, res, next) => {
 	}
 }
 
-const generate = (data) => {
-	return jwt.sign(data, process.env.authSecretTms || 'authSecretTms', { expiresIn: 30 * 24 * 60 * 60 });
+const generate = (data, expiry = 30 * 24 * 60 * 60) => {
+	return jwt.sign(data, process.env.authSecretTms || 'authSecretTms', { expiresIn: expiry });
 }
 
 const decode = (token) => {

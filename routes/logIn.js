@@ -16,6 +16,17 @@ router.post('/api/login', async (req, res) => {
 		let user = await Members.findOne(req.body.creds)
 
 		if(user) {
+
+			let expiry = 30*24*60*60	// 1 month
+
+			if (user.endDate) {
+				if (+new Date(user.endDate) < +new Date)
+					return res.status(401).send("Login expired, please contact admin")
+				
+				if ((+new Date(user.endDate) - +new Date) < expiry*1000)
+					expiry = Math.round((+new Date(user.endDate) - +new Date) / 1000)		
+			}
+
 			const tokenObj = {
 				id:user._id, 
 				perm:[
@@ -27,7 +38,7 @@ router.post('/api/login', async (req, res) => {
 			if (!!user._doc.isAdmin)
 				tokenObj.admin = 1
 			
-			let token = generate(tokenObj)
+			let token = generate(tokenObj, expiry)
 
 			user = user._doc
 			console.log("SAVING", String(user._id), String(token), String(true))
