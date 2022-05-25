@@ -1,5 +1,6 @@
 const fs = require('fs');
 const crypto = require("crypto");
+const moment = require("moment");
 const mongoose = require("mongoose");
 const router     = new (require('express')).Router()
 
@@ -112,7 +113,11 @@ router.get("/api/members/search", checkR, async (req, res) => {
 			const perms = Object.assign({}, decodeAuth(val.permissions))
 
 			val._doc.permissions = decodeAuth(val.permissions)
-			return val._doc
+			val = val._doc
+			val.startDate = moment(new Date(val.startDate)).format("DD-MM-YYYY")
+			val.endDate = moment(new Date(val.endDate)).format("DD-MM-YYYY")
+
+			return val
 		})
 
 		res.json(members)
@@ -188,6 +193,8 @@ router.get("/api/members/", async (req, res) => {
 		const perms = Object.assign({}, decodeAuth(members.permissions))
 
 		members.permissions = decodeAuth(members.permissions)
+		members.endDate = moment(new Date(members.endDate)).format("YYYY-MM-DD")
+		members.startDate = moment(new Date(members.startDate)).format("YYYY-MM-DD")
 
 		let files = await getAllFiles(members.memberID + "/")
 

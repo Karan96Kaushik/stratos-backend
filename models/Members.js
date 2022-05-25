@@ -14,8 +14,8 @@ let Members = new Schema(
     address:String,
     emergencyContact:String,
     bloodGroup:String,
-    startDate:String,
-    endDate:String,
+    startDate:Date,
+    endDate:Date,
 
     password:String,
 
