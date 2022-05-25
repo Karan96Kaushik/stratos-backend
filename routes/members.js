@@ -128,6 +128,7 @@ router.get("/api/members/list", async (req, res) => {
 	try {
 		let members = await Members.find({...req.query});
 
+		members = members.filter((val) => (val.endDate ? +new Date(val.endDate) > +new Date : true))
 		members = members.map((val) => ({
 			_id: val._id,
 			memberID: val.memberID,
