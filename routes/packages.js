@@ -114,7 +114,18 @@ const generateQuery = (req) => {
 		}
 	})
 
-	// console.log(JSON.stringify(query, null, 4))
+	if (!req.permissions.isAdmin) {
+		if(
+			(req.query.services && !req.permissions.page.includes('Packages Services R')) || 
+			(req.query.details && !req.permissions.page.includes('Packages R'))
+		)
+			query['$and'].push({
+				$or:[
+					{addedBy: req.user.id},
+					{_rmAssigned: req.user.id},
+				]
+			})
+	}
 
 	return query
 }
@@ -172,11 +183,11 @@ router.post("/api/packages/search", async (req, res) => {
 		const page = parseInt(req.query.page)-1
 
 		if (!req.permissions.isAdmin) {
-			if(req.query.services && !req.permissions.page.includes('Packages Services R'))
-				return res.status(401).send('Unauthorized to view services')
-			else if(req.query.details && !req.permissions.page.includes('Packages R'))
-				return res.status(401).send('Unauthorized to view details')
-			else if(req.query.accounts && !req.permissions.page.includes('Packages Accounts R'))
+			// if(req.query.services && !req.permissions.page.includes('Packages Services R'))
+			// 	return res.status(401).send('Unauthorized to view services')
+			// else if(req.query.details && !req.permissions.page.includes('Packages R'))
+			// 	return res.status(401).send('Unauthorized to view details')
+			if(req.query.accounts && !req.permissions.page.includes('Packages Accounts R'))
 				return res.status(401).send('Unauthorized to view accounts')
 		}
 
