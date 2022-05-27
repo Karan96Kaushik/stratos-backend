@@ -115,7 +115,7 @@ router.get("/api/members/search", checkR, async (req, res) => {
 			val._doc.permissions = decodeAuth(val.permissions)
 			val = val._doc
 			val.startDate = moment(new Date(val.startDate)).format("DD-MM-YYYY")
-			val.endDate = moment(new Date(val.endDate)).format("DD-MM-YYYY")
+			val.endDate = val.endDate ? moment(new Date(val.endDate)).format("DD-MM-YYYY") : ''
 
 			return val
 		})
@@ -193,7 +193,8 @@ router.get("/api/members/", async (req, res) => {
 		const perms = Object.assign({}, decodeAuth(members.permissions))
 
 		members.permissions = decodeAuth(members.permissions)
-		members.endDate = moment(new Date(members.endDate)).format("YYYY-MM-DD")
+		if (members.endDate)
+			members.endDate = moment(new Date(members.endDate)).format("YYYY-MM-DD")
 		members.startDate = moment(new Date(members.startDate)).format("YYYY-MM-DD")
 
 		let files = await getAllFiles(members.memberID + "/")
