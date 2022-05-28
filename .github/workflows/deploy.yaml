@@ -1,15 +1,20 @@
 name: Prod CD
+
 on:
   push:
     branches:
       - main
+
 jobs:
   build:
+
     name: Build
     runs-on: ubuntu-latest
     steps:
+
     - name: Get color
       run: echo "The selected color is ${{ secrets.TMS_HOST }}"
+
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
       with:
@@ -17,3 +22,6 @@ jobs:
         username: ${{ secrets.TMS_USER }}
         key: ${{ secrets.TMS_EC2_KEY }}
         port: ${{ secrets.TMS_SSH_PORT }}
+        script: |
+          whoami
+          ls -al
