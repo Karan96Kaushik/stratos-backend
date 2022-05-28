@@ -26,4 +26,5 @@ jobs:
           source ~/.zshrc 
           cd ~/TMSBackend/ 
           pm2 restart tms --update-env 
-          pm2 log --nostream
+          sleep 3
+          pm2 log tms --nostream
