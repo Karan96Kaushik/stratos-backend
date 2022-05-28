@@ -23,5 +23,7 @@ jobs:
         key: ${{ secrets.TMS_EC2_KEY }}
         port: ${{ secrets.TMS_SSH_PORT }}
         script: |
-          whoami
-          ls -al
+          source ~/.zshrc 
+          cd ~/TMSBackend/ 
+          pm2 restart tms --update-env 
+          pm2 log --nostream
