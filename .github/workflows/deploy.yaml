@@ -6,22 +6,15 @@ on:
       - main
 
 jobs:
+
   build:
-
+    name: Build
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [12.x]
-
     steps:
-     - name: SSH Remote Commands
-      uses: appleboy/ssh-action@v0.1.4
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.TMS_HOST }}
         username: ${{ secrets.TMS_USER }}
         key: ${{ secrets.TMS_EC2_KEY }}
         port: 22
-      script: |
-        whoami
-        ls -al
