@@ -11,6 +11,7 @@ const {Tasks} = require("../models/Tasks");
 const {Invoices} = require("../models/Invoices");
 const {Quotations} = require("../models/Quotations");
 const {Packages} = require("../models/Packages");
+const {handlePayment} = require("../modules/paymentHelpers");
 
 const migrateTaskPromoter = async () => {
 
@@ -300,7 +301,7 @@ const fixTasks = async () => {
 			console.log("no payments", task.taskID, task.totalAmount, task.balanceAmount)
 			newBalance = task.totalAmount
 		} 
-		else if (!payments.length && task.receivedAmount == 0) {
+		else if (!payments.length && task.receivedAmount == 0 && !isNaN(task.balanceAmount)) {
 			continue
 		}
 		else {
@@ -309,12 +310,11 @@ const fixTasks = async () => {
 				console.log(payments)
 			if (totalPayments != (task.totalAmount - task.balanceAmount)) {
 				console.log("uneq pmt", task.taskID, totalPayments, task.totalAmount - task.balanceAmount)
-				newBalance = task.totalAmount - totalPayments
+				newBalance = (task.totalAmount || 0) - (totalPayments || 0)
 			} else {
 				continue
 			}
 		}
-		console.log(task.totalAmount, newBalance)
 
 		let _ = await Tasks.updateOne(
 			{_id: String(task._id)}, 
@@ -323,6 +323,9 @@ const fixTasks = async () => {
 				receivedAmount: totalPayments
 			}
 		)
+
+		await handlePayment(task)
+		console.log(task.taskID)
 
 	}
 
@@ -455,14 +458,14 @@ const checkIdDuplicates = async () => {
 
 
 // checkIdDuplicates()
-test();
+// test();
 
 // Add remove from accounts property
 // 	migrateTasksRemoveFromAccounts()
 
 // Fix tasks and packages balance amount denormalisation
 // fixPackages()
-// fixTasks()
+fixTasks()
 // fixPayments()
 
 // Restructure invoices to handle array of items
