@@ -16,6 +16,8 @@ let Payments = new Schema(
 
     remarks:String,
 
+    receivedAmount:Schema.Types.Mixed,
+
     addedBy: {
       required:true,
       type:mongoose.Schema.Types.ObjectId

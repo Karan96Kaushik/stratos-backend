@@ -45,7 +45,6 @@ const migrateTaskPromoter = async () => {
 	}
 
 	console.log("Done")
-
 }
 
 const migrateQuotes = async () => {
@@ -80,7 +79,6 @@ const migrateQuotes = async () => {
 	}
 
 	console.log("Done")
-
 }
 
 const migrateLeads = async () => {
@@ -105,7 +103,6 @@ const migrateLeads = async () => {
 	}
 
 	console.log("Done")
-
 }
 
 const migratePayments = async () => {
@@ -135,7 +132,6 @@ const migratePayments = async () => {
 	}
 
 	console.log("Done")
-
 }
 
 const calculateTotal = (val) => (
@@ -156,24 +152,23 @@ const migrateTasksReceivedAmount = async () => {
 		
 		if(task.receivedAmount || task.balanceAmount)
 			continue
-		// console.log(task.taskID)
+		console.log(task.taskID)
 
 		let amount = calculateTotal(task)
 
-		let _ = await Tasks.updateOne(
-			{_id: String(task._id)}, 
-			{
-				receivedAmount: 0,
-				totalAmount: amount,
-				balanceAmount: amount,
-			}
-		)
-		console.log(_)
+		// let _ = await Tasks.updateOne(
+		// 	{_id: String(task._id)}, 
+		// 	{
+		// 		receivedAmount: 0,
+		// 		totalAmount: amount,
+		// 		balanceAmount: amount,
+		// 	}
+		// )
+		console.log(amount)
 
 	}
 
 	console.log("Done")
-
 }
 
 const migrateTasksArchived = async () => {
@@ -233,7 +228,6 @@ const migrateClientAmounts = async () => {
 	}
 
 	console.log("Done")
-
 }
 
 const updateInvoices = async () => {
@@ -261,7 +255,6 @@ const updateInvoices = async () => {
 	}
 
 	console.log("Done")
-
 }
 
 const removeTasks = async () => {
@@ -274,7 +267,6 @@ const removeTasks = async () => {
 	let _ = await Tasks.deleteMany(query)
 
 	console.log(_)
-
 }
 
 const removeInvoices = async () => {
@@ -286,7 +278,6 @@ const removeInvoices = async () => {
 	let _ = await Invoices.deleteMany(query)
 
 	console.log(_)
-
 }
 
 const fixTasks = async () => {
@@ -302,17 +293,18 @@ const fixTasks = async () => {
 			console.log(task)
 
 		let newBalance = 0
+		let totalPayments = 0
 
 		let payments = await Payments.find({taskID: task.taskID})
 		if(!payments.length && task.totalAmount > task.balanceAmount) {
 			console.log("no payments", task.taskID, task.totalAmount, task.balanceAmount)
 			newBalance = task.totalAmount
 		} 
-		else if (!payments.length) {
+		else if (!payments.length && task.receivedAmount == 0) {
 			continue
 		}
 		else {
-			let totalPayments = payments.map(v => v._doc).reduce((prev,curr) => Number(curr.receivedAmount)+prev,0)
+			totalPayments = payments.map(v => v._doc).reduce((prev,curr) => Number(curr.receivedAmount)+prev,0)
 			if(typeof totalPayments == 'string')
 				console.log(payments)
 			if (totalPayments != (task.totalAmount - task.balanceAmount)) {
@@ -323,19 +315,44 @@ const fixTasks = async () => {
 			}
 		}
 		console.log(task.totalAmount, newBalance)
-		// let _ = await Tasks.updateOne(
-		// 	{_id: String(task._id)}, 
+
+		let _ = await Tasks.updateOne(
+			{_id: String(task._id)}, 
+			{
+				balanceAmount: newBalance,
+				receivedAmount: totalPayments
+			}
+		)
+
+	}
+
+	console.log("Done")
+}
+
+// Fix Payments datatype
+const fixPayments = async () => {
+
+	let allPayments = await Payments.find()
+
+	console.log(allPayments.length)
+
+	for (payment of allPayments) {
+
+		payment = payment._doc
+
+		console.log(payment.receivedAmount)
+
+		// let _ = await Payments.updateOne(
+		// 	{_id: String(payment._id)}, 
 		// 	{
-		// 		balanceAmount: newBalance
+		// 		receivedAmount: Number(payment.receivedAmount)
 		// 	}
 		// )
 
 	}
 
 	console.log("Done")
-
 }
-
 
 const fixPackages = async () => {
 
@@ -381,12 +398,14 @@ const fixPackages = async () => {
 	}
 
 	console.log("Done")
-
 }
 
 const test = async () => {
 
 	console.time("JKSHAJKHS")
+
+	// SELECT * FROM Clients
+	// INNER JOIN Tasks On Clinets._id = Tasks._clientID;
 
 	let data = await Clients.aggregate(
 		[
@@ -402,24 +421,49 @@ const test = async () => {
 			{ $project: { 
 					clientID: 1,
 					totalAmount: 1,
-					Total: {$sum: "$Tasks.totalAmount"}
+					Total: { $sum: "$Tasks.totalAmount" }
 				}
 			},
 		])
 
-	console.timeEnd("JKSHAJKHS")
+	console.log(data)
 
+	console.timeEnd("JKSHAJKHS")
 }
 
-// Test Aggregation queries
-// test()
+const checkIdDuplicates = async () => {
+
+	console.time("JKSHAJKHS")
+
+	let data = await Payments.aggregate(
+		[
+			{
+				$group: {
+					_id: '$taskID',
+					count: { $count: { } },
+				}
+			},
+		    {
+		       $match: { "count": { $gt: 1 } }
+		    }
+		])
+
+	console.log(data)
+
+	console.timeEnd("JKSHAJKHS")
+}
+
+
+// checkIdDuplicates()
+test();
 
 // Add remove from accounts property
 // 	migrateTasksRemoveFromAccounts()
 
 // Fix tasks and packages balance amount denormalisation
-// 	fixPackages()
-// 	fixTasks()
+// fixPackages()
+// fixTasks()
+// fixPayments()
 
 // Restructure invoices to handle array of items
 // 	updateInvoices()

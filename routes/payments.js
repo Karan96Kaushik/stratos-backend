@@ -1,7 +1,7 @@
 const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
-const {Payments} = require("../models/Payments");Payments
+const {Payments} = require("../models/Payments");
 const {Members} = require("../models/Members");
 const {Tasks} = require("../models/Tasks");
 const {Clients} = require("../models/Clients");
@@ -16,6 +16,7 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
+const {handlePayment} = require("../modules/paymentHelpers")
 
 // Route to add payemnts for tasks and packages
 router.post("/api/payments/add", async (req, res) => {
@@ -29,14 +30,15 @@ router.post("/api/payments/add", async (req, res) => {
 		return
 	}
 
-	await handlePayment(req.body, null)
-
     let paymentID = "AC" + await getID("account")
 	let _ = await Payments.create({
 		...req.body,
 		paymentID,
 		addedBy: req.user.id
 	});
+
+	await handlePayment(req.body, null)
+
 	_ = await updateID("account")
 
 	if(req.body.docs?.length) {
@@ -200,9 +202,13 @@ router.delete("/api/payments/", async (req, res) => {
 		let _
 		const _id = req.query._id
 
-		await handlePayment(req.query, _id, true)
+		let paymentInfo = await Payments.findOne({_id});
+		if (!paymentInfo)
+			throw new Error("Original payment corrupted")
 
 		await Payments.deleteOne({_id});
+
+		await handlePayment(paymentInfo._doc)
 
 		res.send("OK")
 	} catch (err) {
@@ -226,69 +232,6 @@ const calculateTotal = (val) => (
 	Number(val.sroFees ?? 0)
 )
 
-// manages denormalised balance/received amount in Clients/Tasks
-const handlePayment = async (body, originalPaymentId, isDelete=false) => {
-	let originalPayment, 
-		_, 
-		paymentAmount = 0,
-		task,
-		client,
-		package
-		
-	if(originalPaymentId) {
-		originalPayment = await Payments.findOne({_id: originalPaymentId});
-		originalPayment = originalPayment._doc
-
-		body.packageID = originalPayment.packageID
-		body._packageID = originalPayment._packageID
-		body._taskID = originalPayment._taskID
-		body._clientID = originalPayment._clientID
-	}
-
-	if(isDelete)
-		paymentAmount = - Number(originalPayment?.receivedAmount || 0) 
-	else
-		paymentAmount = ((Number(body.receivedAmount) || 0)) - Number(originalPayment?.receivedAmount || 0) 
-
-	client = await Clients.findOne({_id: body._clientID})
-	if(!client)
-		throw new Error("Linked client not found - contact admin")
-	client = client?._doc
-
-	if (body.taskID) {
-		task = await Tasks.findOne({_id: body._taskID})
-		if(!task)
-			throw new Error("Linked task not found - contact admin")
-
-		task = task?._doc
-		let totalAmount = calculateTotal(task)
-
-		_ = await Tasks.updateOne({
-			_id: body._taskID}, 
-			{
-				receivedAmount: paymentAmount + (Number(task.receivedAmount || 0)),
-				balanceAmount: totalAmount - (paymentAmount + (Number(task.receivedAmount || 0)))
-			})
-
-	} else if (body.packageID) {
-		package = await Packages.findOne({_id: body._packageID})
-		if(!package)
-			throw new Error("Linked package not found - contact admin")
-
-		package = package?._doc
-
-		_ = await Packages.updateOne({
-			_id: body._packageID}, 
-			{
-				receivedAmount: paymentAmount + (Number(package.receivedAmount || 0)),
-				balanceAmount: package.due - (paymentAmount + (Number(package.receivedAmount || 0)))
-			})
-	}
-
-	_ = await Clients.updateOne({_id: body._clientID}, {receivedAmount: paymentAmount + (Number(client.receivedAmount) || 0)})
-
-}
-
 router.post("/api/payments/update", async (req, res) => {
 	try {
 
@@ -303,8 +246,6 @@ router.post("/api/payments/update", async (req, res) => {
 		delete req.body.memberID
 		delete req.body.addedBy
 
-		await handlePayment(req.body, _id)
-
 		_ = await Payments.updateOne(
 			{
 				_id
@@ -312,6 +253,8 @@ router.post("/api/payments/update", async (req, res) => {
 			{
 				...req.body
 			});
+		
+		await handlePayment(req.body, _id)
 
 		if(req.body.docs?.length) {
 			let files = await saveFilesToLocal(req.body.docs)

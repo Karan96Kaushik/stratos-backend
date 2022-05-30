@@ -326,11 +326,11 @@ const commonPaymentsProcessor = async (results) => {
 	}))
 	results = results.map(val => ({
 		...val, 
-		totalAmount: val.tasks.reduce((tot, curr) => Number(curr.totalAmount) + tot,0),
-		receivedAmount: val.payments.reduce((tot, curr) => Number(curr.receivedAmount) + tot,0),
+		// totalAmount: val.tasks.reduce((tot, curr) => Number(curr.totalAmount) + tot,0),
+		// receivedAmount: val.payments.reduce((tot, curr) => Number(curr.receivedAmount) + tot,0),
 		taskList: val.tasks.map(v => v.taskID).join(", "),
 	}))
-	results = results.map(val => ({...val, balanceAmount: Number(val.totalAmount) - Number(val.receivedAmount)}))
+	// results = results.map(val => ({...val, balanceAmount: Number(val.totalAmount) - Number(val.receivedAmount)}))
 	return results
 }
 

@@ -7,6 +7,7 @@ const {getID, updateID} = require("../models/Utils");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const {generateExcel} = require("../modules/excelProcessor");
 const {taskFields, taskPayments} = require("../statics/taskFields");
+const {handlePayment, calculateTotal} = require("../modules/paymentHelpers");
 const fs = require("fs");
 const {
 	getAllFiles,
@@ -384,13 +385,6 @@ router.post("/api/tasks/export", async (req, res) => {
 	}
 })
 
-const calculateTotal = (val) => (
-	Number(val.billAmount ?? 0) +
-	Number(val.gst ?? 0) +
-	Number(val.govtFees ?? 0) +
-	Number(val.sroFees ?? 0)
-)
-
 const generateQueryPayments = async (req) => {
 
 	let query = {$and : []}
@@ -670,6 +664,10 @@ router.post("/api/tasks/update", async (req, res) => {
 			let files = await saveFilesToLocal(req.body.docs)
 			await uploadFiles(files, taskID)
 		}
+		
+		// console.log(task)
+		await handlePayment(task)
+
 		res.send("OK")
 	} catch (err) {
 		console.error(err)

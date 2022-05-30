@@ -12,6 +12,7 @@ const {
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 const { serviceMapping, updatePackage, lastUpdatedMapping, mapFlags, formatDates } = require('../modules/packageHelpers');
+const { handlePayment, updateClient } = require('../modules/paymentHelpers');
 const { packageFields } = require('../statics/packageFields');
 
 router.post("/api/packages/add", async (req, res) => {
@@ -30,6 +31,8 @@ router.post("/api/packages/add", async (req, res) => {
 	let _ = await updateID("package")
 
 	await updatePackage(package)
+
+	await updateClient(package.clientID)
 
 	if(req.body.docs?.length) {
 		let files = await saveFilesToLocal(req.body.docs)
@@ -159,6 +162,14 @@ const mapPayments = async (results) => {
 		packageID: {$in: packageIDs}
 	})
 	payments = payments.map(v => v._doc)
+
+	// console.log(
+	// 	payments, 
+	// 	payments
+	// 		.filter(v => results[0].packageID == v.packageID)
+	// 		.reduce((t, curr) => t + Number(curr.receivedAmount),0)
+	// )
+
 	return results.map(val => ({
 		...val, 
 		receivedAmount: payments.filter(v => val.packageID == v.packageID).reduce((t, curr) => t + Number(curr.receivedAmount),0),
@@ -200,6 +211,7 @@ router.post("/api/packages/search", async (req, res) => {
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = await commonProcessor(results)
+		// console.log(results)
 		if(req.query.accounts)
 			results = await mapPayments(results)
 
@@ -302,7 +314,12 @@ router.delete("/api/packages/", async (req, res) => {
 		let _
 		const _id = req.query._id
 
+		let packageInfo = await Packages.findOne({_id});
+		packageInfo = packageInfo._doc
+
 		await Packages.deleteOne({_id});
+
+		await updateClient(packageInfo.clientID)
 
 		res.send("OK")
 	} catch (err) {
@@ -343,7 +360,7 @@ router.post("/api/packages/update", async (req, res) => {
 
 		let package = await Packages.findOne({_id});
 		
-		_ = await updatePackage(package._doc)
+		await updatePackage(package._doc)
 
 		if(req.body.docs?.length) {
 			let files = await saveFilesToLocal(req.body.docs)

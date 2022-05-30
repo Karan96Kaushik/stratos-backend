@@ -1,5 +1,6 @@
 const moment = require("moment");
 const {Packages} = require("../models/Packages");
+const {handlePayment, updateClient} = require("./paymentHelpers");
 
 const services = [
     // 'Consultation',
@@ -138,13 +139,13 @@ const updatePackage = async (package) => {
 
 	let due = ((Number(package.amount) / (12 / additiveMonths)) * (1 + cyclesPassed))
 
-	let gstamount = null
+	let gstamount = 0
 
 	if(package.gstEnabled) {
 		gstamount = Math.ceil((due * 0.18))
 		due = due + gstamount
 	}
-
+	// console.log(due, gstamount, due - (package.receivedAmount || 0))
 	let _ = await Packages.updateOne(
 		{ _id: String(package._id) },
 		{
@@ -154,6 +155,8 @@ const updatePackage = async (package) => {
 			gstamount
 		}
 	)
+
+	await updateClient(package.clientID)
 }
 
 let getDiffDays = (a, b) => Math.round( (+b - +a) / (1000*60*60*24) )
