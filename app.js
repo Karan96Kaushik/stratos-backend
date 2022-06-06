@@ -41,6 +41,7 @@ app.use(routes.signUp)
 
 app.use(require('./modules/auth').auth)
 
+app.use(routes.hearingDates)
 app.use(routes.clients)
 app.use(routes.members)
 app.use(routes.tasks)

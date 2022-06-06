@@ -456,16 +456,33 @@ const checkIdDuplicates = async () => {
 	console.timeEnd("JKSHAJKHS")
 }
 
+const migrateHearingDate = async () => {
+	let tasks = await Tasks.find({hearingDate: {$exists:true}})
+	for (let task of tasks) {
+		task = task._doc
+		console.log(task.taskID, task.hearingDate)
+		await Tasks.updateOne(
+			{_id: String(task._id)}, 
+			{
+				hearingDetails: task.hearingDate, 
+				$unset: {hearingDate: ''}
+			}
+		)
+	}
+	console.log('Done')
+}
+
+// test();
 
 // checkIdDuplicates()
-// test();
 
 // Add remove from accounts property
 // 	migrateTasksRemoveFromAccounts()
+migrateHearingDate()
 
 // Fix tasks and packages balance amount denormalisation
 // fixPackages()
-fixTasks()
+// fixTasks()
 // fixPayments()
 
 // Restructure invoices to handle array of items

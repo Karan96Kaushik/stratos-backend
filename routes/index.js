@@ -12,4 +12,5 @@ module.exports = {
 	utils: require('./utils'),
 	accounts: require('./accounts'),
 	dashboard: require('./dashboard'),
+	hearingDates: require('./hearingDates'),
 }
