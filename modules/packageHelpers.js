@@ -101,43 +101,52 @@ const lastUpdatedMapping = (package) => {
 
 const updatePackage = async (package) => {
 
+	let due
 	let startDate = new Date(package.startDate)
 
-	let additiveMonths
-
-	switch (package.paymentCycle) {
-		case 'Yearly':
-			additiveMonths = 12
-			break;
-		case 'Half Yearly':
-			additiveMonths = 6
-			break;
-		case 'Quarterly':
-			additiveMonths = 3
-			break;
+	if (package.paymentCycle == "Lumpsum") {
+		due = Number(package.amount || 0)
 	}
+	else {
 
-	let checkDate = new Date
+		let additiveMonths
 
-	if (package.endDate)
-		checkDate = new Date(package.endDate)
+		switch (package.paymentCycle) {
+			case 'Yearly':
+				additiveMonths = 12
+				break;
+			case 'Half Yearly':
+				additiveMonths = 6
+				break;
+			case 'Quarterly':
+				additiveMonths = 3
+				break;
+		}
 
-	// Adding 12 hours to compensate for server time in GMT
-	checkDate = new Date(+checkDate + (12 * 60 * 60 * 1000))
+		let checkDate = new Date
 
-	let cyclesPassed = 0
-	checkDate.setMonth(checkDate.getMonth() - additiveMonths)
-	while (startDate < checkDate) {
-		cyclesPassed++
+		if (package.endDate)
+			checkDate = new Date(package.endDate)
+
+		// Adding 12 hours to compensate for server time in GMT
+		checkDate = new Date(+checkDate + (12 * 60 * 60 * 1000))
+
+		let cyclesPassed = 0
 		checkDate.setMonth(checkDate.getMonth() - additiveMonths)
+		while (startDate < checkDate) {
+			cyclesPassed++
+			checkDate.setMonth(checkDate.getMonth() - additiveMonths)
+		}
+
+		due = ((Number(package.amount) / (12 / additiveMonths)) * (1 + cyclesPassed))
+
 	}
+
 
 	// Map pending services in an array to be queried
 	const packageServices = serviceMapping(package)
 	let pending = []
 	Object.keys(packageServices).forEach(s => packageServices[s].find(v => v.pending) && pending.push(s))
-
-	let due = ((Number(package.amount) / (12 / additiveMonths)) * (1 + cyclesPassed))
 
 	let gstamount = 0
 
