@@ -20,6 +20,7 @@ router.get("/api/hearingdates", async (req, res) => {
 			title: r._doc.taskID + " (Task)",
 			clientName: r._doc.clientName,
 			remarks: r._doc.remarks,
+			isTask: true
 		}))
 
 		results = results.map(r => ({
@@ -38,12 +39,11 @@ router.get("/api/hearingdates", async (req, res) => {
 router.post("/api/hearingdates", async (req, res) => {
 
 	try {
-		await HearingDates.create({
+		let result = await HearingDates.create({
 			...req.body,
 			addedBy: req.user.id
 		})
-
-		res.send('ok')
+		res.json(result)
 	}
 	catch (err) {
 		console.error(err)
@@ -54,11 +54,11 @@ router.post("/api/hearingdates", async (req, res) => {
 router.delete("/api/hearingdates", async (req, res) => {
 
 	try {
-		let {taskID} = req.query
+		let {_id} = req.query
+		
+		let _ = await HearingDates.deleteMany({_id})
 
-		let _ = await HearingDates.deleteMany({taskID})
-
-		if (_.deletedCount == 0) throw new Error("No task found")
+		if (_.deletedCount == 0) throw new Error("No entry found")
 
 		res.send('ok')
 	}
