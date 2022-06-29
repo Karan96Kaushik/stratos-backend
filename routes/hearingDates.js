@@ -17,6 +17,7 @@ router.get("/api/hearingdates", async (req, res) => {
 		tasks = tasks.map(r => ({
 			taskID: r._doc.taskID,
 			hearingDate: r._doc.hearingDate,
+			title: r._doc.taskID,
 		}))
 
 		results = results.map(r => ({

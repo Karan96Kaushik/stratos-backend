@@ -4,9 +4,14 @@ const Schema = mongoose.Schema;
 // Define collection and schema
 let HearingDates = new Schema(
   {
+    title:String,
+
     taskID:String,
-    
     hearingDate: Date,
+    court: String,
+    remarks: String,
+    clientName: String,
+    clientID: String,
     
     addedBy: {
       required:true,
