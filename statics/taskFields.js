@@ -85,6 +85,7 @@ let commonTextFieldsEnd = [
     {label:"Payment Rating", id:"rating", type:"number", options: ['',1,2,3,4,4.5,5]},
     {label:"Payment Date", id:"paymentDate", type:"date"},
     {label:"FollowUp Date", id:"followupDate", type:"date"},
+    {label:"Confirmation Date", id:"confirmationDate", type:"date"},
     {label:"Files", id:"files", type:"file", isHidden:true},
 ]
 

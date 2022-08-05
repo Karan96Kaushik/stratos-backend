@@ -46,6 +46,7 @@ packageFields = {
             {label:'Description', id:"description", required: true},
             {label:'Yearly Amount', id:"amount", type: 'number', required: true},
             {label:'Payment Cycle', id:"paymentCycle", options: ['', 'Half Yearly', 'Quarterly'], required: true},
+            {label:"Payment Rating", id:"rating", type:"number", options: ['',1,2,3,4,4.5,5]},
             {label:'GST Amount', id:"gstamount", type: 'number'},
             {label:'Due Amount', id:"due", type: 'number'},
             {label:'Received Amount', id:"receivedAmount", type: 'number', required: true},
