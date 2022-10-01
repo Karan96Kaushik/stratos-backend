@@ -11,6 +11,7 @@ const {Tasks} = require("../models/Tasks");
 const {Invoices} = require("../models/Invoices");
 const {Quotations} = require("../models/Quotations");
 const {Packages} = require("../models/Packages");
+const {HearingDates} = require('../models/HearingDates');
 const {handlePayment} = require("../modules/paymentHelpers");
 
 const migrateTaskPromoter = async () => {
@@ -46,6 +47,39 @@ const migrateTaskPromoter = async () => {
 	}
 
 	console.log("Done")
+}
+
+const fixClientNames = async () => {
+
+	let allClients = await Clients.find()
+	console.log(allClients.length)
+
+	for (client of allClients) {
+
+		client = client._doc
+
+		let _ = await Tasks.updateMany(
+			{ _clientID: String(client._id) },
+			{
+				clientName:client.name,
+				promoter:client.promoter
+			}
+		)
+
+		_ = await Packages.updateMany(
+			{ _clientID: String(client._id) },
+			{
+				clientName:client.name,
+				promoter:client.promoter
+			}
+		)
+
+		console.log(client.name)
+
+	}
+
+	console.log("Done")
+
 }
 
 const migrateQuotes = async () => {
@@ -472,13 +506,38 @@ const migrateHearingDate = async () => {
 	console.log('Done')
 }
 
+
+const fixHearingDate = async () => {
+	let hDates = await HearingDates.find()
+	for (let hDate of hDates) {
+		hDate = hDate._doc
+
+		hDate.title = hDate.title.split(' ').filter(Boolean).join(' ')
+		hDate.title = hDate.title.replace(/\t/g, ' ')
+		hDate.title = hDate.title.replace(/\n/g, ' ')
+
+		console.log(hDate.title, hDate.hearingDate)
+		await HearingDates.updateOne(
+			{_id: String(hDate._id)}, 
+			{
+				title: hDate.title
+			}
+		)
+	}
+	console.log('Done')
+}
+
 // test();
 
 // checkIdDuplicates()
 
 // Add remove from accounts property
-// 	migrateTasksRemoveFromAccounts()
-migrateHearingDate()
+// migrateTasksRemoveFromAccounts()
+// fixHearingDate()
+
+fixClientNames()
+
+// migrateHearingDate()
 
 // Fix tasks and packages balance amount denormalisation
 // fixPackages()

@@ -4,6 +4,7 @@ const moment = require("moment");
 const {Payments} = require("../models/Payments");
 const {Tasks} = require("../models/Tasks");
 const {Clients} = require("../models/Clients");
+const {Packages} = require("../models/Packages");
 const {Members} = require("../models/Members");
 const {generateExcel} = require("../modules/excelProcessor");
 const clientFields = require("../statics/clientFields");
@@ -469,7 +470,7 @@ router.post("/api/clients/update", checkW, async (req, res) => {
 					resolve({name:file.name,path:fileName})
 				})
 			})))
-			console.log(files)
+			// console.log(files)
 
 		}
 
@@ -480,6 +481,23 @@ router.post("/api/clients/update", checkW, async (req, res) => {
 			{
 				...req.body
 			});
+
+		
+		_ = await Tasks.updateMany(
+			{ _clientID: String(_id) },
+			{
+				clientName:req.body.name,
+				promoter:req.body.promoter
+			}
+		)
+
+		_ = await Packages.updateMany(
+			{ _clientID: String(_id) },
+			{
+				clientName:req.body.name,
+				promoter:req.body.promoter
+			}
+		)
 
 		if(files?.length) {
 			await Promise.all(files.map(async (file) => {

@@ -39,6 +39,11 @@ router.get("/api/hearingdates", async (req, res) => {
 router.post("/api/hearingdates", async (req, res) => {
 
 	try {
+
+		req.body.title = req.body.title.split(' ').filter(Boolean).join(' ')
+		req.body.title = req.body.title.replace(/\t/g, ' ')
+		req.body.title = req.body.title.replace(/\n/g, ' ')
+
 		let result = await HearingDates.create({
 			...req.body,
 			addedBy: req.user.id
