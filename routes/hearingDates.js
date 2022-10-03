@@ -56,6 +56,34 @@ router.post("/api/hearingdates", async (req, res) => {
 	}
 })
 
+router.patch("/api/hearingdates", async (req, res) => {
+
+	try {
+
+		if (!req.body._id)
+			return res.status(400).send("No _id present")
+
+		req.body.title = req.body.title.split(' ').filter(Boolean).join(' ')
+		req.body.title = req.body.title.replace(/\t/g, ' ')
+		req.body.title = req.body.title.replace(/\n/g, ' ')
+
+		let result = await HearingDates.updateOne(
+			{
+				_id: req.body._id
+			},
+			{
+				...req.body,
+				addedBy: req.user.id
+			})
+
+		res.json(req.body)
+	}
+	catch (err) {
+		console.error(err)
+		res.status(500).send(err.message)
+	}
+})
+
 router.delete("/api/hearingdates", async (req, res) => {
 
 	try {
