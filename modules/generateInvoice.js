@@ -15,7 +15,10 @@ const generateInvoice = (data) => new Promise((resolve, reject) => {
 	    }
 	}
 
-	pdf.create(file.content, options).toBuffer(function(err, pdfBuffer){
+	pdf.create(file.content, options).toBuffer(function(err, pdfBuffer) {
+		if(err) {
+			reject(err)
+		}
 	    const fs = require('fs');
 	    let path = "/tmp/invoice" + (+new Date) + ".pdf"
 	    fs.writeFile(path, pdfBuffer, function(err) {

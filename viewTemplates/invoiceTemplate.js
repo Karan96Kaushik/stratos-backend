@@ -1,4 +1,35 @@
 
+const modeAccountInfo = {
+	"RERA Easy": {
+		accountNumber: '103005002473',
+		accountName: 'RERA EASY',
+		ifsc: 'ICIC0001030',
+		bank: 'ICICI Bank',
+		branch: 'Khargar'
+	},
+	"Shantanu Kuchya": {
+		accountNumber: '50100237262898',
+		accountName: 'SHANTANU KUCHYA',
+		ifsc: 'HDFC0001102',
+		bank: 'HDFC Bank',
+		branch: 'Kharghar'
+	},
+	"Osha Technologies": {
+		accountNumber: '50200030428962',
+		accountName: 'OSHA TECHNOLOGIES',
+		ifsc: 'HDFC0001102',
+		bank: 'HDFC Bank',
+		branch: 'Kharghar'
+	},
+	"SDC Legal Services": {
+		accountNumber: '0302102000014890',
+		accountName: 'SDC Legal Services',
+		ifsc: 'IBKL0000302',
+		bank: 'IDBI Bank',
+		branch: 'Kharghar'
+	}
+}
+
 const renderParticularsRows = (data) => {
 
 	let rows = data.items.map((item,idx) => {
@@ -34,6 +65,8 @@ const renderParticularsRows = (data) => {
 }
 
 module.exports = (data) => {
+
+	let bankDetails = modeAccountInfo[data.from || "Osha Technologies"]
 
 	let html = `<table style="border-collapse: collapse; border-style: hidden; height: 402px; width: 100%;" border="0" cellspacing="0">
 		<tbody>
@@ -262,7 +295,7 @@ module.exports = (data) => {
 			</tr>
 			<tr>
 				<td style="height: 18px; width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;">Payment /
-						Cheque to be made in the name of: OSHA Technologies<br /></span></td>
+						Cheque to be made in the name of: ${data.from}<br /></span></td>
 				<td style="height: 18px; width: 3.68614%;">&nbsp;</td>
 				<td style="height: 18px; width: 4.46831%;">&nbsp;</td>
 			</tr>
@@ -275,32 +308,32 @@ module.exports = (data) => {
 			</tr>
 			<tr>
 				<td style="height: 18px; width: 91.6633%;"><span
-						style="font-family: Leelawadee UI,sans-serif;"><strong>Account Name</strong>: OSHA
-						TECHNOLOGIES<br /></span></td>
+						style="font-family: Leelawadee UI,sans-serif;"><strong>Account Name</strong>: 
+						${bankDetails.accountName}<br /></span></td>
 				<td style="height: 18px; width: 3.68614%;">&nbsp;</td>
 				<td style="height: 18px; width: 4.46831%;">&nbsp;</td>
 			</tr>
 			<tr>
 				<td style="height: 18px; width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;">Account
-						Number: 50200030428962<br /></span></td>
+						Number: ${bankDetails.accountNumber}<br /></span></td>
 				<td style="height: 18px; width: 3.68614%;">&nbsp;</td>
 				<td style="height: 18px; width: 4.46831%;">&nbsp;</td>
 			</tr>
 			<tr>
 				<td style="width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;">IFSC Code:
-						HDFC0001102<br /></span></td>
+					${bankDetails.ifsc}<br /></span></td>
 				<td style="width: 3.68614%;">&nbsp;</td>
 				<td style="width: 4.46831%;">&nbsp;</td>
 			</tr>
 			<tr>
 				<td style="height: 18px; width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;">Name of
-						Bank: HDFC Bank</span></td>
+						Bank: ${bankDetails.bank}</span></td>
 				<td style="height: 18px; width: 3.68614%;">&nbsp;</td>
 				<td style="height: 18px; width: 4.46831%;">&nbsp;</td>
 			</tr>
 			<tr>
 				<td style="width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;">Bank Branch:
-						Kharghar<br /></span></td>
+						${bankDetails.branch}<br /></span></td>
 				<td style="width: 3.68614%;">&nbsp;</td>
 				<td style="width: 4.46831%;">&nbsp;</td>
 			</tr>
