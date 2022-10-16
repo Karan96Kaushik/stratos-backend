@@ -217,6 +217,17 @@ const migrateTasksArchived = async () => {
 	console.log("Done")
 }
 
+const migratePackagesArchived = async () => {
+	let _ = await Packages.updateMany(
+		{}, 
+		{
+			archived: false
+		}
+	)
+
+	console.log("Done")
+}
+
 const migrateTasksRemoveFromAccounts = async () => {
 	let _ = await Tasks.updateMany(
 		{}, 
@@ -535,7 +546,7 @@ const fixHearingDate = async () => {
 // migrateTasksRemoveFromAccounts()
 // fixHearingDate()
 
-fixClientNames()
+// fixClientNames()
 
 // migrateHearingDate()
 
@@ -552,6 +563,7 @@ fixClientNames()
 
 // removeTasks()
 // migrateClientAmounts()
+migratePackagesArchived()
 // migrateTasksArchived()
 // migrateTasksReceivedAmount()
 // migrateQuotes()

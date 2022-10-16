@@ -22,6 +22,9 @@ router.post("/api/packages/add", async (req, res) => {
 		return
 	}
 
+	if(!req.body.archived)
+		req.body.archived = false
+
     let packageID = "RT" + await getID("package")
 	let package = await Packages.create({
 		...req.body,
@@ -56,6 +59,18 @@ const generateQuery = (req) => {
 			}
 		],
 	}
+
+	// search only the non-archived tasks if not specified exclusively
+	if(req.query.filters.onlyarchived)
+		query['$and'].push({
+			archived:true
+		})
+	else if(!req.query.filters.archived)
+		query['$and'].push({
+			archived:false
+		})
+	delete req.query.filters.archived
+	delete req.query.filters.onlyarchived
 
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
