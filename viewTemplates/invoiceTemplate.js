@@ -27,7 +27,14 @@ const modeAccountInfo = {
 		ifsc: 'IBKL0000302',
 		bank: 'IDBI Bank',
 		branch: 'Kharghar'
-	}
+	},
+	"RERA Easy Services": {
+		accountNumber: '922020019202267',
+		accountName: 'RERA Easy Services',
+		ifsc: 'UTIB0003526',
+		bank: 'Axis Bank Ltd',
+		branch: 'Kharghar'
+	}, 
 }
 
 const renderParticularsRows = (data) => {
