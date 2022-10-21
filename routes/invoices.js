@@ -23,6 +23,15 @@ const checkInvoiceW = (req, res, next) => {
 		res.status(401).send("Unauthorized")
 }
 
+const invoiceCodes = {
+	"Shantanu Kuchya": "RESK", 
+	"RERA Easy": "RERA", 
+	"Osha Technologies": "RERA", 
+	"SDC Legal Services": "RERA", 
+	"RERA Easy Services": "RES",
+    "Envision Next LLP": "RERA",
+}
+
 router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
 
@@ -36,14 +45,16 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 	})
 	req.body.balanceAmount = req.body.totalAmount - (req.body.paidAmount || 0)
 
-    // let invoiceID = "IN" + await getID("invoice")
+	let invoiceCode = invoiceCodes[req.body.from] ?? "RERA"
+
+	req.body.invoiceID = invoiceCode + await getID(invoiceCode, 100000)
 	let _ = await Invoices.create({
 		...req.body,
 		memberID:memberInfo.memberID,
 		// invoiceID,
 		addedBy: req.user.id
 	});
-	// _ = await updateID("invoice")
+	_ = await updateID(invoiceCode)
 
 	if(req.body.docs?.length) {
 		let files = await saveFilesToLocal(req.body.docs)

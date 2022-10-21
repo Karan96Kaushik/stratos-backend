@@ -18,9 +18,10 @@ let Utils = new Schema(
 
 let UtilsModel = mongoose.model("Utils", Utils)
 
-const getID = async (type) => {
+const getID = async (type, padding=10000) => {
     let data = await UtilsModel.findOne({type:"IDs"})
-    const idNum = String(10000 + (data.ids[type + "ID"] ?? 0) + 1)
+    console.log(data.ids)
+    const idNum = String(padding + (data.ids[type + "ID"] ?? 0) + 1)
     return idNum.substring(1,)
 }
 
