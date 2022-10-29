@@ -23,6 +23,7 @@ const pagePermissions = [
 	"Packages Services W",
 	"Packages Accounts R",
 	"Packages Accounts W",
+	"Assigned Task Accounts R",
 ]
 
 let servicePermissions = [

@@ -465,6 +465,11 @@ const generateQueryPayments = async (req) => {
 		})
 	}
 
+	// console.log(req.permissions.page.includes("Assigned Task Accounts R"), !req.permissions.page.includes("Payments R"))
+	if (req.permissions.page.includes("Assigned Task Accounts R") && !req.permissions.page.includes("Payments R")) {
+		query['$and'].push({_membersAssigned: req.user.id})
+	}
+
 	query.$and.push({ removeFromAccounts: false })
 
 	if (!query.$and.length)
@@ -510,7 +515,7 @@ router.post("/api/tasks/payments/search", async (req, res) => {
 	req.query = req.body
 
 	if(!req.permissions.isAdmin)
-		if(!req.permissions.page.includes("Payments R") || !req.permissions.page.includes("Tasks R")) {
+		if((!req.permissions.page.includes("Payments R") && !req.permissions.page.includes("Assigned Task Accounts R")) || !req.permissions.page.includes("Tasks R")) {
 			res.status(401).send("Unauthorized access")
 			return
 		}
@@ -522,7 +527,7 @@ router.post("/api/tasks/payments/search", async (req, res) => {
 	const sortDir = parseInt(req.query.sortDir)
 
 	let query = await generateQueryPayments(req)
-
+console.log(JSON.stringify(query))
 	let results = await Tasks.find(query)
 		.collation({locale: "en" })
 		.limit(rowsPerPage)
