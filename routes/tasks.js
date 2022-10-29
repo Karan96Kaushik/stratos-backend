@@ -527,7 +527,7 @@ router.post("/api/tasks/payments/search", async (req, res) => {
 	const sortDir = parseInt(req.query.sortDir)
 
 	let query = await generateQueryPayments(req)
-console.log(JSON.stringify(query))
+	
 	let results = await Tasks.find(query)
 		.collation({locale: "en" })
 		.limit(rowsPerPage)
