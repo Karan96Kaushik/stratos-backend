@@ -3,8 +3,8 @@ const sstorage = new AWS.S3()
 const fs = require("fs")
 
 sstorage.config.update({
-	accessKeyId: process.env.S3ID, //"AKIAXRPMYGKGXNQCJYF4", 
-	secretAccessKey: process.env.S3Secret, //"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",
+	accessKeyId: process.env.S3ID, 
+	secretAccessKey: process.env.S3Secret,
 	signatureVersion: "v4",
 	region: 'ap-south-1'
 })
@@ -13,7 +13,7 @@ const myBucket = "tms0001"
 
 const getAllFiles = (filePath, finalResult = [], StartAfter = false) => {
     return new Promise((resolve, reject) => {
-
+        return resolve([])
         let obj = {
             Bucket: myBucket,
             Prefix: filePath
@@ -41,6 +41,8 @@ const getAllFiles = (filePath, finalResult = [], StartAfter = false) => {
 }
 
 const uploadToS3 = (s3Path="", localFilePath="", option) => {
+
+    return
 
     if (!localFilePath || !localFilePath.trim().length) {
         return Promise.reject(new Error("Invalid local file destination path"));
@@ -73,6 +75,8 @@ const uploadToS3 = (s3Path="", localFilePath="", option) => {
 }
 
 const getFilePath = (filePath, minutes = 5) => {
+
+    return
 
     const signedUrlExpireSeconds = 60 * minutes;
 
