@@ -13,7 +13,7 @@ const myBucket = "tms0001"
 
 const getAllFiles = (filePath, finalResult = [], StartAfter = false) => {
     return new Promise((resolve, reject) => {
-        return resolve([])
+        // return resolve([])
         let obj = {
             Bucket: myBucket,
             Prefix: filePath
@@ -42,7 +42,7 @@ const getAllFiles = (filePath, finalResult = [], StartAfter = false) => {
 
 const uploadToS3 = (s3Path="", localFilePath="", option) => {
 
-    return
+    // return
 
     if (!localFilePath || !localFilePath.trim().length) {
         return Promise.reject(new Error("Invalid local file destination path"));
@@ -76,7 +76,7 @@ const uploadToS3 = (s3Path="", localFilePath="", option) => {
 
 const getFilePath = (filePath, minutes = 5) => {
 
-    return
+    // return
 
     const signedUrlExpireSeconds = 60 * minutes;
 
