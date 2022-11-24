@@ -88,7 +88,7 @@ module.exports = (data) => {
 									style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;">BILL
 									FROM:</u></strong></span> <br /><span
 							style="font-family: Leelawadee UI,sans-serif; font-size: 16px; line-height: 1.7;"><strong>
-								${data.from}</strong></span> <br /><span style="font-family: Leelawadee UI,sans-serif;">909,
+								${data.from}</strong></span> <br /><span style="font-family: Leelawadee UI,sans-serif;">809/810,
 							The Landmark, Plot No 26A, Sector- 7, Kharghar- 410210 <br />+91 76780 81406</span></p>
 				</td>
 			</tr>
