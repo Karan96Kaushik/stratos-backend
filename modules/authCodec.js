@@ -24,6 +24,7 @@ const pagePermissions = [
 	"Packages Accounts R",
 	"Packages Accounts W",
 	"Assigned Task Accounts R",
+	"Leads R Servicewise",
 ]
 
 let servicePermissions = [

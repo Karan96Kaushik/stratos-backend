@@ -8,8 +8,31 @@ const leadSourceOptions = ["","Whatsapp","Inbound Calls","Existing Customer","Re
 const closureStatusOptions = ["","On hold","Pricing issue", "Awaiting Response", "Undecisive", "Converted", "In Progress", "Confirmed", "Not Interested"]
 const statusOptions = ["", "Profile Sent", "Quotation Sent", "Awaiting Response", "Follow up required", "Cold", "Not Interested","Others"]
 
+
+
+
 // Name, Project Name, Mobile No, Lead Rating, Status, Closure Status, Follow Up Date
-module.exports = {
+let fields = {
+    // all: {
+    //     name:"All",
+    //     texts:[
+    //         {label:"Date Added", id:"createdTime", isRequired:true},
+    //         {label:"Lead ID", id:"leadID", isRequired:true},
+    //         {label:"Member ID", id:"memberID", isRequired:true},
+            
+    //         // {label:"Name", id:"name", isRequired:true},
+    //         {label:"Mobile", id:"mobile", isRequired:true},
+    //         {label:"Email", id:"email", isHidden:true},
+
+    //         {label:"Lead Rating", id:"leadRating", options: ["", 1,2,3,4,5], type:"number", isRequired:true},
+    //         {label:"Lead Source", id:"leadSource", options:leadSourceOptions, isHidden:true},
+    //         {label:"Lead Responsibility", id:"leadResponsibility", isHidden:true},
+    //         {label:"FollowUp Date", id:"followUpDate", type:"date"},
+    //         {label:"Remarks", id:"remarks", isHidden:true},
+    //         {label:"Closure Status", id:"closureStatus", options:closureStatusOptions},
+    //         {label:"Status", id: "status", options: statusOptions},
+    //     ]
+    // },
     developer: {
         name:"Developer",
         texts:[
@@ -105,3 +128,5 @@ module.exports = {
         ]
     },
 }
+
+module.exports = fields

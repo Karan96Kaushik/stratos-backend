@@ -49,7 +49,8 @@ let Leads = new Schema(
   },
   {
     timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },
-    collection: "Leads"
+    collection: "Leads",
+    strict:false,
   }
 );
 

@@ -9,7 +9,6 @@ const {getID, updateID} = require("../models/Utils");
 
 const {generateExcel} = require("../modules/excelProcessor");
 const leadFields = require("../statics/leadFields");
-const crypto = require('crypto');
 
 const {
 	getAllFiles,
@@ -63,13 +62,6 @@ router.post("/api/leads/add", async (req, res) => {
 
 const generateQuery = (req) => {
 
-	let others = {}
-
-	if(!req.query.leadType && !req.query.searchAll) {
-		res.send()
-		return
-	}
-
 	let query = {
 		$and:[
 			{
@@ -90,11 +82,19 @@ const generateQuery = (req) => {
 		],
 	}
 
-	if(!req.query.searchAll) {
+	if(req.query.leadType) {
 		query['$and'].push({
 			leadType: req.query.leadType
 		})
 	}
+
+	// search only the lead services that are permitted
+	if(!req.query.serviceType && !req.permissions.isAdmin)
+		query['$and'].push({'$or':
+			req.permissions.service.map((svc) => ({
+				serviceType: svc
+			}))
+		})
 
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
@@ -135,6 +135,7 @@ const commonProcessor = (results) => {
 	// created & followup timestamp
 	results = results.map(val => ({
 		...val, 
+		serviceType: val.serviceType.join(', '),
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
 	}))

@@ -4,5 +4,4 @@ let a = crypto.createHmac('sha256', "someSalt")
 			.update("123456")
 			.digest('hex')
 
-
-			console.log(a)
+console.log(a)
