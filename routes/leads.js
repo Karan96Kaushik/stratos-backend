@@ -88,14 +88,6 @@ const generateQuery = (req) => {
 		})
 	}
 
-	// search only the lead services that are permitted
-	if(!req.query.serviceType && !req.permissions.isAdmin)
-		query['$and'].push({'$or':
-			req.permissions.service.map((svc) => ({
-				serviceType: svc
-			}))
-		})
-
 	// add filters to the query, if present
 	Object.keys(req.query.filters ?? []).forEach(filter => {
 
@@ -121,12 +113,21 @@ const generateQuery = (req) => {
 		}
 	})
 
-	// non leads-read user can only view their own added leads
-	if(!req.permissions.isAdmin && !req.permissions.page.includes("Leads R")) {
-		query['$and'].push({
-			addedBy: req.user.id
-		})
+	// non leads-read user can only view their own added leads or assigned ones
+	if(!req.permissions.isAdmin && !req.permissions.page.includes("Leads R") && !req.permissions.page.includes("Leads R Servicewise")) {
+		query['$and'].push({ $or: [
+			{addedBy: req.user.id},
+			{_membersAssigned: req.user.id}
+		]})
 	}
+
+	// search only the lead services that are permitted
+	if(!req.query.serviceType && !req.permissions.isAdmin && req.permissions.page.includes("Leads R Servicewise"))
+		query['$and'].push({'$or':
+			req.permissions.service.map((svc) => ({
+				serviceType: svc
+			}))
+		})
 
 	return query
 }
