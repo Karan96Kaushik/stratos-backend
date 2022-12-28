@@ -9,6 +9,7 @@ router.get("/api/hearingdates", async (req, res) => {
 		req.query
 
 		let results = await HearingDates.find()
+			.sort({"createdTime": -1})
 			.limit(200)
 
 		let tasks = await Tasks.find({hearingDate: {$exists:true}})
