@@ -206,7 +206,7 @@ router.post("/api/leads/export", async (req, res) => {
 
 		results = commonProcessor(results)
 
-		let file = await generateExcel(results, leadFields[req.query.leadType], "leadsExport" + (+new Date))
+		let file = await generateExcel(results, leadFields[req.query.leadType ?? 'all'], "leadsExport" + (+new Date))
 
 		res.download("/tmp/" + file,(err) => {
 			fs.unlink("/tmp/" + file, () => {})
