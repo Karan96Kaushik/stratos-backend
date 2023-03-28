@@ -398,9 +398,16 @@ const generateQueryPayments = async (req) => {
 				{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 			]
 		})
+	else
+
 
 	if(!isNaN(Number(req.query.text))) {
-
+		if (query.$and.length == 0) {
+			query.$and.push({
+				$or:[]
+			})
+		}
+		
 		query.$and[0].$or.push(
 			{ receivedAmount: Number(req.query.text)},
 			{ balanceAmount: Number(req.query.text)},

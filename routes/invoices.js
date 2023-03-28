@@ -58,7 +58,7 @@ router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
 
 	if(req.body.docs?.length) {
 		let files = await saveFilesToLocal(req.body.docs)
-		await uploadFiles(files, invoiceID)
+		await uploadFiles(files, req.body.invoiceID)
 	}
 	res.send("OK")
 })
