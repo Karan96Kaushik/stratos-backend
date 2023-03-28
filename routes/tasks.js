@@ -398,7 +398,6 @@ const generateQueryPayments = async (req) => {
 				{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 			]
 		})
-	else
 
 
 	if(!isNaN(Number(req.query.text))) {
