@@ -35,6 +35,13 @@ const modeAccountInfo = {
 		bank: 'Axis Bank Ltd',
 		branch: 'Kharghar'
 	}, 
+	"RERA Easy Consultancy": {
+		accountNumber: '50200080745801',
+		accountName: 'RERA Easy Consultancy',
+		ifsc: 'HDFC0001102',
+		bank: 'HDFC Bank',
+		branch: 'Kharghar'
+	}, 
 }
 
 const renderParticularsRows = (data) => {

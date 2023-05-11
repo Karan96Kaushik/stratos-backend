@@ -26,6 +26,7 @@ const checkInvoiceW = (req, res, next) => {
 const invoiceCodes = {
 	"Shantanu Kuchya": "RESK", 
 	"RERA Easy": "RERA", 
+	"RERA Easy Consultancy": "REC", 
 	"Osha Technologies": "RERA", 
 	"SDC Legal Services": "RERA", 
 	"RERA Easy Services": "RES",
