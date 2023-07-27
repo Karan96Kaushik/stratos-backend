@@ -586,7 +586,7 @@ router.get("/api/tasks/payments/search/add", async (req, res) => {
 	try {
 
 		if(!req.permissions.isAdmin)
-			if(!req.permissions.page.includes("Payments R") || (!req.permissions.page.includes("Tasks R") && !req.permissions.service.length)) {
+			if(!req.permissions.page.includes("Payments W") || (!req.permissions.page.includes("Tasks R") && !req.permissions.service.length)) {
 				res.status(401).send("Unauthorized access")
 				return
 			}
