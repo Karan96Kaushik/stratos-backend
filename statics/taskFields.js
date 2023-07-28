@@ -51,6 +51,19 @@ const statusSet6 = [
     "Certified", 
 ]
 
+const statusSet7 = [
+    "MahaRERA Queries",
+    "Submitted for Approval",
+    "Transfer of Profile",
+]
+
+const statusSet8 = [
+    "Form 4 Accepted",
+    "Form 4 Rejected",
+    "Completed", 
+    "Uploaded",
+]
+
 const actions = [
     "", 
     "Awaiting Accounts Confirmation", 
@@ -409,6 +422,35 @@ const taskFields = {
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
+            ...commonCheckboxFields
+        ]
+    },
+    "Project Closure": {
+        name:"Project Closure",
+        texts:[
+            {label:"OC Date", id:"ocDate", type:'date'},
+            {label:"Priority", id:"priority", options:["", "High", "Medium", "Low"]},
+            {label:"Status", id:"status", options:[...statuses, ...statusSet8]},
+            ...commonTextFieldsEnd,
+        ],
+        checkboxes:[
+            {label:"Society Formed", id:"societyFormed"},
+            {label:"Conveyance Deed Executed", id:"conveyanceDeedExecuted"},
+            {label:"Declaration of Society Formation", id:"declarationOfSocietyFormation"},
+            {label:"Declaration of Conveyance Deed", id:"declarationOfConveyanceDeed"},
+            ...commonCheckboxFields
+        ]
+    },
+    "Change of Promoter": {
+        name:"Change of Promoter",
+        texts:[
+            {label:"Date of Submission", id:"dateOfSubmission", type:'date'},
+            {label:"Status", id:"status", options:[...statuses, ...statusSet7, ...statusSet1]},
+            ...commonTextFieldsEnd,
+        ],
+        checkboxes:[
+            {label:"With Consents", id:"withConsents"},
+            {label:"Without Consents", id:"withoutConsents"},
             ...commonCheckboxFields
         ]
     },

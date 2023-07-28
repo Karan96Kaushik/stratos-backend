@@ -47,7 +47,9 @@ let servicePermissions = [
 	"Legal Notice",
 	"Registration",
 	"Drafting of Documents",
-	"Others - Legal"
+	"Others - Legal",
+    "Change of Promoter",
+    "Project Closure",
  ]
 
 /**
