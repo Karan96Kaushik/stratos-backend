@@ -607,7 +607,7 @@ router.get("/api/tasks/payments/search/add", async (req, res) => {
 			task.clientName = client.name
 		}
 
-		if( !req.permissions.service.includes(task.serviceType) ) {
+		if( !req.permissions.service.includes(task.serviceType) && !req.permissions.page.includes("Tasks R") ) {
 			res.status(401).send("Unauthorized access for service")
 			return
 		}
