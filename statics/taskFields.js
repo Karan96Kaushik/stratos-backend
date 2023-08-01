@@ -64,6 +64,14 @@ const statusSet8 = [
     "Uploaded",
 ]
 
+const statusSet9 = [
+    "MahaRERA Queries",
+    "Submitted for Approval",
+    "Transfer of Profile",
+    "Listed - Awaiting Approval",
+    "De-Registered",
+]
+
 const actions = [
     "", 
     "Awaiting Accounts Confirmation", 
@@ -286,6 +294,7 @@ const taskFields = {
             {label:"Service Description", id:"serviceDesc"},
             {label:"Status", id:"status", options:[...statuses, ...statusSet2]},
             ...commonTextFields,
+            {label:"Government Fees", id:"govtFees", type:"number"},
             ...commonTextFieldsEnd
             // {label:"Bill Amount", id:"billAmount", type:"number", isHidden:true},
             // {label:"GST", id:"gst", type:"number", isHidden:true},
@@ -446,6 +455,20 @@ const taskFields = {
         texts:[
             {label:"Date of Submission", id:"dateOfSubmission", type:'date'},
             {label:"Status", id:"status", options:[...statuses, ...statusSet7, ...statusSet1]},
+            ...commonTextFieldsEnd,
+        ],
+        checkboxes:[
+            {label:"With Consents", id:"withConsents"},
+            {label:"Without Consents", id:"withoutConsents"},
+            ...commonCheckboxFields
+        ]
+    },
+    "De-Registration": {
+        name:"De-Registration",
+        texts:[
+            {label:"Date of Submission", id:"dateOfSubmission", type:'date'},
+            {label:"Priority", id:"priority", options:["", "High", "Medium", "Low"]},
+            {label:"Status", id:"status", options:[...statuses, ...statusSet9]},
             ...commonTextFieldsEnd,
         ],
         checkboxes:[

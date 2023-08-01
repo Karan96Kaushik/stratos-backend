@@ -50,6 +50,7 @@ let servicePermissions = [
 	"Others - Legal",
     "Change of Promoter",
     "Project Closure",
+    "De-Registration",
  ]
 
 /**

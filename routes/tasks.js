@@ -39,6 +39,7 @@ const serviceCodes = {
 	"Others - Legal": "OL",
     "Change of Promoter": "CP",
     "Project Closure": "PC",
+    "De-Registration": "DR",
 }
 
 const checkR = (req, res, next) => {
