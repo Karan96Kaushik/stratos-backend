@@ -538,6 +538,39 @@ const fixHearingDate = async () => {
 	console.log('Done')
 }
 
+const migratePaymentsServicetype = async () => {
+
+	let allTasks = await Tasks.find()
+	let allPayments = await Payments.find()
+
+	console.log(allPayments.length)
+
+	for (payment of allPayments) {
+
+		let task = allTasks.find(val => String(val.taskID) == String(payment.taskID))
+		if(!task) {
+			// console.log(String(payment))
+			continue
+		}
+
+		let _ = await Payments.updateOne(
+			{_id: String(payment._id)}, 
+			{
+				// clientName: task.clientName,
+				serviceType: task.serviceType
+			}
+		)
+		// console.log(_)
+
+	}
+
+	console.log("Done")
+}
+
+
+
+migratePaymentsServicetype()
+
 // test();
 
 // checkIdDuplicates()
@@ -563,7 +596,7 @@ const fixHearingDate = async () => {
 
 // removeTasks()
 // migrateClientAmounts()
-migratePackagesArchived()
+// migratePackagesArchived()
 // migrateTasksArchived()
 // migrateTasksReceivedAmount()
 // migrateQuotes()
