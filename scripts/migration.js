@@ -540,24 +540,25 @@ const fixHearingDate = async () => {
 
 const migratePaymentsServicetype = async () => {
 
-	let allTasks = await Tasks.find()
+	// let allPackages = await Packages.find()
 	let allPayments = await Payments.find()
 
 	console.log(allPayments.length)
 
 	for (payment of allPayments) {
 
-		let task = allTasks.find(val => String(val.taskID) == String(payment.taskID))
-		if(!task) {
+		// let package = allPackages.find(val => String(val.packageID) == String(payment.packageID))
+		if(!payment._doc.packageID) {
 			// console.log(String(payment))
 			continue
 		}
+		// console.log('.')
 
 		let _ = await Payments.updateOne(
 			{_id: String(payment._id)}, 
 			{
 				// clientName: task.clientName,
-				serviceType: task.serviceType
+				serviceType: "Package"
 			}
 		)
 		// console.log(_)
