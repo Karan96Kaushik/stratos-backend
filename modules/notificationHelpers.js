@@ -188,8 +188,6 @@ const addedPaymentNotification = async (data) => {
 	}
 }
 
-addedPaymentNotification({packageID: 'RT0035'})
-
 module.exports = { 
 	assignedPackageNotification, 
 	newPackageAssignedNotification, 
