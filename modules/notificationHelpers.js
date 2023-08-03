@@ -70,6 +70,72 @@ const assignedTaskNotification = async (data, oldData) => {
 
 }
 
+
+const newPackageAssignedNotification = async (data) => {
+
+	try {
+		await Promise.all(data._rmAssigned.map(async mID => {
+			try {
+				await Notifications.create({
+					type:'package',
+					text: 'New Package Added',
+					id: data.packageID,
+					_memberID: mID
+				})
+			}
+			catch (err) {
+				console.error('Error creating notification', err)
+			}
+		}))
+	}
+	catch (err) {
+		console.error(err)
+	}
+
+}
+
+const assignedPackageNotification = async (data, oldData) => {
+
+	try {
+		const newAssignedMembers = data._rmAssigned.filter(_mid => !oldData._rmAssigned.find(_m1 => _m1 == _mid))
+		const removedMembers = oldData._rmAssigned.filter(_mid => !data._rmAssigned.find(_m1 => _m1 == _mid))
+
+		await Promise.all(newAssignedMembers.map(async mID => {
+			try {
+				await Notifications.create({
+					type:'package',
+					text: 'New Package Assigned',
+					id: oldData.packageID,
+					_memberID: mID
+				})
+			}
+			catch (err) {
+				console.error('Error creating notification', err)
+			}
+
+		}))
+
+		await Promise.all(removedMembers.map(async mID => {
+			try {
+				await Notifications.create({
+					type:'package',
+					text: 'Package Unassigned',
+					id: oldData.packageID,
+					_memberID: mID
+				})
+			}
+			catch (err) {
+				console.error('Error creating notification', err)
+			}
+
+		}))
+	}
+	catch (err) {
+		console.error(err)
+	}
+
+}
+
 const addedPaymentNotification = async (data) => {
 	try {
 
@@ -124,4 +190,10 @@ const addedPaymentNotification = async (data) => {
 
 addedPaymentNotification({packageID: 'RT0035'})
 
-module.exports = { assignedTaskNotification, newTaskAssignedNotification, addedPaymentNotification }
+module.exports = { 
+	assignedPackageNotification, 
+	newPackageAssignedNotification, 
+	assignedTaskNotification, 
+	newTaskAssignedNotification, 
+	addedPaymentNotification 
+}

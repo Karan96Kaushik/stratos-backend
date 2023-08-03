@@ -14,6 +14,8 @@ const fs = require('fs');
 const { serviceMapping, updatePackage, lastUpdatedMapping, mapFlags, formatDates } = require('../modules/packageHelpers');
 const { handlePayment, updateClient } = require('../modules/paymentHelpers');
 const { packageFields } = require('../statics/packageFields');
+const {newPackageAssignedNotification, assignedPackageNotification} = require("../modules/notificationHelpers");
+const _ = require('lodash')
 
 router.post("/api/packages/add", async (req, res) => {
 
@@ -36,6 +38,14 @@ router.post("/api/packages/add", async (req, res) => {
 	await updatePackage(package)
 
 	await updateClient(package.clientID)
+
+	if(req.body._rmAssigned.length)
+		await newPackageAssignedNotification({
+			...req.body,
+			packageID,
+			addedBy: req.user.id
+		})
+
 
 	if(req.body.docs?.length) {
 		let files = await saveFilesToLocal(req.body.docs)
@@ -365,7 +375,10 @@ router.post("/api/packages/update", async (req, res) => {
 		delete req.body.memberID
 		delete req.body.addedBy
 
-		_ = await Packages.updateOne(
+		let package = await Packages.findOne({_id});
+		let oldPackage = _.merge({}, package._doc)
+
+		await Packages.updateOne(
 			{
 				_id
 			},
@@ -373,10 +386,14 @@ router.post("/api/packages/update", async (req, res) => {
 				...req.body
 			});
 
-		let package = await Packages.findOne({_id});
-		
-		await updatePackage(package._doc)
+		package = {...package._doc, ...req.body}
+		let newPackage = _.merge({}, package)
 
+		await updatePackage(package)
+
+		if(req.body._rmAssigned.length || task._rmAssigned.length)
+			await assignedPackageNotification(newPackage, oldPackage)
+		
 		if(req.body.docs?.length) {
 			let files = await saveFilesToLocal(req.body.docs)
 			await uploadFiles(files, invoiceID)
