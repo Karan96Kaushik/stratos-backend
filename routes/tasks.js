@@ -199,6 +199,8 @@ const generateQuery = (req) => {
 			]
 		})
 	}
+	else
+		delete req.query.text
 
 	if(req.query.text && !isNaN(Number(req.query.text))) {
 
@@ -411,6 +413,8 @@ const generateQueryPayments = async (req) => {
 				{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 			]
 		})
+	else
+		delete req.query.text
 
 
 	if(!isNaN(Number(req.query.text))) {
