@@ -37,17 +37,17 @@ router.post("/api/payments/add", async (req, res) => {
 		paymentID,
 		addedBy: req.user.id
 	});
+	await handlePayment(req.body, null)
+	_ = await updateID("account")
+	res.send("OK")
 
 	await addedPaymentNotification(req.body)
-	await handlePayment(req.body, null)
 
-	_ = await updateID("account")
 
 	if(req.body.docs?.length) {
 		let files = await saveFilesToLocal(req.body.docs)
 		await uploadFiles(files, invoiceID)
 	}
-	res.send("OK")
 })
 
 const generateQuery = (req) => {
