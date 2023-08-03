@@ -38,7 +38,7 @@ const assignedTaskNotification = async (data, oldData) => {
 			try {
 				await Notifications.create({
 					type:'task',
-					text: 'New Task Assigned',
+					text: 'Task Assigned',
 					id: oldData.taskID,
 					_memberID: mID
 				})
@@ -104,7 +104,7 @@ const assignedPackageNotification = async (data, oldData) => {
 			try {
 				await Notifications.create({
 					type:'package',
-					text: 'New Package Assigned',
+					text: 'Package Assigned',
 					id: oldData.packageID,
 					_memberID: mID
 				})
