@@ -391,7 +391,7 @@ router.post("/api/packages/update", async (req, res) => {
 
 		await updatePackage(package)
 
-		if(req.body._rmAssigned.length || task._rmAssigned.length)
+		if(req.body._rmAssigned.length || oldPackage._rmAssigned.length)
 			await assignedPackageNotification(newPackage, oldPackage)
 		
 		if(req.body.docs?.length) {
