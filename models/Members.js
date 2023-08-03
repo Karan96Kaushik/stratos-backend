@@ -24,6 +24,7 @@ let Members = new Schema(
       service:Number,
     },
 
+    activeNotifications: Array,
 
 
     addedBy: {

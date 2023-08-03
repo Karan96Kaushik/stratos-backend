@@ -8,6 +8,7 @@ const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const {generateExcel} = require("../modules/excelProcessor");
 const {taskFields, taskPayments} = require("../statics/taskFields");
 const {handlePayment, calculateTotal} = require("../modules/paymentHelpers");
+const {newTaskAssignedNotification, assignedTaskNotification} = require("../modules/notificationHelpers");
 const fs = require("fs");
 const {
 	getAllFiles,
@@ -116,6 +117,15 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 			addedBy: req.user.id
 		});
 		_ = await updateID(serviceCode)
+
+		if(req.body._membersAssigned.length)
+			await newTaskAssignedNotification({
+				...req.body,
+				taskID,
+				docs:null,
+				files:null,
+				addedBy: req.user.id
+			})
 
 		if(req.body.docs?.length) {
 			let files = await saveFilesToLocal(req.body.docs)
@@ -683,6 +693,13 @@ router.post("/api/tasks/update", async (req, res) => {
 			let files = await saveFilesToLocal(req.body.docs)
 			await uploadFiles(files, taskID)
 		}
+
+		if(req.body._membersAssigned.length || task._membersAssigned.length)
+			await assignedTaskNotification({
+				...req.body,
+				docs:null,
+				files:null,
+			}, task)
 		
 		// console.log(task)
 		await handlePayment(task)

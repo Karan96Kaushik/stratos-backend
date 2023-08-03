@@ -13,4 +13,5 @@ module.exports = {
 	accounts: require('./accounts'),
 	dashboard: require('./dashboard'),
 	hearingDates: require('./hearingDates'),
+	notifications: require('./notifications'),
 }

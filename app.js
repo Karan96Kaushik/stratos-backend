@@ -52,6 +52,7 @@ app.use(routes.utils)
 app.use(routes.accounts)
 app.use(routes.payments)
 app.use(routes.packages)
+app.use(routes.notifications)
 app.use(routes.dashboard)
 
 /*****************  ***********************/
