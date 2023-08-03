@@ -1,6 +1,9 @@
 const moment = require("moment");
 const { Notifications } = require("../models/Notifications");
 const { Members } = require("../models/Members");
+const { Packages } = require("../models/Packages");
+const { Payments } = require("../models/Payments");
+const { Tasks } = require("../models/Tasks");
 
 const newTaskAssignedNotification = async (data) => {
 
@@ -67,4 +70,58 @@ const assignedTaskNotification = async (data, oldData) => {
 
 }
 
-module.exports = { assignedTaskNotification, newTaskAssignedNotification }
+const addedPaymentNotification = async (data) => {
+	try {
+
+		let id
+		let members = [] 
+
+		if (data.packageID) {
+			id = data.packageID
+			let pkg = await Packages.findOne({packageID: data.packageID})
+			members = pkg._doc._rmAssigned
+		} else if (data.taskID) {
+			id = data.packageID
+			let task = await Tasks.findOne({taskID: data.taskID})
+			members = task._doc._membersAssigned
+		}
+
+		members = await Members.find({
+			_id: {
+				$in: members
+			}
+		})
+
+		await Promise.all(members.map(async m => {
+			m = m._doc
+			try {
+				if (data.packageID && m.activeNotifications.includes('Package RM - Added Payments'))
+					await Notifications.create({
+						type:'package',
+						text: 'Payment Added for Package',
+						id: data.packageID,
+						_memberID: m._id
+					})
+				else if (data.taskID && m.activeNotifications.includes('Assigned Task - Added Payments'))
+					await Notifications.create({
+						type:'task',
+						text: 'Payment Added for Task',
+						id: data.taskID,
+						_memberID: m._id
+					})
+			}
+			catch (err) {
+				console.error('Error creating notification', err)
+			}
+
+		}))
+
+	}
+	catch (err) {
+		console.error(err)
+	}
+}
+
+addedPaymentNotification({packageID: 'RT0035'})
+
+module.exports = { assignedTaskNotification, newTaskAssignedNotification, addedPaymentNotification }

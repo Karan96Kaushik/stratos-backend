@@ -17,6 +17,7 @@ const {
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 const fs = require('fs');
 const {handlePayment} = require("../modules/paymentHelpers")
+const {addedPaymentNotification} = require("../modules/notificationHelpers")
 
 // Route to add payemnts for tasks and packages
 router.post("/api/payments/add", async (req, res) => {
@@ -37,6 +38,7 @@ router.post("/api/payments/add", async (req, res) => {
 		addedBy: req.user.id
 	});
 
+	await addedPaymentNotification(req.body)
 	await handlePayment(req.body, null)
 
 	_ = await updateID("account")
