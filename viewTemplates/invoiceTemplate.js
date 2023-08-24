@@ -43,10 +43,10 @@ const modeAccountInfo = {
 		branch: 'Kharghar'
 	}, 
 	"Envision Next LLP": {
-		accountNumber: '921020032221802',
-		accountName: 'ENVISION NEXT LLP',
-		ifsc: 'UTIB0003526',
-		bank: 'Axis Bank',
+		accountNumber: '50200085489111',
+		accountName: 'Envision Next LLP',
+		ifsc: 'HDFC0001102',
+		bank: 'HDFC Bank',
 		branch: '-'
 	}, 
 }
