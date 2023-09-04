@@ -392,8 +392,8 @@ router.post("/api/tasks/export", async (req, res) => {
 
 		if (req.query.serviceType.length) {
 			req.query.serviceType.forEach(f => {
-				taskFields[f].texts.forEach(fl => fields.texts.push(fl))
-				taskFields[f].checkboxes.forEach(fl => fields.texts.push(fl))
+				taskFields[f].texts.forEach(fl => !fields.texts.find(a => a.id == fl.id) ? fields.texts.push(fl) : false)
+				taskFields[f].checkboxes.forEach(fl => !fields.checkboxes.find(a => a.id == fl.id) ? fields.checkboxes.push(fl) : false)
 			})
 		}
 
