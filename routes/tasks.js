@@ -388,7 +388,16 @@ router.post("/api/tasks/export", async (req, res) => {
 
 		results = commonProcessor(results)
 
-		let file = await generateExcel(results, taskFields[req.query.searchAll ? "all" : req.query.serviceType], "tasksExport" + (+new Date))
+		let fields = taskFields["all"]
+
+		if (req.query.serviceType.length) {
+			req.query.serviceType.forEach(f => {
+				taskFields[f].texts.forEach(fl => fields.texts.push(fl))
+				taskFields[f].checkboxes.forEach(fl => fields.texts.push(fl))
+			})
+		}
+
+		let file = await generateExcel(results, fields, "tasksExport" + (+new Date))
 
 		res.download("/tmp/" + file,(err) => {
 			fs.unlink("/tmp/" + file, () => {})
