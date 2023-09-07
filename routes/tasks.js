@@ -189,6 +189,7 @@ const generateQuery = (req) => {
 				{ taskID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				{ clientName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				{ membersAssigned: { $regex: new RegExp(req.query.text) , $options:"i" }},
+				{ membersAllocated: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				// { memberName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				{ promoter: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				{ totalAmount: Number(req.query.text)},
@@ -285,6 +286,7 @@ const generateQuery = (req) => {
 				{addedBy: req.user.id},
 				{_memberID: req.user.id},
 				{_membersAssigned: req.user.id},
+				{_membersAllocated: req.user.id},
 			]
 		})
 
@@ -390,7 +392,7 @@ router.post("/api/tasks/export", async (req, res) => {
 
 		let fields = taskFields["all"]
 
-		if (req.query.serviceType.length) {
+		if (req.query.serviceType?.length) {
 			req.query.serviceType.forEach(f => {
 				taskFields[f].texts.forEach(fl => !fields.texts.find(a => a.id == fl.id) ? fields.texts.push(fl) : false)
 				taskFields[f].checkboxes.forEach(fl => !fields.checkboxes.find(a => a.id == fl.id) ? fields.checkboxes.push(fl) : false)
@@ -499,7 +501,10 @@ const generateQueryPayments = async (req) => {
 
 	// console.log(req.permissions.page.includes("Assigned Task Accounts R"), !req.permissions.page.includes("Payments R"))
 	if (req.permissions.page.includes("Assigned Task Accounts R") && !req.permissions.page.includes("Payments R")) {
-		query['$and'].push({_membersAssigned: req.user.id})
+		query['$and'].push({$or: [
+			{_membersAllocated: req.user.id},
+			{_membersAssigned: req.user.id}
+		]})
 	}
 
 	query.$and.push({ removeFromAccounts: false })
@@ -686,6 +691,7 @@ router.post("/api/tasks/update", async (req, res) => {
 			!req.permissions.isAdmin && 
 			task.addedBy != req.user.id && 
 			!(task._membersAssigned ?? []).includes(String(req.user.id)) && 
+			!(task._membersAllocated ?? []).includes(String(req.user.id)) && 
 			!req.permissions.page.includes("Payments W")
 		) {
 			res.status(401).send("Unauthorized to update this task")

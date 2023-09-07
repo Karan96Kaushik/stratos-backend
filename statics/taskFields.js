@@ -129,6 +129,7 @@ const taskFields = {
             {label:"Client Name", id: "clientName"},
             {label:"Promoter", id: "promoter"},
             {label:"Members Assigned", id: "membersAssigned"},
+            {label:"Members Allocated", id: "membersAllocated"},
             {label:"Type", id: "serviceType"},
             {label:"Status", id: "status", options: allStatuses},
         ],
