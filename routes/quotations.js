@@ -2,6 +2,7 @@ const router     = new (require('express')).Router()
 const mongoose = require("mongoose");
 const moment = require("moment");
 const {Quotations} = require("../models/Quotations");
+const {Clients} = require("../models/Clients");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
 const {quotationFields} = require("../statics/quotationFields")
@@ -26,7 +27,18 @@ const checkQuotationW = (req, res, next) => {
 
 router.post("/api/quotations/add", checkQuotationW, async (req, res) => {
 	const memberInfo = await Members.findOne({_id: req.user.id})
-    console.log(memberInfo.memberID)
+
+	if (!req.body.ignoreMobileDuplicate && req.body.mobileEnd) {
+		let results = await Clients.find({ mobile: new RegExp(req.body.mobileEnd + '$', "i") })
+		if (results.length) {
+			results = results.map(r => r._doc.name).join(', ')
+			return res.json({
+				message: 'Existing client found for mobile number: ' + results
+			})
+		}
+	}
+
+	delete req.body.ignoreMobileDuplicate
 
     let quotationID = "REQ" + await getID("quotation")
 	let _ = await Quotations.create({
