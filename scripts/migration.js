@@ -246,14 +246,22 @@ const migrateClientAmounts = async () => {
 	for (client of allClients) {
 
 		let tasks = await Tasks.find({clientID: client.clientID})
+		let packages = await Packages.find({clientID: client.clientID})
 		tasks = tasks.map(t => t._doc)
-		if(!tasks.length)
+		packages = packages.map(p => p._doc)
+		if(!tasks.length && !packages.length)
 			continue
 
 		let totalAmount = tasks.reduce((t, curr) => Number(curr.totalAmount || 0) + t,0)
+		let totalAmountP = packages.reduce((t, curr) => Number(curr.totalAmount || 0) + t,0)
+		totalAmount = totalAmount + totalAmountP
 		let receivedAmount = tasks.reduce((t, curr) => Number(curr.receivedAmount || 0) + t,0)
+		let receivedAmountP = packages.reduce((t, curr) => Number(curr.receivedAmount || 0) + t,0)
+		receivedAmount = receivedAmount + receivedAmountP
 		let balanceAmount = tasks.reduce((t, curr) => Number(curr.balanceAmount || 0) + t,0)
-
+		let balanceAmountP = packages.reduce((t, curr) => Number(curr.balanceAmount || 0) + t,0)
+		balanceAmount = balanceAmount + balanceAmountP
+		
 		// if(!client.promoter) {
 		// 	console.log(String(client.clientID))
 		// 	continue
