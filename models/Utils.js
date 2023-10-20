@@ -20,7 +20,6 @@ let UtilsModel = mongoose.model("Utils", Utils)
 
 const getID = async (type, padding=10000) => {
     let data = await UtilsModel.findOne({type:"IDs"})
-    console.log(data.ids)
     const idNum = String(padding + (data.ids[type + "ID"] ?? 0) + 1)
     return idNum.substring(1,)
 }

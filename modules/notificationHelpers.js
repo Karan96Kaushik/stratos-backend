@@ -12,7 +12,7 @@ const newTaskAssignedNotification = async (data) => {
 			try {
 				await Notifications.create({
 					type:'task',
-					text: 'New Task Added',
+					text: trimString('New Task Added -' + data.clientName),
 					id: data.taskID,
 					_memberID: mID
 				})
@@ -38,7 +38,7 @@ const assignedTaskNotification = async (data, oldData) => {
 			try {
 				await Notifications.create({
 					type:'task',
-					text: 'Task Assigned',
+					text: trimString('Task Assigned - ' + oldData.clientName),
 					id: oldData.taskID,
 					_memberID: mID
 				})
@@ -53,7 +53,7 @@ const assignedTaskNotification = async (data, oldData) => {
 			try {
 				await Notifications.create({
 					type:'task',
-					text: 'Task Unassigned',
+					text: trimString('Task Unassigned - ' + oldData.clientName),
 					id: oldData.taskID,
 					_memberID: mID
 				})
@@ -78,7 +78,7 @@ const newPackageAssignedNotification = async (data) => {
 			try {
 				await Notifications.create({
 					type:'package',
-					text: 'New Package Added',
+					text: trimString('New Package Added - ' + data.clientName),
 					id: data.packageID,
 					_memberID: mID
 				})
@@ -104,7 +104,7 @@ const assignedPackageNotification = async (data, oldData) => {
 			try {
 				await Notifications.create({
 					type:'package',
-					text: 'Package Assigned',
+					text: trimString('Package Assigned - ' + oldData.clientName),
 					id: oldData.packageID,
 					_memberID: mID
 				})
@@ -119,7 +119,7 @@ const assignedPackageNotification = async (data, oldData) => {
 			try {
 				await Notifications.create({
 					type:'package',
-					text: 'Package Unassigned',
+					text: trimString('Package Unassigned - ' + oldData.clientName),
 					id: oldData.packageID,
 					_memberID: mID
 				})
@@ -163,15 +163,15 @@ const addedPaymentNotification = async (data) => {
 			try {
 				if (data.packageID && m.activeNotifications.includes('Package RM - Added Payments'))
 					await Notifications.create({
-						type:'package',
-						text: 'Payment Added for Package',
+						type:'packageaccounts',
+						text: trimString('Payment Added - ' + data.clientName),
 						id: data.packageID,
 						_memberID: m._id
 					})
 				else if (data.taskID && m.activeNotifications.includes('Assigned Task - Added Payments'))
 					await Notifications.create({
-						type:'task',
-						text: 'Payment Added for Task',
+						type:'taskaccounts',
+						text: trimString('Payment Added - ' + data.clientName),
 						id: data.taskID,
 						_memberID: m._id
 					})
@@ -187,6 +187,9 @@ const addedPaymentNotification = async (data) => {
 		console.error(err)
 	}
 }
+
+const STR_LEN = 40
+const trimString = (st) => st.length > STR_LEN ? st.substring(0,STR_LEN) + '...' : st
 
 module.exports = { 
 	assignedPackageNotification, 
