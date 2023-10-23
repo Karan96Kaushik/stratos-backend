@@ -55,7 +55,8 @@ const generateQuery = (req) => {
 			{
 				$or:[
 					{ ticketID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ ticketID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ subject: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					// { ticketID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
 			}
 		],
@@ -139,10 +140,15 @@ router.post("/api/tickets/search", async (req, res) => {
 
 router.get("/api/tickets/", async (req, res) => {
 	try{
-		const query = req.query
+		let query = {"$and" : [{...req.query}]}
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Tickets R")) {
-			query.addedBy = req.user.id
+			query["$and"].push({
+				"$or" : [
+					{addedBy:req.user.id}, 
+					{_membersAssigned:req.user.id}
+				]
+			})
 		}
 
 		let tickets = await Tickets.findOne({...query});
