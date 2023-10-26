@@ -576,9 +576,42 @@ const migratePaymentsServicetype = async () => {
 	console.log("Done")
 }
 
+const migrateDepartments = async () => {
+
+	let departments = [
+		'Admin', 
+		'Operations', 
+		'Technical',
+		'Accounts',
+		'Relationship Manager',
+		'Sales',
+	]
+
+	let departmentsNew = [
+		'Administration', 
+		'Compliance', 
+		'Registration',
+		'Finance',
+		'Client Retention',
+		'Business Development',
+	]
+
+	for (dep of departments) {
+		console.debug(dep, departmentsNew[departments.indexOf(dep)])
+		let _ = await Members.updateMany(
+			{department: dep}, 
+			{department: departmentsNew[departments.indexOf(dep)]}, 
+		)
+
+	}
+
+	console.log("Done")
+}
 
 
-migratePaymentsServicetype()
+migrateDepartments()
+
+// migratePaymentsServicetype()
 
 // test();
 
