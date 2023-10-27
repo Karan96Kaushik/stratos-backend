@@ -51,6 +51,31 @@ const newTicketAssignedNotification = async (data) => {
 
 }
 
+const newTicketMessageNotification = async (data, message_creater_id) => {
+
+	try {
+		data._membersAssigned = data._membersAssigned.filter(m => m._id !== message_creater_id)
+
+		await Promise.all(data._membersAssigned.map(async mID => {
+			try {
+				await Notifications.create({
+					type:'tickets',
+					text: trimString('Ticket - New Message - ' + data.subject),
+					id: data.ticketID,
+					_memberID: mID
+				})
+			}
+			catch (err) {
+				console.error('Error creating notification', err)
+			}
+		}))
+	}
+	catch (err) {
+		console.error(err)
+	}
+
+}
+
 const assignedTaskNotification = async (data, oldData) => {
 
 	try {
@@ -219,5 +244,6 @@ module.exports = {
 	assignedTaskNotification, 
 	newTaskAssignedNotification, 
 	addedPaymentNotification,
-	newTicketAssignedNotification
+	newTicketAssignedNotification,
+	newTicketMessageNotification
 }
