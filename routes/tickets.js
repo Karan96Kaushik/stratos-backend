@@ -17,19 +17,19 @@ const {
 	uploadToS3,
 	getFilePath
 } = require("../modules/useS3");
-const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
+const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager");
+const { newTicketAssignedNotification } = require('../modules/notificationHelpers');
 
 const tmpdir = "/tmp/"
 
 router.post("/api/tickets/add", async (req, res) => {
 	try {
 
-		const memberInfo = await Members.findOne({_id: req.user.id})
+		// const memberInfo = await Members.findOne({_id: req.user.id})
 
 		let ticketID = "TK" + await getID("TK")
 		let _ = await Tickets.create({
 			...req.body,
-			memberName:memberInfo.userName,
 			ticketID,
 			addedBy: req.user.id
 		});
@@ -39,6 +39,11 @@ router.post("/api/tickets/add", async (req, res) => {
 			let files = await saveFilesToLocal(req.body.docs)
 			await uploadFiles(files, ticketID)
 		}
+
+		await newTicketAssignedNotification({
+			...req.body,
+			ticketID
+		})
 
 		res.send("OK")
 		
