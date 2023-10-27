@@ -54,7 +54,8 @@ const newTicketAssignedNotification = async (data) => {
 const newTicketMessageNotification = async (data, message_creater_id) => {
 
 	try {
-		data._membersAssigned = data._membersAssigned.filter(m => m._id !== message_creater_id)
+		data._membersAssigned.push(data.addedBy)
+		data._membersAssigned = [...new Set(data._membersAssigned)].filter(m => String(m) !== String(message_creater_id))
 
 		await Promise.all(data._membersAssigned.map(async mID => {
 			try {
