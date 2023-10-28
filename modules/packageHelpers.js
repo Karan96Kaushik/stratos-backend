@@ -139,9 +139,10 @@ const updatePackage = async (package) => {
 		}
 
 		due = ((Number(package.amount) / (12 / additiveMonths)) * (1 + cyclesPassed))
-
+		
 	}
 
+	due = due + Number(package.govtFees || 0)
 
 	// Map pending services in an array to be queried
 	const packageServices = serviceMapping(package)
