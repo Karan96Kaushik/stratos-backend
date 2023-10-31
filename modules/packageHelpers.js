@@ -142,8 +142,6 @@ const updatePackage = async (package) => {
 		
 	}
 
-	due = due + Number(package.govtFees || 0)
-
 	// Map pending services in an array to be queried
 	const packageServices = serviceMapping(package)
 	let pending = []
@@ -155,6 +153,9 @@ const updatePackage = async (package) => {
 		gstamount = Math.ceil((due * 0.18))
 		due = due + gstamount
 	}
+
+	due = due + Number(package.govtFees || 0)
+
 	// console.log(due, gstamount, due - (package.receivedAmount || 0))
 	let _ = await Packages.updateOne(
 		{ _id: String(package._id) },
