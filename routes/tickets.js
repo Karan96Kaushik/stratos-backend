@@ -22,6 +22,8 @@ const {
 	newTicketMessageNotification, 
 	newTicketAssignedNotification 
 } = require('../modules/notificationHelpers');
+const client = require('../scripts/redisClient');
+const { setReadTime, getAllReadTime } = require('../modules/ticketHelper');
 
 const tmpdir = "/tmp/"
 
@@ -106,12 +108,13 @@ const generateQuery = (req) => {
 	return query
 }
 
-const commonProcessor = (results) => {
+const commonProcessor = (results, lastReads) => {
 	// created & followup timestamp
 	results = results.map(val => ({
 		...val, 
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
-		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY")
+		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY"),
+		isBold: val.lastMessageTime ? (lastReads[val._id] ? val.lastMessageTime > Number(lastReads[val._id]) : true) : false
 	}))
 
 	return results
@@ -137,7 +140,9 @@ router.post("/api/tickets/search", async (req, res) => {
 
 		results = results.map(val => val._doc)
 
-		results = commonProcessor(results)
+		const lastReads = await getAllReadTime(req.user.id)
+
+		results = commonProcessor(results, lastReads)
 
 		res.json(results)
 	} catch (err) {
@@ -167,6 +172,8 @@ router.get("/api/tickets/", async (req, res) => {
 		tickets.files = files
 		
 		res.json(tickets)
+
+		await setReadTime(req.user.id, req.query._id)
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
@@ -178,12 +185,18 @@ router.post("/api/messages/add", async (req, res) => {
 		if (!req.body._ticketID) throw new Error("No ticket ID")
 
 		const memberInfo = await Members.findOne({_id: req.user.id})
-		
+
 		await TicketMessages.create({ 
 			...req.body,
 			addedBy: req.user.id,
 			memberName:memberInfo.userName
 		})
+		
+		await Tickets.updateOne({ 
+			_id: req.body._ticketID 
+		}, { lastMessageTime: +new Date })
+		
+		await setReadTime(req.user.id, req.body._ticketID)
 
 		const ticket = await Tickets.findOne({ _id: req.body._ticketID })
 
