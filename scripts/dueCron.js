@@ -15,12 +15,16 @@ const updatePackages = async () => {
 	console.log(allPackages.length + ' packages found')
 
 	for (let package of allPackages) {
-
-		package = package._doc
-		if (!package.startDate || !package.paymentCycle)
-			continue
-		await updatePackage(package)
-
+		try {
+			package = package._doc
+			if (!package.startDate || !package.paymentCycle)
+				continue
+			await updatePackage(package)
+		}
+		catch (err) {
+			console.error("Error in package", package)
+			console.error(err)
+		}
 	}
 
 	console.log("Done")
