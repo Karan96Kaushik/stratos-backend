@@ -1,5 +1,4 @@
 const router     = new (require('express')).Router()
-const mongoose = require("mongoose");
 const moment = require("moment");
 const fs = require("fs");
 
@@ -7,10 +6,6 @@ const {Tickets} = require("../models/Tickets");
 const {TicketMessages} = require("../models/TicketMessages");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
-
-const {generateExcel} = require("../modules/excelProcessor");
-const ticketFields = require("../statics/ticketFields").ticketFields;
-const messengerFields = require("../statics/ticketFields").messengerFields;
 
 const {
 	getAllFiles,
@@ -22,7 +17,6 @@ const {
 	newTicketMessageNotification, 
 	newTicketAssignedNotification 
 } = require('../modules/notificationHelpers');
-const client = require('../scripts/redisClient');
 const { setReadTime, getAllReadTime } = require('../modules/ticketHelper');
 
 const tmpdir = "/tmp/"
