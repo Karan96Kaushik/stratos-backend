@@ -315,7 +315,7 @@ router.get("/api/packages/", async (req, res) => {
 		if(new Date(package.startDate) + "" != "Invalid Date")
 			package.startDate = new Date(package.startDate).toISOString().split("T")[0]
 
-		let files = await getAllFiles(package.invoiceID + "/")
+		let files = await getAllFiles(package.packageID + "/")
 		files = files.map(({Key}) => (Key))
 
 		package.files = files
