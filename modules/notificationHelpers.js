@@ -187,18 +187,20 @@ const assignedPackageNotification = async (data, oldData) => {
 const addedPaymentNotification = async (data) => {
 	try {
 
-		let id
+		// let id
 		let members = [] 
 
 		if (data.packageID) {
-			id = data.packageID
+			// id = data.packageID
 			let pkg = await Packages.findOne({packageID: data.packageID})
 			members = pkg._doc._rmAssigned
 		} else if (data.taskID) {
-			id = data.packageID
+			// id = data.taskID
 			let task = await Tasks.findOne({taskID: data.taskID})
-			members = task._doc._membersAssigned
+			members = [...new Set([...task._doc._membersAssigned, ...task._doc._membersAllocated])]
 		}
+
+		members = members.filter(m => !m.includes('Department'))
 
 		members = await Members.find({
 			_id: {
