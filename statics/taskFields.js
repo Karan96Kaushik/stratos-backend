@@ -72,6 +72,33 @@ const statusSet9 = [
     "De-Registered",
 ]
 
+const statusSet10 = [
+    "Retrieval Only", 
+    "Half Yearly Retainer",
+]
+
+const statusSet11 = [
+    "Awaiting Documents From Client",
+    "Under Scrutiny",
+    "Submitted Documents to RERA",
+    "Hearing Date Received",
+    "MahaRERA Queries",
+    "Awaiting Order",
+]
+
+const sroAuthorities = [
+    "",
+    "CREDAI MAHARASHTRA",
+    "CREDAI - MCHI",
+    "NAREDCO",
+    "BAI ",
+    "MBVA ",
+    "BDA",
+    "Public Authority ",
+    "Union Territory",
+    "Unavailable",
+]
+
 const actions = [
     "", 
     "Awaiting Accounts Confirmation", 
@@ -477,6 +504,22 @@ const taskFields = {
         checkboxes:[
             {label:"With Consents", id:"withConsents"},
             {label:"Without Consents", id:"withoutConsents"},
+            ...commonCheckboxFields
+        ]
+    },
+    "Order No 40": {
+        name:"Order No 40",
+        texts:[
+            {label:"Priority", id:"priority", options:["", "High", "Medium", "Low"]},
+            {label:"Hearing Date", id:"hearingDate", type:'date'},
+            {label:"Curr Completion Date", id:"currCompletionDate", type:'date'},
+            {label:"To Be Extended Date", id:"extensionDate", type:'date'},
+            {label:"Date of Submission", id:"dateOfSubmission", type:'date'},
+            {label:"SRO Authority", id:"sroAuthority", options:sroAuthorities},
+            {label:"Status", id:"status", options:[...statusSet1, ...statusSet11]},
+            ...commonTextFieldsEnd,
+        ],
+        checkboxes:[
             ...commonCheckboxFields
         ]
     },
