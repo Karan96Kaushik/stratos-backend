@@ -268,6 +268,7 @@ router.delete("/api/tickets/", async (req, res) => {
 		}
 
 		await Tickets.deleteOne({_id});
+		await TicketMessages.deleteMany({_ticketID: _id});
 		// console.log(clients)
 		res.send("ok")
 	} catch (err) {

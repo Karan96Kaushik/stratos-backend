@@ -36,7 +36,7 @@ const newTicketAssignedNotification = async (data) => {
 	try {
 		await Promise.all(data._membersAssigned.map(async mID => {
 			try {
-				await setReadTime(mID, data._ticketID, +new Date - 5000) // Push old time so unread count is not updated for new messages  
+				await setReadTime(mID, data._id, +new Date - 5000) // Push old time so unread count is not updated for new messages  
 				await Members.findOneAndUpdate({ _id: mID }, { $inc: { unread: 1 } }) //, { new: true })
 				await Notifications.create({
 					type:'tickets',
@@ -68,10 +68,10 @@ const newTicketMessageNotification = async (data, message_creater_id) => {
 
 		await Promise.all(data._membersAssigned.map(async mID => {
 			try {
-				let readTime = await getReadTime(mID, data._ticketID)
+				let readTime = await getReadTime(mID, data._id)
 				if (!readTime)
-					await setReadTime(mID, data._ticketID, +new Date - 2000) // Push old time so unread count is not updated for new messages  
-				// console.debug(new Date(oldMessageTime) , new Date(readTime) , oldMessageTime < readTime)
+					await setReadTime(mID, data._id, +new Date - 2000) // Push old time so unread count is not updated for new messages  
+				// console.debug(new Date(oldMessageTime) , new Date(readTime) , oldMessageTime < readTime, "Doing - " + (!oldMessageTime || !readTime || oldMessageTime < readTime))
 				if (!oldMessageTime || !readTime || oldMessageTime < readTime) {
 					await Members.findOneAndUpdate({ _id: mID }, { $inc: { unread: 1 } }) //, { new: true })
 					// console.debug(m)

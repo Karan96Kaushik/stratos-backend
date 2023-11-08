@@ -13,6 +13,7 @@ const getAllReadTime = async (_memberID) => {
 
 const setReadTime = async (_memberID, ticketID, time=+new Date) => {
     try {
+        // console.debug('TKS-' + String(_memberID), String(ticketID))
         await client.hSet('TKS-' + String(_memberID), String(ticketID), time)
     }
     catch (err) {
@@ -22,7 +23,7 @@ const setReadTime = async (_memberID, ticketID, time=+new Date) => {
 
 const getReadTime = async (_memberID, ticketID) => {
     try {
-        // console.debug(String(_memberID), String(ticketID))
+        // console.debug('TKS-' + String(_memberID), String(ticketID))
         const readTime = await client.hGet('TKS-' + String(_memberID), String(ticketID))
         return Number(readTime)
     }
