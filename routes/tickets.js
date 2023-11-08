@@ -17,7 +17,7 @@ const {
 	newTicketMessageNotification, 
 	newTicketAssignedNotification 
 } = require('../modules/notificationHelpers');
-const { setReadTime, getAllReadTime } = require('../modules/ticketHelper');
+const { setReadTime, getAllReadTime, getReadTime, setLastMessageTime } = require('../modules/ticketHelper');
 
 const tmpdir = "/tmp/"
 
@@ -25,11 +25,12 @@ router.post("/api/tickets/add", async (req, res) => {
 	try {
 
 		// const memberInfo = await Members.findOne({_id: req.user.id})
-
+		let _
 		let ticketID = "TK" + await getID("TK")
-		let _ = await Tickets.create({
+		let createdTick = await Tickets.create({
 			...req.body,
 			ticketID,
+			lastMessageTime: +new Date,
 			addedBy: req.user.id
 		});
 		_ = await updateID("TK")
@@ -41,8 +42,11 @@ router.post("/api/tickets/add", async (req, res) => {
 
 		await newTicketAssignedNotification({
 			...req.body,
-			ticketID
+			ticketID,
+			_id: createdTick._id,
 		})
+		await setLastMessageTime(createdTick._id)
+		await setReadTime(req.user.id, createdTick._id)
 
 		res.send("OK")
 		
@@ -135,10 +139,11 @@ router.post("/api/tickets/search", async (req, res) => {
 		results = results.map(val => val._doc)
 
 		const lastReads = await getAllReadTime(req.user.id)
-
 		results = commonProcessor(results, lastReads)
 
-		res.json(results)
+		const member = await Members.findOne({_id: req.user.id})
+
+		res.json({tickets: results, unread: member?._doc?.unread})
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
@@ -165,7 +170,14 @@ router.get("/api/tickets/", async (req, res) => {
 		files = files.map(f => f.Key)
 		tickets.files = files
 		
-		res.json(tickets)
+		let unread
+		const lastRead = await getReadTime(req.user.id, req.query._id)
+		if (lastRead < tickets.lastMessageTime) {
+			const member = await Members.findOneAndUpdate({ _id: req.user.id, unread: { $gt: 0 } }, { $inc: { unread: -1 } }, { new: true })
+			unread = member?._doc?.unread
+		}
+
+		res.json({tickets, unread})
 
 		await setReadTime(req.user.id, req.query._id)
 	} catch (err) {
@@ -185,16 +197,6 @@ router.post("/api/messages/add", async (req, res) => {
 			addedBy: req.user.id,
 			memberName:memberInfo.userName
 		})
-		
-		await Tickets.updateOne({ 
-			_id: req.body._ticketID 
-		}, { lastMessageTime: +new Date })
-		
-		await setReadTime(req.user.id, req.body._ticketID)
-
-		const ticket = await Tickets.findOne({ _id: req.body._ticketID })
-
-		await newTicketMessageNotification(ticket._doc, req.user.id)
 
 		res.json({ 
 			...req.body,
@@ -202,6 +204,21 @@ router.post("/api/messages/add", async (req, res) => {
 			memberName:memberInfo.userName,
 			createdTime: moment(new Date()).format("DD-MMM HH:mm")
 		})
+		
+		try {
+			await setReadTime(req.user.id, req.body._ticketID)
+			const ticket = await Tickets.findOneAndUpdate({ 
+				_id: req.body._ticketID 
+			}, { lastMessageTime: +new Date })
+			
+			// const ticket = await Tickets.findOne({ _id: req.body._ticketID })
+			await newTicketMessageNotification(ticket._doc, req.user.id)
+			await setLastMessageTime(ticket._doc._id)
+
+		}
+		catch (err) {
+			console.error("Error in notif", err)
+		}
 
 	} catch (err) {
 		console.log(err)
@@ -269,6 +286,7 @@ router.post("/api/tickets/update", async (req, res) => {
 		delete req.body.addedBy
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Tickets R")) {
+			console.debug(_id)
 			let result = await Tickets.findOne({_id})
 			if (String(result.addedBy) != req.user.id) {
 				res.status(401).send("Unauthorized to update this task")

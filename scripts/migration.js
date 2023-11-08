@@ -608,8 +608,14 @@ const migrateDepartments = async () => {
 	console.log("Done")
 }
 
+const migrateMembersUnread = async () => {
+	console.log(await Members.updateMany({}, {unread:0}))
+	console.debug('Done')
+}
 
-migrateDepartments()
+migrateMembersUnread()
+
+// migrateDepartments()
 
 // migratePaymentsServicetype()
 

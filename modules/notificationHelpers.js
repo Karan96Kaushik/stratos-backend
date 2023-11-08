@@ -4,6 +4,8 @@ const { Members } = require("../models/Members");
 const { Packages } = require("../models/Packages");
 const { Payments } = require("../models/Payments");
 const { Tasks } = require("../models/Tasks");
+const { getReadTime, getLastMessageTime, setReadTime } = require("./ticketHelper");
+const client = require("../scripts/redisClient");
 
 const newTaskAssignedNotification = async (data) => {
 
@@ -16,6 +18,7 @@ const newTaskAssignedNotification = async (data) => {
 					id: data.taskID,
 					_memberID: mID
 				})
+				await setLastNotificationTime(mID)
 			}
 			catch (err) {
 				console.error('Error creating notification', err)
@@ -33,12 +36,15 @@ const newTicketAssignedNotification = async (data) => {
 	try {
 		await Promise.all(data._membersAssigned.map(async mID => {
 			try {
+				await setReadTime(mID, data._ticketID, +new Date - 5000) // Push old time so unread count is not updated for new messages  
+				await Members.findOneAndUpdate({ _id: mID }, { $inc: { unread: 1 } }) //, { new: true })
 				await Notifications.create({
 					type:'tickets',
 					text: trimString('Ticket Assigned - ' + data.subject),
 					id: data.ticketID,
 					_memberID: mID
 				})
+				await setLastNotificationTime(mID)
 			}
 			catch (err) {
 				console.error('Error creating notification', err)
@@ -54,17 +60,29 @@ const newTicketAssignedNotification = async (data) => {
 const newTicketMessageNotification = async (data, message_creater_id) => {
 
 	try {
+		const oldMessageTime = await getLastMessageTime(data._id)
+		if (!data._membersAssigned?.length)
+			return 
 		data._membersAssigned.push(data.addedBy)
 		data._membersAssigned = [...new Set(data._membersAssigned)].filter(m => String(m) !== String(message_creater_id))
 
 		await Promise.all(data._membersAssigned.map(async mID => {
 			try {
+				let readTime = await getReadTime(mID, data._ticketID)
+				if (!readTime)
+					await setReadTime(mID, data._ticketID, +new Date - 2000) // Push old time so unread count is not updated for new messages  
+				// console.debug(new Date(oldMessageTime) , new Date(readTime) , oldMessageTime < readTime)
+				if (!oldMessageTime || !readTime || oldMessageTime < readTime) {
+					await Members.findOneAndUpdate({ _id: mID }, { $inc: { unread: 1 } }) //, { new: true })
+					// console.debug(m)
+				}
 				await Notifications.create({
 					type:'tickets',
 					text: trimString('Ticket - New Message - ' + data.subject),
 					id: data.ticketID,
 					_memberID: mID
 				})
+				await setLastNotificationTime(mID)
 			}
 			catch (err) {
 				console.error('Error creating notification', err)
@@ -91,6 +109,7 @@ const assignedTaskNotification = async (data, oldData) => {
 					id: oldData.taskID,
 					_memberID: mID
 				})
+				await setLastNotificationTime(mID)
 			}
 			catch (err) {
 				console.error('Error creating notification', err)
@@ -106,6 +125,7 @@ const assignedTaskNotification = async (data, oldData) => {
 					id: oldData.taskID,
 					_memberID: mID
 				})
+				await setLastNotificationTime(mID)
 			}
 			catch (err) {
 				console.error('Error creating notification', err)
@@ -130,6 +150,7 @@ const newPackageAssignedNotification = async (data) => {
 					id: data.packageID,
 					_memberID: mID
 				})
+				await setLastNotificationTime(mID)
 			}
 			catch (err) {
 				console.error('Error creating notification', err)
@@ -156,6 +177,7 @@ const assignedPackageNotification = async (data, oldData) => {
 					id: oldData.packageID,
 					_memberID: mID
 				})
+				await setLastNotificationTime(mID)
 			}
 			catch (err) {
 				console.error('Error creating notification', err)
@@ -171,6 +193,7 @@ const assignedPackageNotification = async (data, oldData) => {
 					id: oldData.packageID,
 					_memberID: mID
 				})
+				await setLastNotificationTime(mID)
 			}
 			catch (err) {
 				console.error('Error creating notification', err)
@@ -211,20 +234,24 @@ const addedPaymentNotification = async (data) => {
 		await Promise.all(members.map(async m => {
 			m = m._doc
 			try {
-				if (data.packageID && m.activeNotifications.includes('Package RM - Added Payments'))
+				if (data.packageID && m.activeNotifications.includes('Package RM - Added Payments')) {
 					await Notifications.create({
 						type:'packageaccounts',
 						text: trimString('Payment Added - ' + data.clientName),
 						id: data.packageID,
 						_memberID: m._id
 					})
-				else if (data.taskID && m.activeNotifications.includes('Assigned Task - Added Payments'))
+					await setLastNotificationTime(m._id)
+				}
+				else if (data.taskID && m.activeNotifications.includes('Assigned Task - Added Payments')) {
 					await Notifications.create({
 						type:'taskaccounts',
 						text: trimString('Payment Added - ' + data.clientName),
 						id: data.taskID,
 						_memberID: m._id
 					})
+					await setLastNotificationTime(m._id)
+				}
 			}
 			catch (err) {
 				console.error('Error creating notification', err)
@@ -236,6 +263,18 @@ const addedPaymentNotification = async (data) => {
 	catch (err) {
 		console.error(err)
 	}
+}
+
+const setLastNotificationTime = async (memberID) => {
+    try {
+        const currTime = +new Date
+        // console.debug(String(_memberID), String(ticketID))
+        const readTime = await client.hSet('NOTIF', String(memberID), currTime)
+        return readTime
+    }
+    catch (err) {
+        console.error(err)
+    }
 }
 
 const STR_LEN = 35

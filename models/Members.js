@@ -16,6 +16,7 @@ let Members = new Schema(
     bloodGroup:String,
     startDate:Date,
     endDate:Date,
+    unread:Number,
 
     password:String,
 

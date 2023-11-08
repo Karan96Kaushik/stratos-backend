@@ -1,16 +1,18 @@
 const moment = require("moment");
 const router     = new (require('express')).Router()
 
-const {Notifications} = require("../models/Notifications");
+const { Notifications } = require("../models/Notifications");
 const client = require('../scripts/redisClient');
+const { Members } = require("../models/Members");
 
 router.get("/api/notifications", async (req, res) => {
 	try {
 		let _;
 
 		const lastNotif = await getLastNotificationTime(req.query.mid)
-		if ( req.query.useCached && (!lastNotif || lastNotif < (+new Date - 10000)) )
-			return res.status(304).send('ok')
+		// console.debug(new Date(lastNotif),new Date,  (!lastNotif || lastNotif < (+new Date - 20000)), 'last notif', (+new Date - lastNotif)/1000, "secs")
+		if ( req.query.useCached == 'true' && (!lastNotif || lastNotif < (+new Date - 20000)) )
+			return res.status(304).json({notifications:[]})
 		
 		let data = await Notifications.find({
 			_memberID: req.query.mid
@@ -22,10 +24,14 @@ router.get("/api/notifications", async (req, res) => {
 
 		let notifications = data.map(d => d._doc)
 
+		let unread = await Members.findOne({ _id: req.query.mid })
+
 		res.status(200).json({
-			notifications
+			notifications,
+			unread: unread?._doc?.unread
 		})
 	} catch (err) {
+		console.error(err)
 		res.status(500).send(err.message)
 	}
 })
