@@ -21,32 +21,37 @@ const {addedPaymentNotification} = require("../modules/notificationHelpers")
 
 // Route to add payemnts for tasks and packages
 router.post("/api/payments/add", async (req, res) => {
-
-	if(req.body.taskID && !req.permissions.isAdmin && !req.permissions.page.includes("Payments W")) {
-		res.status(401).send("Unauthorized to add payments for tasks")
-		return
-	} 
-	else if(req.body.packageID && !req.permissions.isAdmin && !req.permissions.page.includes("Packages Accounts W")) {
-		res.status(401).send("Unauthorized to add payments for packages")
-		return
+	try {
+		if(req.body.taskID && !req.permissions.isAdmin && !req.permissions.page.includes("Payments W")) {
+			res.status(401).send("Unauthorized to add payments for tasks")
+			return
+		} 
+		else if(req.body.packageID && !req.permissions.isAdmin && !req.permissions.page.includes("Packages Accounts W")) {
+			res.status(401).send("Unauthorized to add payments for packages")
+			return
+		}
+	
+		let paymentID = "AC" + await getID("account")
+		let _ = await Payments.create({
+			...req.body,
+			paymentID,
+			addedBy: req.user.id
+		});
+		await handlePayment(req.body, null)
+		_ = await updateID("account")
+		
+		res.send("OK")
+	
+		await addedPaymentNotification(req.body)
+	
+		if(req.body.docs?.length) {
+			let files = await saveFilesToLocal(req.body.docs)
+			await uploadFiles(files, invoiceID)
+		}
 	}
-
-    let paymentID = "AC" + await getID("account")
-	let _ = await Payments.create({
-		...req.body,
-		paymentID,
-		addedBy: req.user.id
-	});
-	await handlePayment(req.body, null)
-	_ = await updateID("account")
-	res.send("OK")
-
-	await addedPaymentNotification(req.body)
-
-
-	if(req.body.docs?.length) {
-		let files = await saveFilesToLocal(req.body.docs)
-		await uploadFiles(files, invoiceID)
+	catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
 	}
 })
 

@@ -119,21 +119,28 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 		});
 		_ = await updateID(serviceCode)
 
-		if(req.body._membersAssigned.length)
-			await newTaskAssignedNotification({
-				...req.body,
-				taskID,
-				docs:null,
-				files:null,
-				addedBy: req.user.id
-			})
-
-		if(req.body.docs?.length) {
-			let files = await saveFilesToLocal(req.body.docs)
-			await uploadFiles(files, taskID)
-		}
 		res.send("OK")
+
+		try {
+			if(req.body._membersAssigned?.length || req.body._membersAllocated?.length)
+				await newTaskAssignedNotification({
+					...req.body,
+					taskID,
+					docs:null,
+					files:null,
+					addedBy: req.user.id
+				})
+	
+			if(req.body.docs?.length) {
+				let files = await saveFilesToLocal(req.body.docs)
+				await uploadFiles(files, taskID)
+			}
+		}
+		catch (err) {
+			console.error("Error in upload files or notifications", err)
+		}
 	} catch (err) {
+		console.error(err)
 		res.status(500).send(err.message)
 	}
 })
@@ -714,17 +721,23 @@ router.post("/api/tasks/update", async (req, res) => {
 			await uploadFiles(files, taskID)
 		}
 
-		if(req.body._membersAssigned.length || task._membersAssigned.length)
-			await assignedTaskNotification({
-				...req.body,
-				docs:null,
-				files:null,
-			}, task)
-		
-		// console.log(task)
-		await handlePayment(task)
-
 		res.send("OK")
+
+		try {
+			if(req.body._membersAssigned?.length || task._membersAllocated?.length)
+				await assignedTaskNotification({
+					...req.body,
+					docs:null,
+					files:null,
+				}, task)
+			
+			// console.log(task)
+			await handlePayment(task)
+		}
+		catch (err) {
+			console.error("Error in Handle Payment or Notifs", err)
+		}
+
 	} catch (err) {
 		console.error(err)
 		res.status(500).send(err.message)

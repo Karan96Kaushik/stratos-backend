@@ -12,7 +12,7 @@ const newTaskAssignedNotification = async (data) => {
 			try {
 				await Notifications.create({
 					type:'task',
-					text: trimString('New Task Added -' + data.clientName),
+					text: trimString('New Task Added - ' + data.clientName),
 					id: data.taskID,
 					_memberID: mID
 				})

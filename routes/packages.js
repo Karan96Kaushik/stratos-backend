@@ -18,40 +18,51 @@ const {newPackageAssignedNotification, assignedPackageNotification} = require(".
 const _ = require('lodash')
 
 router.post("/api/packages/add", async (req, res) => {
-
-	if(!req.permissions.isAdmin && !req.permissions.page.includes("Packages W")) {
-		res.status(401).send("Unauthorized")
-		return
-	}
-
-	if(!req.body.archived)
-		req.body.archived = false
-
-    let packageID = "RT" + await getID("package")
-	let package = await Packages.create({
-		...req.body,
-		packageID,
-		addedBy: req.user.id
-	});
-	let _ = await updateID("package")
-
-	await updatePackage(package)
-
-	await updateClient(package.clientID)
-
-	if(req.body._rmAssigned.length)
-		await newPackageAssignedNotification({
+	try {
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Packages W")) {
+			res.status(401).send("Unauthorized")
+			return
+		}
+	
+		if(!req.body.archived)
+			req.body.archived = false
+	
+		let packageID = "RT" + await getID("package")
+		let package = await Packages.create({
 			...req.body,
 			packageID,
 			addedBy: req.user.id
-		})
+		});
+		let _ = await updateID("package")
+	
+		res.send("OK")
+		
+		try {
+			if(req.body.docs?.length) {
+				let files = await saveFilesToLocal(req.body.docs)
+				await uploadFiles(files, packageID)
+			}
+	
+			await updatePackage(package)
+		
+			await updateClient(package.clientID)
+		
+			if(req.body._rmAssigned?.length)
+				await newPackageAssignedNotification({
+					...req.body,
+					packageID,
+					addedBy: req.user.id
+				})
+		}
+		catch (err) {
+			console.error("Error in upload files / update pkg / update client / notifications", err)
+		}
 
-
-	if(req.body.docs?.length) {
-		let files = await saveFilesToLocal(req.body.docs)
-		await uploadFiles(files, packageID)
 	}
-	res.send("OK")
+	catch (err) {
+		console.error(err)
+		res.status(500).send(err.message)
+	}
 })
 
 const generateQuery = (req) => {
@@ -386,20 +397,26 @@ router.post("/api/packages/update", async (req, res) => {
 				...req.body
 			});
 
-		package = {...package._doc, ...req.body}
-		let newPackage = _.merge({}, package)
+		res.send("OK")
 
-		await updatePackage(package)
+		try {
+			if(req.body.docs?.length) {
+				let files = await saveFilesToLocal(req.body.docs)
+				await uploadFiles(files, invoiceID)
+			}
 
-		if(req.body._rmAssigned.length || oldPackage._rmAssigned.length)
-			await assignedPackageNotification(newPackage, oldPackage)
-		
-		if(req.body.docs?.length) {
-			let files = await saveFilesToLocal(req.body.docs)
-			await uploadFiles(files, invoiceID)
+			package = {...package._doc, ...req.body}
+			let newPackage = _.merge({}, package)
+			
+			await updatePackage(package)
+	
+			if(req.body._rmAssigned?.length || oldPackage._rmAssigned?.length)
+				await assignedPackageNotification(newPackage, oldPackage)
+		}
+		catch (err) {
+			console.error("Error in upload files / update packages / notifications", err)
 		}
 
-		res.send("OK")
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
