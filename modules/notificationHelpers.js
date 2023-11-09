@@ -31,11 +31,12 @@ const newTaskAssignedNotification = async (data) => {
 
 }
 
-const newTicketAssignedNotification = async (data) => {
+const newTicketAssignedNotification = async (data, creator_id) => {
 
 	try {
 		await Promise.all(data._membersAssigned.map(async mID => {
 			try {
+				if (mID == creator_id) return
 				await setReadTime(mID, data._id, +new Date - 5000) // Push old time so unread count is not updated for new messages  
 				await Members.findOneAndUpdate({ _id: mID }, { $inc: { unread: 1 } }) //, { new: true })
 				await Notifications.create({

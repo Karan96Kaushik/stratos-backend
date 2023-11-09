@@ -44,7 +44,7 @@ router.post("/api/tickets/add", async (req, res) => {
 			...req.body,
 			ticketID,
 			_id: createdTick._id,
-		})
+		}, req.user.id)
 		await setLastMessageTime(createdTick._id)
 		await setReadTime(req.user.id, createdTick._id)
 
