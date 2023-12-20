@@ -202,7 +202,7 @@ router.post("/api/messages/add", async (req, res) => {
 			...req.body,
 			addedBy: req.user.id,
 			memberName:memberInfo.userName,
-			createdTime: moment(new Date()).format("DD-MMM HH:mm")
+			createdTime: (new Date()).toISOString()
 		})
 		
 		try {
