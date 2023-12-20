@@ -202,7 +202,7 @@ router.post("/api/messages/add", async (req, res) => {
 			...req.body,
 			addedBy: req.user.id,
 			memberName:memberInfo.userName,
-			createdTime: (new Date()).toISOString()
+			createdTime: moment(new Date()).utc().utcOffset("+05:30").format("DD-MMM HH:mm")
 		})
 		
 		try {
@@ -237,8 +237,8 @@ router.get("/api/messages", async (req, res) => {
 			.limit(100)
 			// .skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || 1});
-
-		results = results.map(val => val._doc).map(v => ({...v, createdTime: moment(new Date(v.createdTime)).format("DD-MMM HH:mm"),}))
+		
+		results = results.map(val => val._doc).map(v => ({...v, createdTime: moment(new Date(v.createdTime)).utc().utcOffset("+05:30").format("DD-MMM HH:mm"),}))
 
 		res.json(results)
 	} catch (err) {
@@ -287,7 +287,7 @@ router.post("/api/tickets/update", async (req, res) => {
 		delete req.body.addedBy
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Tickets R")) {
-			console.debug(_id)
+			// console.debug(_id)
 			let result = await Tickets.findOne({_id})
 			if (String(result.addedBy) != req.user.id) {
 				res.status(401).send("Unauthorized to update this task")
