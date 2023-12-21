@@ -20,6 +20,9 @@ const crypto = require('crypto');
 
 const tmpdir = "/tmp/"
 
+const maskString = (str) => str && str.length > 4 ? str.substring(0, 2) + '*'.repeat(str.length - 4) + str.substring(str.length - 2) : str
+const isMasked = str => /\*{3,}/.test(str);
+
 const checkR = (req, res, next) => {
 	const isPermitted = req.permissions.isAdmin || req.permissions.page.includes("Clients R")
 
@@ -174,11 +177,13 @@ const processDate = (compDate) => {
 		return new Date(compDate)
 }
 
-const commonProcessor = (results) => {
+const commonProcessor = (results, isExport=false) => {
 	results = results.map(val => ({
 		...val._doc, 
 		createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		completionDate: val.completionDate ? moment(new Date(processDate(val.completionDate))).format("DD-MM-YYYY") : "-",
+		mobile: !isExport ? maskString(val.mobile) : val.mobile,
+		email: !isExport ? maskString(val.email) : val.email,
 	}))
 	return results
 }
@@ -232,7 +237,7 @@ router.post("/api/clients/export", async (req, res) => {
 		let results = await Clients.find(query)
 			.collation({locale: "en" })
 
-		results = commonProcessor(results)
+		results = commonProcessor(results, true)
 
 		let file = await generateExcel(results, clientFields[req.query.searchAll ? "all" : req.query.clientType], "clientsExport" + (+new Date))
 
@@ -412,6 +417,8 @@ router.get("/api/clients/", async (req, res) => {
 
 		clients.certDate = moment(new Date(processDate(clients.certDate))).format("YYYY-MM-DD")
 		clients.completionDate = moment(new Date(processDate(clients.completionDate))).format("YYYY-MM-DD")
+		clients.mobile = maskString(clients.mobile)
+		clients.email = maskString(clients.email)
 
 		let files = await getAllFiles(clients.clientID + "/")
 
@@ -453,6 +460,9 @@ router.post("/api/clients/update", checkW, async (req, res) => {
 		delete req.body.clientID
 		delete req.body.clientType
 		delete req.body.addedBy
+
+		if (req.body.mobile && isMasked(req.body.mobile)) delete req.body.mobile
+		if (req.body.email && isMasked(req.body.email)) delete req.body.email
 
 		// console.time("Uploading")
 		let files
