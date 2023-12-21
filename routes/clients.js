@@ -183,6 +183,7 @@ const commonProcessor = (results, isExport=false) => {
 		createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		completionDate: val.completionDate ? moment(new Date(processDate(val.completionDate))).format("DD-MM-YYYY") : "-",
 		mobile: !isExport ? maskString(val.mobile) : val.mobile,
+		office: !isExport ? maskString(val.office) : val.office,
 		email: !isExport ? maskString(val.email) : val.email,
 	}))
 	return results
@@ -418,6 +419,7 @@ router.get("/api/clients/", async (req, res) => {
 		clients.certDate = moment(new Date(processDate(clients.certDate))).format("YYYY-MM-DD")
 		clients.completionDate = moment(new Date(processDate(clients.completionDate))).format("YYYY-MM-DD")
 		clients.mobile = maskString(clients.mobile)
+		clients.office = maskString(clients.office)
 		clients.email = maskString(clients.email)
 
 		let files = await getAllFiles(clients.clientID + "/")
@@ -462,6 +464,7 @@ router.post("/api/clients/update", checkW, async (req, res) => {
 		delete req.body.addedBy
 
 		if (req.body.mobile && isMasked(req.body.mobile)) delete req.body.mobile
+		if (req.body.office && isMasked(req.body.office)) delete req.body.office
 		if (req.body.email && isMasked(req.body.email)) delete req.body.email
 
 		// console.time("Uploading")
