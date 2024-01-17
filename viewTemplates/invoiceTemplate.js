@@ -320,7 +320,7 @@ module.exports = (data) => {
 					applicable to Goods and Service Tax under Reverse Charge Mechanism.<br /></span></td>
 				<td style="height: 18px; width: 3.68614%;">&nbsp;</td>
 				<td style="height: 18px; width: 4.46831%;">&nbsp;</td>
-			</tr>` : ``}
+			</tr><tr></tr>` : ``}
 			<tr>
 				<td style="height: 18px; width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;"><u
 							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><strong>PAYMENT
