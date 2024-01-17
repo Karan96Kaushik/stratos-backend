@@ -308,6 +308,19 @@ module.exports = (data) => {
 	<p>&nbsp;</p>
 	<table style="border-collapse: collapse; height: 108px; width: 100%;" border="0" cellspacing="0">
 		<tbody>
+			${['SDC Legal Services', 'RERA Easy Consultancy'].includes(data.from) ? `<tr>
+				<td style="height: 18px; width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;"><u
+							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><strong>Notes
+								</strong></u></span></td>
+				<td style="height: 18px; width: 3.68614%;">&nbsp;</td>
+				<td style="height: 18px; width: 4.46831%;">&nbsp;</td>
+			</tr>
+			<tr>
+				<td style="height: 18px; width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;">The above services are 
+					applicable to Goods and Service Tax under Reverse Charge Mechanism.<br /></span></td>
+				<td style="height: 18px; width: 3.68614%;">&nbsp;</td>
+				<td style="height: 18px; width: 4.46831%;">&nbsp;</td>
+			</tr>` : ``}
 			<tr>
 				<td style="height: 18px; width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;"><u
 							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><strong>PAYMENT
