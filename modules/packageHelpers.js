@@ -121,6 +121,9 @@ const updatePackage = async (package) => {
 			case 'Quarterly':
 				additiveMonths = 3
 				break;
+			case 'Monthly':
+				additiveMonths = 1
+				break;
 		}
 
 		let checkDate = new Date
