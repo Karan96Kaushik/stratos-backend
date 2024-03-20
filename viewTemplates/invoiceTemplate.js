@@ -55,7 +55,13 @@ const modeAccountInfo = {
 		ifsc: 'HDFC0001102',
 		bank: 'HDFC Bank',
 		branch: 'Kharghar'
-		// branch: '-'
+	}, 
+	"KC & PARTNERS": {
+		accountNumber: '50200081478325',
+		accountName: 'KC & PARTNERS',
+		ifsc: 'HDFC0001102',
+		bank: 'HDFC Bank',
+		branch: 'Kharghar'
 	}, 
 }
 

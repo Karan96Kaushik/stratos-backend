@@ -7,6 +7,7 @@ const froms = [
     "Shantanu Kuchya" ,
     "SDC Legal Services", 
     "Envision Next LLP",
+    "KC & PARTNERS",
 ] 
 
 const invoiceFields = {
