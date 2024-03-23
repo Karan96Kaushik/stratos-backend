@@ -31,7 +31,7 @@ const invoiceCodes = {
 	"SDC Legal Services": "RERA", 
 	"RERA Easy Services": "RES",
     "Envision Next LLP": "RERA",
-	"KC & PARTNERS": "RERA",
+	"KC & PARTNERS": "KC24-251",
 }
 
 router.post("/api/invoices/add", checkInvoiceW, async (req, res) => {
