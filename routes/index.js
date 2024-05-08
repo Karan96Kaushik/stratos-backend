@@ -6,6 +6,7 @@ module.exports = {
 	tasks: require('./tasks'),
 	tickets: require('./tickets'),
 	leads: require('./leads'),
+	sales: require('./sales'),
 	quotations: require('./quotations'),
 	invoices: require('./invoices'),
 	payments: require('./payments'),
@@ -15,4 +16,5 @@ module.exports = {
 	dashboard: require('./dashboard'),
 	hearingDates: require('./hearingDates'),
 	notifications: require('./notifications'),
+	calendar: require('./calendar'),
 }

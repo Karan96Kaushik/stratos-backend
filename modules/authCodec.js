@@ -27,6 +27,8 @@ const pagePermissions = [
 	"Leads R Servicewise",
 	"Tickets R",
 	"Tickets W",
+	"Sales R",
+	"Sales W",
 ]
 
 let servicePermissions = [
