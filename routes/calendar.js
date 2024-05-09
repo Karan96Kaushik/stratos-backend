@@ -7,18 +7,42 @@ router.get("/api/calendar", async (req, res) => {
 
 	try {
 
-		let results = await Meetings.find()
+		let salesQuery = {"$and" : [
+			// {...req.query}
+			{meetingDate: {$exists:true}}
+		]}
+
+		let meetingsQuery = {}
+
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R") && !req.permissions.page.includes("Approve Meetings")) {
+            salesQuery['$and'].push({ $or: [
+                {addedBy: req.user.id},
+                {_membersAssigned: req.user.id}
+            ]})
+		}
+
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Approve Meetings")) {
+			let meetingsQuery = {"$and" : [
+			]}
+			meetingsQuery['$and'].push({ $or: [
+                {addedBy: req.user.id},
+                {_membersAssigned: req.user.id}
+            ]})
+		}
+
+		let results = await Meetings.find(meetingsQuery)
 			.sort({"createdTime": -1})
 			.limit(250)
 
-		let sales = await Sales.find({meetingDate: {$exists:true}})
+		let sales = await Sales.find(salesQuery)
 			.sort({"createdTime": -1})
 			.limit(250)
 
 		sales = sales.map(r => ({
+			_id: r._doc._id,
 			salesID: r._doc.salesID,
 			meetingDate: moment(new Date(r._doc.meetingDate)).format("YYYY-MM-DD"),
-			title: r._doc.salesID + " (Meeting)",
+			title: r._doc.salesID + " (Sales Meeting)",
 			exClientID: r._doc.exClientID,
 			meetingStatus: r._doc.meetingStatus,
 			remarks: r._doc.remarks,
@@ -48,7 +72,8 @@ router.post("/api/calendar", async (req, res) => {
 
 		let result = await Meetings.create({
 			...req.body,
-			addedBy: req.user.id
+			addedBy: req.user.id,
+			meetingStatus: 0,
 		})
 		res.json(result)
 	}
@@ -77,6 +102,39 @@ router.patch("/api/calendar", async (req, res) => {
 				...req.body,
 				addedBy: req.user.id
 			})
+
+		res.json(req.body)
+	}
+	catch (err) {
+		console.error(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.patch("/api/calendar/approve", async (req, res) => {
+
+	try {
+
+		if (!req.body._id)
+			return res.status(400).send("No event found")
+
+		if (req.body.isSales)
+			await Meetings.updateOne(
+				{
+					_id: req.body._id
+				},
+				{
+					meetingStatus: 1
+				})
+		
+		else
+			await Sales.updateOne(
+				{
+					_id: req.body._id
+				},
+				{
+					meetingStatus: 1
+				})
 
 		res.json(req.body)
 	}

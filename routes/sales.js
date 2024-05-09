@@ -206,6 +206,9 @@ router.get("/api/sales/", async (req, res) => {
 
 		let sales = await Sales.findOne(query);
 		sales = sales._doc
+		
+		sales.followUpDate = moment(sales.followUpDate).format("YYYY-MM-DD")
+		sales.meetingDate = moment(sales.meetingDate).format("YYYY-MM-DD")
 
 		let files = await getAllFiles(sales.salesID + "/")
 		files = files.map(f => f.Key)

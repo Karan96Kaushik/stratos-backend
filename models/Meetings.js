@@ -6,12 +6,9 @@ let Meetings = new Schema(
   {
     title:String,
 
-    taskID:String,
-    hearingDate: Date,
-    court: String,
+    meetingDate: Date,
+    meetingStatus: Number,
     remarks: String,
-    clientName: String,
-    clientID: String,
     
     addedBy: {
       required:true,
