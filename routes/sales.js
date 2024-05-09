@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const moment = require("moment");
 const fs = require("fs");
 
+const {parse} = require('csv-parse/sync');
+
 const {Sales} = require("../models/Sales");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
@@ -305,6 +307,35 @@ router.post("/api/sales/update", async (req, res) => {
 		console.log(err)
 		res.status(500).send(err.message)
 	}
+})
+
+router.post("/api/sales/fileupload", async (req, res) => {
+	try {
+
+		const memberInfo = await Members.findOne({_id: req.user.id})
+
+		// console.debug(req.body.docs?.length, 'files')
+		if(req.body.docs?.length) {
+
+			const fileContents = Buffer.from(req.body.docs[0].data, 'base64');
+
+			const csvData = fileContents.toString('utf8');
+
+			const records = parse(csvData, {
+				columns: true,
+				skip_empty_lines: true
+			});
+
+			console.log(records.length)
+
+		}
+
+		res.send("OK")
+		
+	} catch (err) {
+		res.status(500).send(err.message)
+	}
+
 })
 
 
