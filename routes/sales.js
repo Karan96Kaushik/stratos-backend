@@ -26,6 +26,7 @@ router.post("/api/sales/add", async (req, res) => {
 
 		const memberInfo = await Members.findOne({_id: req.user.id})
 
+		let salesID = "SL" + await getID(salesIdPrefix)
 		let _ = await Sales.create({
 			...req.body,
 			memberID:memberInfo.memberID,
@@ -33,6 +34,7 @@ router.post("/api/sales/add", async (req, res) => {
 			meetingStatus:0,
 			addedBy: req.user.id
 		});
+		_ = await updateID(salesIdPrefix)
 
 		if(req.body.docs?.length) {
 			let files = await saveFilesToLocal(req.body.docs)
@@ -58,6 +60,7 @@ const generateQuery = (req) => {
 					{ promoterName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ phone1: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ phone2: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ exClientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
 			},
 		],
@@ -91,8 +94,9 @@ const generateQuery = (req) => {
 	if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R")) {
 		query['$and'].push({ $or: [
 			{addedBy: req.user.id},
-			{_membersAssigned: req.user.id}
+			{_membersAssigned: req.user.id},
 		]})
+		query['$and'].push({ followUpDate: { $lt: new Date() } })
 		query['$and'].push({
 			$expr: {
 				$not: {
@@ -114,6 +118,8 @@ const commonProcessor = (results) => {
 		...val, 
 		// serviceType: val.serviceType.join(', '),
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		completionDate: !val.completionDate ? "" : moment(new Date(val.completionDate)).format("DD-MM-YYYY"),
+		certificateDate: !val.certificateDate ? "" : moment(new Date(val.certificateDate)).format("DD-MM-YYYY"),
 		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY"),
 		meetingDate: !val.meetingDate ? "" : moment(new Date(val.meetingDate)).format("DD-MM-YYYY")
 	}))
@@ -142,18 +148,19 @@ router.post("/api/sales/search", async (req, res) => {
 		results = results.map(val => val._doc)
 
 		// followup duration color coding
-		results = results.map(val => {
-			let followUpDateColor = +new Date(val.followUpDate) - +new Date()
 
-			if(followUpDateColor < 0)						// follow up date passed
-				followUpDateColor = 2
-			else if(followUpDateColor < 1000*60*60*24*3) 	// 3 days pending
-				followUpDateColor = 1
-			else 											// more than 3 days
-				followUpDateColor = 0
+		// results = results.map(val => {
+		// 	let followUpDateColor = +new Date(val.followUpDate) - +new Date()
 
-			return ({...val, followUpDateColor})
-		})
+		// 	if(followUpDateColor < 0)						// follow up date passed
+		// 		followUpDateColor = 2
+		// 	else if(followUpDateColor < 1000*60*60*24*3) 	// 3 days pending
+		// 		followUpDateColor = 1
+		// 	else 											// more than 3 days
+		// 		followUpDateColor = 0
+
+		// 	return ({...val, followUpDateColor})
+		// })
 
 		results = commonProcessor(results)
 
@@ -168,7 +175,7 @@ router.post("/api/sales/export", async (req, res) => {
 	try{
 		req.query = req.body
 
-		if(!(req.query.password == (process.env.ExportPassword ?? "export45678"))) {
+		if(!(req.query.password == (process.env.ExportPassword ?? "exp"))) {
 			res.status(401).send("Incorrect password")
 			return
 		}
@@ -209,8 +216,10 @@ router.get("/api/sales/", async (req, res) => {
 		let sales = await Sales.findOne(query);
 		sales = sales._doc
 		
-		sales.followUpDate = moment(sales.followUpDate).format("YYYY-MM-DD")
-		sales.meetingDate = moment(sales.meetingDate).format("YYYY-MM-DD")
+		sales.followUpDate = sales.followUpDate ? moment(sales.followUpDate).format("YYYY-MM-DD") : undefined
+		sales.meetingDate = sales.meetingDate ? moment(sales.meetingDate).format("YYYY-MM-DD") : undefined
+		sales.completionDate = sales.completionDate ? moment(sales.completionDate).format("YYYY-MM-DD") : undefined
+		sales.certificateDate = sales.certificateDate ? moment(sales.certificateDate).format("YYYY-MM-DD") : undefined
 
 		let files = await getAllFiles(sales.salesID + "/")
 		files = files.map(f => f.Key)
@@ -226,7 +235,7 @@ router.get("/api/sales/", async (req, res) => {
 router.delete("/api/sales/", async (req, res) => {
 	try{
 
-		if(req.query.password != (process.env.DeletePassword ?? "delete45678")) {
+		if(req.query.password != (process.env.DeletePassword ?? "del")) {
 			res.status(401).send("Incorrect password")
 			return
 		}
@@ -264,7 +273,8 @@ router.post("/api/sales/update", async (req, res) => {
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R")) {
 			let result = await Sales.findOne({_id})
-			if (String(result.addedBy) != req.user.id) {
+			// console.log(result._doc)
+			if (String(result.addedBy) != req.user.id && !result._doc._membersAssigned.includes(req.user.id)) {
 				res.status(401).send("Unauthorized to update this task")
 				return
 			}
@@ -312,6 +322,11 @@ router.post("/api/sales/update", async (req, res) => {
 router.post("/api/sales/fileupload", async (req, res) => {
 	try {
 
+		const generateID = (idNum, padding=100000) => {
+			idNum = String(padding + (idNum ?? 0) + 1)
+			return idNum.substring(1,)
+		}
+
 		const memberInfo = await Members.findOne({_id: req.user.id})
 
 		// console.debug(req.body.docs?.length, 'files')
@@ -321,13 +336,44 @@ router.post("/api/sales/fileupload", async (req, res) => {
 
 			const csvData = fileContents.toString('utf8');
 
-			const records = parse(csvData, {
+			let records = parse(csvData, {
 				columns: true,
 				skip_empty_lines: true
 			});
 
-			console.log(records.length)
-
+			let salesIdPrefix = 'SL'
+			let salesID = await getID(salesIdPrefix)
+			salesID = salesID ? parseInt(salesID) : 0
+			records = records.map(r => ({
+				createdTime: new Date(),
+				addedBy: req.user.id,
+				meetingStatus: 0,
+				salesID: (salesID += 1) && salesIdPrefix + generateID(salesID),
+				exClientID: r['Client ID'],
+				promoterName: r['Name of Promoter'],
+				projectName: r['Name of Project'],
+				certificateNo: r['Certificate No.'],
+				certificateDate: r['Certificate Date'].split('/').reverse().join('-'),
+				phone1: r['Mobile No 1'],
+				phone2: r['Mobile No 2'],
+				district: r['District'],
+				completionDate: r['Completion Date'].split('/').reverse().join('-'),
+				purpose: r['Purpose'],
+				form4: r['Form 4 '] || r['Form 4'],
+				oc: r['OC'],
+				taluka: r['Taluka'],
+				village: r['Village'],
+				followUpDate: new Date((r['Date of Calling'] || "").split('/').reverse().join('-')),
+			}))
+			const erroredRecords = records.filter(r => String(r.followUpDate) == 'Invalid Date')
+			// records = records.filter(r => String(r.followUpDate) == 'Invalid Date' ? {...r, followUpDate: undefined} : r)
+	
+			if (erroredRecords.length > 0)
+				throw new Error("Date of Calling invalid for clients: " + erroredRecords.map(r => r.exClientID).join(', '))
+	
+			_ = await updateID(salesIdPrefix, addCount=records.length)
+			_ = await Sales.insertMany(records)
+			// console.log(records)
 		}
 
 		res.send("OK")

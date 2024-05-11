@@ -24,10 +24,10 @@ const getID = async (type, padding=10000) => {
     return idNum.substring(1,)
 }
 
-const updateID = async (type) => {
+const updateID = async (type, addCount=1) => {
     let data = await UtilsModel.findOne({type:"IDs"})
     data = Object.assign({}, data._doc)
-    data.ids[type + "ID"] = (data.ids[type + "ID"] ?? 0) + 1 
+    data.ids[type + "ID"] = (data.ids[type + "ID"] ?? 0) + addCount 
     // console.log("UPDATEID", data, type + "ID")
     const _ = await UtilsModel.updateOne(data)
     return 
