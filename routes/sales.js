@@ -346,8 +346,10 @@ router.post("/api/sales/fileupload", async (req, res) => {
 			let salesIdPrefix = 'SL'
 			let salesID = await getID(salesIdPrefix)
 			salesID = salesID ? parseInt(salesID) : 0
-			records = records.map(r => ({
-				createdTime: new Date(),
+
+			let baseDate = +new Date
+			records = records.map((r, _i) => ({
+				createdTime: new Date(baseDate + _i),
 				addedBy: req.user.id,
 				meetingStatus: 0,
 				salesID: (salesID += 1) && salesIdPrefix + generateID(salesID),
