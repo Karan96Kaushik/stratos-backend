@@ -353,17 +353,17 @@ router.post("/api/sales/fileupload", async (req, res) => {
 				promoterName: r['Name of Promoter'],
 				projectName: r['Name of Project'],
 				certificateNo: r['Certificate No.'],
-				certificateDate: r['Certificate Date'].split('/').reverse().join('-'),
+				certificateDate: r['Certificate Date'].split('-').reverse().join('-'),
 				phone1: r['Mobile No 1'],
 				phone2: r['Mobile No 2'],
 				district: r['District'],
-				completionDate: r['Completion Date'].split('/').reverse().join('-'),
+				completionDate: r['Completion Date'].split('-').reverse().join('-'),
 				purpose: r['Purpose'],
 				form4: r['Form 4 '] || r['Form 4'],
 				oc: r['OC'],
 				taluka: r['Taluka'],
 				village: r['Village'],
-				followUpDate: new Date((r['Date of Calling'] || "").split('/').reverse().join('-')),
+				followUpDate: new Date((r['Date of Calling'] || "").split('-').reverse().join('-')),
 			}))
 			const erroredRecords = records.filter(r => String(r.followUpDate) == 'Invalid Date')
 			// records = records.filter(r => String(r.followUpDate) == 'Invalid Date' ? {...r, followUpDate: undefined} : r)
