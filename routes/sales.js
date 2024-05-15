@@ -96,7 +96,7 @@ const generateQuery = (req) => {
 			{addedBy: req.user.id},
 			{_membersAssigned: req.user.id},
 		]})
-		query['$and'].push({ followUpDate: { $lt: new Date() } })
+		query['$and'].push({ callingDate: { $lt: new Date() } })
 		query['$and'].push({
 			$expr: {
 				$not: {
@@ -120,6 +120,7 @@ const commonProcessor = (results) => {
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		completionDate: !val.completionDate ? "" : moment(new Date(val.completionDate)).format("DD-MM-YYYY"),
 		certificateDate: !val.certificateDate ? "" : moment(new Date(val.certificateDate)).format("DD-MM-YYYY"),
+		callingDate: !val.callingDate ? "" : moment(new Date(val.callingDate)).format("DD-MM-YYYY"),
 		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY"),
 		meetingDate: !val.meetingDate ? "" : moment(new Date(val.meetingDate)).format("DD-MM-YYYY")
 	}))
@@ -150,16 +151,16 @@ router.post("/api/sales/search", async (req, res) => {
 		// followup duration color coding
 
 		// results = results.map(val => {
-		// 	let followUpDateColor = +new Date(val.followUpDate) - +new Date()
+		// 	let callingDateColor = +new Date(val.callingDate) - +new Date()
 
-		// 	if(followUpDateColor < 0)						// follow up date passed
-		// 		followUpDateColor = 2
-		// 	else if(followUpDateColor < 1000*60*60*24*3) 	// 3 days pending
-		// 		followUpDateColor = 1
+		// 	if(callingDateColor < 0)						// follow up date passed
+		// 		callingDateColor = 2
+		// 	else if(callingDateColor < 1000*60*60*24*3) 	// 3 days pending
+		// 		callingDateColor = 1
 		// 	else 											// more than 3 days
-		// 		followUpDateColor = 0
+		// 		callingDateColor = 0
 
-		// 	return ({...val, followUpDateColor})
+		// 	return ({...val, callingDateColor})
 		// })
 
 		results = commonProcessor(results)
@@ -216,6 +217,7 @@ router.get("/api/sales/", async (req, res) => {
 		let sales = await Sales.findOne(query);
 		sales = sales._doc
 		
+		sales.callingDate = sales.callingDate ? moment(sales.callingDate).format("YYYY-MM-DD") : undefined
 		sales.followUpDate = sales.followUpDate ? moment(sales.followUpDate).format("YYYY-MM-DD") : undefined
 		sales.meetingDate = sales.meetingDate ? moment(sales.meetingDate).format("YYYY-MM-DD") : undefined
 		sales.completionDate = sales.completionDate ? moment(sales.completionDate).format("YYYY-MM-DD") : undefined
@@ -367,13 +369,13 @@ router.post("/api/sales/fileupload", async (req, res) => {
 				oc: r['OC'],
 				taluka: r['Taluka'],
 				village: r['Village'],
-				followUpDate: new Date((r['Date of Calling'] || "").split('-').reverse().join('-')),
+				callingDate: new Date((r['Date of Calling'] || "").split('-').reverse().join('-')),
 				_membersAssigned: r['Member ID'].trim().length > 2 ? r['Member ID'].split(',').map(mID => String(allMembers.find(m => m.memberID == mID)?._id)) : [],
 				membersAssigned: r['Member ID'].trim().length > 2 ? r['Member ID'].split(',').map(mID => allMembers.find(m => m.memberID == mID)?.userName) : [],
 			}))
-			const erroredRecords = records.filter(r => String(r.followUpDate) == 'Invalid Date')
+			const erroredRecords = records.filter(r => String(r.callingDate) == 'Invalid Date')
 			const erroredRecordsMembers = records.filter(r => r._membersAssigned.includes('undefined'))
-			// records = records.filter(r => String(r.followUpDate) == 'Invalid Date' ? {...r, followUpDate: undefined} : r)
+			// records = records.filter(r => String(r.callingDate) == 'Invalid Date' ? {...r, callingDate: undefined} : r)
 	
 			if (erroredRecords.length > 0)
 				throw new Error("Date of Calling invalid for clients: " + erroredRecords.map(r => r.exClientID).join(', '))

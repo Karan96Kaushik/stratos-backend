@@ -13,6 +13,7 @@ const {Quotations} = require("../models/Quotations");
 const {Packages} = require("../models/Packages");
 const {HearingDates} = require('../models/HearingDates');
 const {handlePayment} = require("../modules/paymentHelpers");
+const {Sales} = require('../models/Sales');
 
 const migrateTaskPromoter = async () => {
 
@@ -613,7 +614,25 @@ const migrateMembersUnread = async () => {
 	console.debug('Done')
 }
 
-migrateMembersUnread()
+const migrateCallingDate = async () => {
+	let sales = await Sales.find()
+	for (let sale of sales) {
+		sale = sale._doc
+		// console.log(task.taskID, task.hearingDate)
+		await Sales.updateOne(
+			{_id: String(sale._id)}, 
+			{
+				callingDate: sale.followUpDate, 
+				// $unset: {hearingDate: ''}
+			}
+		)
+	}
+	console.log('Done')
+}
+
+migrateCallingDate()
+
+// migrateMembersUnread()
 
 // migrateDepartments()
 
