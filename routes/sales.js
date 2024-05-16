@@ -122,7 +122,8 @@ const commonProcessor = (results) => {
 		certificateDate: !val.certificateDate ? "" : moment(new Date(val.certificateDate)).format("DD-MM-YYYY"),
 		callingDate: !val.callingDate ? "" : moment(new Date(val.callingDate)).format("DD-MM-YYYY"),
 		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY"),
-		meetingDate: !val.meetingDate ? "" : moment(new Date(val.meetingDate)).format("DD-MM-YYYY")
+		meetingDate: !val.meetingDate ? "" : moment(new Date(val.meetingDate)).format("DD-MM-YYYY"),
+		remarks: val.remarks || []
 	}))
 
 	return results
@@ -222,6 +223,9 @@ router.get("/api/sales/", async (req, res) => {
 		sales.meetingDate = sales.meetingDate ? moment(sales.meetingDate).format("YYYY-MM-DD") : undefined
 		sales.completionDate = sales.completionDate ? moment(sales.completionDate).format("YYYY-MM-DD") : undefined
 		sales.certificateDate = sales.certificateDate ? moment(sales.certificateDate).format("YYYY-MM-DD") : undefined
+		sales.existingRemarks = sales.remarks
+
+		delete sales.remarks
 
 		let files = await getAllFiles(sales.salesID + "/")
 		files = files.map(f => f.Key)
@@ -301,12 +305,24 @@ router.post("/api/sales/update", async (req, res) => {
 
 		}
 
+		let remarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks
+		let existingRemarks = req.body.existingRemarks
+
+		if (Array.isArray(existingRemarks)) {
+			delete req.body.remarks
+		}
+		else {
+			req.body.remarks = [remarks]
+		}
+		delete req.body.existingRemarks
+
 		let _ = await Sales.updateOne(
 			{
 				_id
 			},
 			{
-				...req.body
+				$set: { ...req.body },
+				$push: (remarks.length > 2 && Array.isArray(existingRemarks)) ? { remarks: remarks } : {}
 			});
 
 		if(req.body.docs?.length) {
