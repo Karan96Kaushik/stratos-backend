@@ -123,7 +123,7 @@ const commonProcessor = (results) => {
 		callingDate: !val.callingDate ? "" : moment(new Date(val.callingDate)).format("DD-MM-YYYY"),
 		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY"),
 		meetingDate: !val.meetingDate ? "" : moment(new Date(val.meetingDate)).format("DD-MM-YYYY"),
-		remarks: val.remarks || []
+		remarks: Array.isArray(val.remarks) ? val.remarks : [val.remarks]
 	}))
 
 	return results
