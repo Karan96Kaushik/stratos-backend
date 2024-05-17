@@ -26,13 +26,20 @@ router.post("/api/sales/add", async (req, res) => {
 
 		const memberInfo = await Members.findOne({_id: req.user.id})
 
+		if (req.body.remarks?.length > 0)
+			req.body.remarks = [moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks]
+		else
+			delete req.body.remarks
+
+		const salesIdPrefix = "SL"
 		let salesID = "SL" + await getID(salesIdPrefix)
 		let _ = await Sales.create({
 			...req.body,
 			memberID:memberInfo.memberID,
 			memberName:memberInfo.userName,
 			meetingStatus:0,
-			addedBy: req.user.id
+			addedBy: req.user.id,
+			salesID
 		});
 		_ = await updateID(salesIdPrefix)
 
@@ -305,7 +312,10 @@ router.post("/api/sales/update", async (req, res) => {
 
 		}
 
-		let remarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks
+		let remarks = ''
+		if (req.body.remarks?.length > 0) 
+			remarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks
+
 		let existingRemarks = req.body.existingRemarks
 
 		if (Array.isArray(existingRemarks)) {
@@ -322,7 +332,7 @@ router.post("/api/sales/update", async (req, res) => {
 			},
 			{
 				$set: { ...req.body },
-				$push: (remarks.length > 2 && Array.isArray(existingRemarks)) ? { remarks: remarks } : {}
+				$push: (remarks.length > 0 && Array.isArray(existingRemarks)) ? { remarks: remarks } : {}
 			});
 
 		if(req.body.docs?.length) {
