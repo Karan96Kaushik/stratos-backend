@@ -630,7 +630,29 @@ const migrateCallingDate = async () => {
 	console.log('Done')
 }
 
-migrateCallingDate()
+const migrateSalesRemarks = async () => {
+
+	await Sales.updateMany(
+		{ remarks: { $type: "string" } }, // Filter to find the specific user where remarks is a string
+		[
+		{
+			$set: {
+			remarks: {
+				$cond: {
+				if: { $eq: [{ $type: "$remarks" }, "string"] },
+				then: ["$remarks"], // Convert string to array with the string inside it
+				else: "$remarks"
+				}
+			}
+			}
+		}
+		])
+	console.log('done')
+}
+
+migrateSalesRemarks()
+
+// migrateCallingDate()
 
 // migrateMembersUnread()
 
