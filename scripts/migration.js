@@ -650,7 +650,30 @@ const migrateSalesRemarks = async () => {
 	console.log('done')
 }
 
-migrateSalesRemarks()
+const migrateCallingDateType = async () => {
+
+	await Sales.updateMany(
+		{ callingDate: { $type: "string" } }, // Filter to find all documents where callingDate is a string
+		[
+		{
+			$set: {
+			callingDate: {
+				$cond: {
+				if: { $eq: [{ $type: "$callingDate" }, "string"] },
+				then: { $toDate: "$callingDate" }, // Convert string to Date
+				else: "$callingDate"
+				}
+			}
+			}
+		}
+		])
+
+	console.log('done')
+}
+
+migrateCallingDateType()
+
+// migrateSalesRemarks()
 
 // migrateCallingDate()
 

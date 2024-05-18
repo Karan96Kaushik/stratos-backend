@@ -7,6 +7,7 @@ let Sales = new Schema(
     salesID: String,
     meetingDate: Date,
     followUpDate: Date,
+    callingDate: Date,
 
     addedBy: {
       required:true,

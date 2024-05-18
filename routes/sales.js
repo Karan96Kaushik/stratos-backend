@@ -32,7 +32,7 @@ router.post("/api/sales/add", async (req, res) => {
 			delete req.body.remarks
 
 		const salesIdPrefix = "SL"
-		let salesID = "SL" + await getID(salesIdPrefix)
+		let salesID = "SL" + await getID(salesIdPrefix, padding=100000)
 		let _ = await Sales.create({
 			...req.body,
 			memberID:memberInfo.memberID,
