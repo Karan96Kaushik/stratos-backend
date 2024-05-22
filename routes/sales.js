@@ -81,7 +81,7 @@ const generateQuery = (req) => {
 				if(val == null)
 					return
 
-				let operator = i == 0 ? "$lt" : "$gt"
+				let operator = i == 0 ? "$lte" : "$gte"
 				query['$and'].push({
 					[filter]: {
 						[operator]: val

@@ -30,7 +30,15 @@ router.get("/api/calendar", async (req, res) => {
             ]})
 		}
 
+		{_membersAssigned: req.user.id}
+
+
 		let results = await Meetings.find(meetingsQuery)
+			.sort({"createdTime": -1})
+			.limit(250)
+
+		
+		let followups = await Sales.find({_membersAssigned: req.user.id, followUpDate: {$exists: true}},)
 			.sort({"createdTime": -1})
 			.limit(250)
 
@@ -42,7 +50,7 @@ router.get("/api/calendar", async (req, res) => {
 			_id: r._doc._id,
 			salesID: r._doc.salesID,
 			meetingDate: moment(new Date(r._doc.meetingDate)).format("YYYY-MM-DD"),
-			title: r._doc.salesID + " (Sales Meeting)",
+			title: r._doc.salesID + " - Meeting",
 			exClientID: r._doc.exClientID,
 			meetingStatus: r._doc.meetingStatus,
 			remarks: r._doc.remarks,
@@ -54,7 +62,14 @@ router.get("/api/calendar", async (req, res) => {
 			meetingDate: moment(new Date(r._doc.meetingDate)).format("YYYY-MM-DD")
 		}))
 
-		res.json([...results, ...sales])
+		followups = followups.map(r => ({
+			...r._doc,
+			meetingStatus: 99,
+			title: r._doc.salesID + " - FollowUp",
+			meetingDate: moment(new Date(r._doc.followUpDate)).format("YYYY-MM-DD")
+		}))
+
+		res.json([...results, ...sales, ...followups])
 	}
 	catch (err) {
 		console.error(err)
