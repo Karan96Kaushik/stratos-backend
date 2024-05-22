@@ -68,6 +68,8 @@ const generateQuery = (req) => {
 					{ phone1: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ phone2: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ exClientID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ district: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ village: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
 			},
 		],
