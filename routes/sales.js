@@ -393,13 +393,13 @@ router.post("/api/sales/fileupload", async (req, res) => {
 				district: r['District'],
 				completionDate: r['Completion Date'].split('-').reverse().join('-'),
 				purpose: r['Purpose'],
-				form4: (r['Form 4 '] || r['Form 4']).trim() == 'Y',
+				form4: (r['Form 4 '] || r['Form 4'])?.trim() == 'Y',
 				oc: r['OC'],
 				taluka: r['Taluka'],
 				village: r['Village'],
 				callingDate: new Date((r['Date of Calling'] || "").split('-').reverse().join('-')),
-				_membersAssigned: r['Member ID'].trim().length > 2 ? r['Member ID'].split(',').map(mID => String(allMembers.find(m => m.memberID == mID)?._id)) : [],
-				membersAssigned: r['Member ID'].trim().length > 2 ? r['Member ID'].split(',').map(mID => allMembers.find(m => m.memberID == mID)?.userName) : [],
+				_membersAssigned: r['Member ID']?.trim().length > 2 ? r['Member ID'].split(',').map(mID => String(allMembers.find(m => m.memberID == mID)?._id)) : [],
+				membersAssigned: r['Member ID']?.trim().length > 2 ? r['Member ID'].split(',').map(mID => allMembers.find(m => m.memberID == mID)?.userName) : [],
 			}))
 			const erroredRecords = records.filter(r => String(r.callingDate) == 'Invalid Date')
 			const erroredRecordsMembers = records.filter(r => r._membersAssigned.includes('undefined'))
