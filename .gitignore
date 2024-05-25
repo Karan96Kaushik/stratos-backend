@@ -1,2 +1,4 @@
 node_modules/
 test.pdf
+yarn.lock
+*.rdb
