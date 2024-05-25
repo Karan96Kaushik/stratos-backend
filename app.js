@@ -56,6 +56,7 @@ app.use(routes.payments)
 app.use(routes.packages)
 app.use(routes.notifications)
 app.use(routes.calendar)
+app.use(routes.ccreceived)
 app.use(routes.dashboard)
 
 /*****************  ***********************/

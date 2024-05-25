@@ -17,4 +17,5 @@ module.exports = {
 	hearingDates: require('./hearingDates'),
 	notifications: require('./notifications'),
 	calendar: require('./calendar'),
+	ccreceived: require('./ccreceived'),
 }
