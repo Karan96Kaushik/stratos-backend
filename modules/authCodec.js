@@ -30,6 +30,8 @@ const pagePermissions = [
 	"Sales R",
 	"Sales W",
 	"Approve Meetings",
+	"CC Received R",
+	"CC Received W",
 ]
 
 let servicePermissions = [

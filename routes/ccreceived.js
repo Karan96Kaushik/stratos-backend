@@ -65,6 +65,7 @@ const generateQuery = (req) => {
 					{ dataID: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ promoterName: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ memberInformation: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ certNo: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ district: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ village: { $regex: new RegExp(req.query.text) , $options:"i" }},
 				]
@@ -132,7 +133,7 @@ router.post("/api/ccreceived/search", async (req, res) => {
 
 		let query = generateQuery(req)
 
-		console.debug(query)
+		// console.debug(query)
 
 		let results = await CCReceived.find(query)
 			.collation({locale: "en" })
@@ -141,7 +142,7 @@ router.post("/api/ccreceived/search", async (req, res) => {
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = results.map(val => val._doc)
-		console.debug(results)
+		// console.debug(results)
 
 		// followup duration color coding
 
@@ -345,9 +346,10 @@ router.post("/api/ccreceived/fileupload", async (req, res) => {
 				addedBy: req.user.id,
 
 				dataID: r['Data ID'],
-				memberInformation: r['Member Information'],
+				certNo: r['RERA Cert No'],
+				memberInformation: r['Member Details'],
 				promoterName: r['Promoter Name'],
-				village: r['Village'],
+				village: r['Project Village'],
 				district: r['District'],
 
 				// meetingStatus: 0,
