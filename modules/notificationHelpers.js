@@ -12,6 +12,9 @@ const newTaskAssignedNotification = async (data) => {
 	try {
 		await Promise.all(data._membersAssigned.map(async mID => {
 			try {
+				if (mID.includes('Department'))
+					return
+				
 				await Notifications.create({
 					type:'task',
 					text: trimString('New Task Added - ' + data.clientName),

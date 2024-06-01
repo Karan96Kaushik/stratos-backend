@@ -109,13 +109,16 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 		req.body.totalAmount = calculateTotal(req.body)
 		req.body.balanceAmount = req.body.totalAmount
 
+		const member = await Members.findOne({_id: req.user.id})
+
 		let taskID = serviceCode + await getID(serviceCode)
 		_ = await Tasks.create({
 			...req.body,
 			taskID,
 			docs:null,
 			files:null,
-			addedBy: req.user.id
+			addedBy: req.user.id,
+			addedByName: member.userName
 		});
 		_ = await updateID(serviceCode)
 

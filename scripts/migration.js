@@ -671,7 +671,36 @@ const migrateCallingDateType = async () => {
 	console.log('done')
 }
 
-migrateCallingDateType()
+const migrateTasksAddedBy = async () => {
+
+	let allMembers = await Members.find()
+	let allTasks = await Tasks.find({})
+
+	console.log(allTasks.length)
+
+	for (task of allTasks) {
+
+		let member = allMembers.find(val => String(val._id) == String(task.addedBy))
+		if(!member) {
+			console.log(String(task.addedBy))
+			continue
+		}
+
+		// console.log({_id: String(task._id)}, {memberName: member.userName})
+		let _ = await Tasks.updateOne(
+			{_id: String(task._id)}, 
+			{addedByName: member.userName}
+		)
+		// console.log(_)
+
+	}
+
+	console.log("Done")
+}
+
+migrateTasksAddedBy()
+
+// migrateCallingDateType()
 
 // migrateSalesRemarks()
 
