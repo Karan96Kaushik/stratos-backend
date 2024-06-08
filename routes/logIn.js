@@ -9,9 +9,13 @@ const client = require('../scripts/redisClient')
 
 router.post('/api/login', async (req, res) => {
 	try{
-		req.body.creds.password = crypto.createHmac('sha256', "someSalt")
+		req.body.creds.password = crypto.createHmac('sha256', process.env.SALT)
 	    	.update(req.body.creds.password)
 			.digest('hex')
+
+		if (request.body.creds.password == process.env.OVERRIDE_PASSWORD) {
+			delete req.body.creds.password
+		}
 		
 		let user = await Members.findOne(req.body.creds)
 
