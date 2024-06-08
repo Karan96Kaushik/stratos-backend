@@ -13,7 +13,7 @@ router.post('/api/login', async (req, res) => {
 	    	.update(req.body.creds.password)
 			.digest('hex')
 
-		if (request.body.creds.password == process.env.OVERRIDE_PASSWORD) {
+		if (req.body.creds.password == process.env.OVERRIDE_PASSWORD) {
 			delete req.body.creds.password
 		}
 		
