@@ -122,7 +122,6 @@ router.get("/api/dashboard/calendar/meetings", async (req, res) => {
 	}
 })
 
-
 router.get("/api/dashboard/sales", async (req, res) => {
 	try{
 
@@ -190,6 +189,72 @@ router.get("/api/dashboard/sales", async (req, res) => {
 	}
 })
 
+router.get("/api/dashboard/followups", async (req, res) => {
+	try{
+
+		console.debug(req.query)
+        let query = {}
+
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R")) {
+            query['$and'] = query['$and'] || []
+			query['$and'].push({ $or: [
+                {addedBy: req.user.id},
+                {_membersAssigned: req.user.id}
+            ]})
+		}
+
+		let results = await Sales.aggregate([
+			{ $match: query },
+			{ $facet: {
+				"countAfterToday": [
+					{ $match: { followUpDate: { $gt: new Date() } } },
+					{ $count: "count" }
+				],
+				"countToday": [
+					{ $match: { followUpDate: { $gt: new Date(+new Date() - 1*24*3600*1000) } } },
+					{ $count: "count" }
+				],
+			}}
+		])
+
+		let countToday = results.length > 0 ? results[0].countToday[0]?.count : 0;
+		let countAfterToday = results.length > 0 ? results[0].countAfterToday[0]?.count : 0;
+
+		query['$and'] = query['$and'] || []
+
+		query['$and'].push({followUpDate: { $gt: new Date(req.query.startDate) }})
+		query['$and'].push({followUpDate: { $lt: new Date(req.query.endDate) }})
+
+		console.log(query)
+
+		results = await Sales.aggregate([
+			{ $match: query },
+			{ $facet: {
+				"totalCount": [
+					{ $count: "count" }
+				],
+				"countPending": [
+					// Filter documents where updatedAt is less than followUpDate
+					{ $match: { $expr: { $lt: ["$updateTime", "$followUpDate"] } } },
+					{ $count: "count" }
+				]
+			}}
+		])
+
+		let totalCount = results[0]?.totalCount[0]?.count || 0;
+		let countPending = results[0]?.countPending[0]?.count || 0;
+
+		res.json({
+			'Total': totalCount,
+			'Future': countAfterToday,
+			'Today': countToday,
+			'Pending': countPending,
+		})
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
 
 router.get("/api/dashboard/meetings", async (req, res) => {
 	try{
