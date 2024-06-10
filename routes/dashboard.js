@@ -158,7 +158,7 @@ router.get("/api/dashboard/sales", async (req, res) => {
 		query['$and'].push({callingDate: { $gt: new Date(req.query.startDate) }})
 		query['$and'].push({callingDate: { $lt: new Date(req.query.endDate) }})
 
-		console.log(query)
+		// console.log(query)
 
 		results = await Sales.aggregate([
 			{ $match: query },
@@ -225,7 +225,7 @@ router.get("/api/dashboard/followups", async (req, res) => {
 		query['$and'].push({followUpDate: { $gt: new Date(req.query.startDate) }})
 		query['$and'].push({followUpDate: { $lt: new Date(req.query.endDate) }})
 
-		console.log(query)
+		// console.log(query)
 
 		results = await Sales.aggregate([
 			{ $match: query },
@@ -292,7 +292,7 @@ router.get("/api/dashboard/meetings", async (req, res) => {
 		query['$and'].push({meetingDate: { $gt: new Date(req.query.startDate) }})
 		query['$and'].push({meetingDate: { $lt: new Date(req.query.endDate) }})
 
-		console.log(query)
+		// console.log(query)
 
 		results = await Sales.aggregate([
 			{ $match: query },
