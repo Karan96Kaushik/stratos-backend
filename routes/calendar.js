@@ -54,6 +54,7 @@ router.get("/api/calendar", async (req, res) => {
 			exClientID: r._doc.exClientID,
 			meetingStatus: r._doc.meetingStatus,
 			remarks: r._doc.remarks,
+			openlink: '/app/sales/edit/' + r._doc._id,
 			isSales: true
 		}))
 
@@ -66,6 +67,7 @@ router.get("/api/calendar", async (req, res) => {
 			...r._doc,
 			meetingStatus: 99,
 			title: r._doc.salesID + ' - ' + r._doc.promoterName + " - FollowUp",
+			openlink: '/app/sales/edit/' + r._doc._id,
 			meetingDate: moment(new Date(r._doc.followUpDate)).format("YYYY-MM-DD")
 		}))
 
