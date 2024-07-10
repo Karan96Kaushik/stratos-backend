@@ -177,7 +177,25 @@ const processDate = (compDate) => {
 		return new Date(compDate)
 }
 
-const commonProcessor = (results, isExport=false) => {
+function encrypt(text, shift=12) {
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+        let char = text.charCodeAt(i);
+        if (char >= 65 && char <= 90) {
+            // Uppercase letters
+            result += String.fromCharCode((char - 65 + shift) % 26 + 65);
+        } else if (char >= 97 && char <= 122) {
+            // Lowercase letters
+            result += String.fromCharCode((char - 97 + shift) % 26 + 97);
+        } else {
+            // Non-alphabetical characters
+            result += text.charAt(i);
+        }
+    }
+    return result;
+}
+
+const commonProcessor = (results, isExport=false, isAdmin=false, permissions) => {
 	results = results.map(val => ({
 		...val._doc, 
 		createdTime: moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
@@ -185,7 +203,12 @@ const commonProcessor = (results, isExport=false) => {
 		mobile: !isExport ? maskString(val.mobile) : val.mobile,
 		office: !isExport ? maskString(val.office) : val.office,
 		email: !isExport ? maskString(val.email) : val.email,
+		u: !isExport && encrypt(JSON.stringify({userID: val.userID, password: val.password}))
 	}))
+
+	if (!isAdmin && !permissions.system.includes('View RERA Passwords'))
+		results = results.map(r => ({...r, userID: r.userID && '***', password: r.password && '***'}))
+	
 	return results
 }
 
@@ -213,7 +236,7 @@ router.post("/api/clients/search", async (req, res) => {
 			.skip(rowsPerPage * page)
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
-		results = commonProcessor(results)
+		results = commonProcessor(results, false, req.permissions.isAdmin, req.permissions)
 
 		res.json(results)
 	} catch (err) {
@@ -238,7 +261,7 @@ router.post("/api/clients/export", async (req, res) => {
 		let results = await Clients.find(query)
 			.collation({locale: "en" })
 
-		results = commonProcessor(results, true)
+		results = commonProcessor(results, true, req.isAdmin, req.permissions)
 
 		let file = await generateExcel(results, clientFields[req.query.searchAll ? "all" : req.query.clientType], "clientsExport" + (+new Date))
 
@@ -422,6 +445,11 @@ router.get("/api/clients/", async (req, res) => {
 		clients.office = maskString(clients.office)
 		clients.email = maskString(clients.email)
 
+		if (!req.permissions.isAdmin && req.permissions.system.includes('View RERA Passwords')) {
+			client.userID = '***'
+			client.password = '***'
+		}
+
 		let files = await getAllFiles(clients.clientID + "/")
 
 		files = files.map(f => f.Key)
@@ -466,6 +494,8 @@ router.post("/api/clients/update", checkW, async (req, res) => {
 		if (req.body.mobile && isMasked(req.body.mobile)) delete req.body.mobile
 		if (req.body.office && isMasked(req.body.office)) delete req.body.office
 		if (req.body.email && isMasked(req.body.email)) delete req.body.email
+		if (req.body.userID === '***') delete req.body.userID
+		if (req.body.password === '***') delete req.body.password
 
 		// console.time("Uploading")
 		let files
