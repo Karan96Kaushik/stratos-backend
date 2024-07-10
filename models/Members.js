@@ -23,6 +23,7 @@ let Members = new Schema(
     permissions:{
       page:Number,
       service:Number,
+      system:Number,
     },
 
     activeNotifications: Array,

@@ -20,6 +20,7 @@ const auth = (req, res, next) => {
 				req.permissions = decodeAuth({
 					page: decoded.perm[0],
 					service: decoded.perm[1],
+					system: decoded.perm[2],
 				})
 				req.permissions.isAdmin = Boolean(decoded.admin)
 				next()

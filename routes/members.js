@@ -59,7 +59,7 @@ router.post("/api/members/add", checkW, async (req, res) => {
 			.update(req.body.password)
 			.digest('hex')
 
-		let permissions = [...(req.body.servicePermissions ?? []), ...(req.body.pagePermissions ?? [])]
+		let permissions = [...(req.body.servicePermissions ?? []), ...(req.body.pagePermissions ?? []), ...(req.body.systemPermissions ?? [])]
 		// permissions = permissions.map(val => val.toLowerCase())
 		// permissions = permissions.map(val => val.replace(" ", ""))
 		permissions = encodeAuth(permissions)
@@ -191,6 +191,7 @@ router.get("/api/members/", async (req, res) => {
 		
 		members.password = undefined
 		const perms = Object.assign({}, decodeAuth(members.permissions))
+		console.log(perms, members.permissions)
 
 		members.permissions = decodeAuth(members.permissions)
 		if (members.endDate)
@@ -255,10 +256,12 @@ router.post("/api/members/update", checkW, async (req, res) => {
 			delete req.body.password
 		}
 
-		let permissions = [...req.body.servicePermissions, ...req.body.pagePermissions]
+		let permissions = [...req.body.servicePermissions, ...req.body.pagePermissions, ...req.body.systemPermissions]
+
 		// permissions = permissions.map(val => val.toLowerCase())
 		// permissions = permissions.map(val => val.replace(" ", ""))
 		permissions = encodeAuth(permissions)
+		// console.log(permissions, decodeAuth(permissions))
 
 		let _ = await Members.updateOne(
 			{
