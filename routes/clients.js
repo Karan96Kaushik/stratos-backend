@@ -17,6 +17,7 @@ const {
 } = require("../modules/useS3");
 const fs = require('fs');
 const crypto = require('crypto');
+const client = require('../scripts/redisClient');
 
 const tmpdir = "/tmp/"
 
@@ -434,26 +435,27 @@ router.get("/api/clients/", async (req, res) => {
 		if(!checkR(req))
 			query.addedBy = req.user.id
 
-		let clients = await Clients.findOne(req.query);
-		if(!clients){
+		let client = await Clients.findOne(req.query);
+		if(!client){
 			res.status(404).send("Client not found")
 		}
+		client = client._doc
 
-		clients.certDate = moment(new Date(processDate(clients.certDate))).format("YYYY-MM-DD")
-		clients.completionDate = moment(new Date(processDate(clients.completionDate))).format("YYYY-MM-DD")
-		clients.mobile = maskString(clients.mobile)
-		clients.office = maskString(clients.office)
-		clients.email = maskString(clients.email)
+		client.certDate = moment(new Date(processDate(client.certDate))).format("YYYY-MM-DD")
+		client.completionDate = moment(new Date(processDate(client.completionDate))).format("YYYY-MM-DD")
+		client.mobile = maskString(client.mobile)
+		client.office = maskString(client.office)
+		client.email = maskString(client.email)
 
-		if (!req.permissions.isAdmin && req.permissions.system.includes('View RERA Passwords')) {
+		if (!req.permissions.isAdmin && !req.permissions.system.includes('View RERA Passwords')) {
 			client.userID = '***'
 			client.password = '***'
 		}
 
-		let files = await getAllFiles(clients.clientID + "/")
+		let files = await getAllFiles(client.clientID + "/")
 
 		files = files.map(f => f.Key)
-		res.json({...clients._doc, files})
+		res.json({...client, files})
 		
 	} catch (err) {
 		console.log(err)
