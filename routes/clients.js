@@ -261,8 +261,9 @@ router.post("/api/clients/export", async (req, res) => {
 
 		let results = await Clients.find(query)
 			.collation({locale: "en" })
-
-		results = commonProcessor(results, true, req.isAdmin, req.permissions)
+			
+			
+		results = commonProcessor(results, true, req.permissions.isAdmin, req.permissions)
 
 		let file = await generateExcel(results, clientFields[req.query.searchAll ? "all" : req.query.clientType], "clientsExport" + (+new Date))
 
