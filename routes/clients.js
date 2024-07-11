@@ -449,8 +449,8 @@ router.get("/api/clients/", async (req, res) => {
 		client.email = maskString(client.email)
 
 		if (!req.permissions.isAdmin && !req.permissions.system.includes('View RERA Passwords')) {
-			client.userID = '***'
-			client.password = '***'
+			client.userID = client.userID && '***'
+			client.password = client.userID && '***'
 		}
 
 		let files = await getAllFiles(client.clientID + "/")

@@ -37,7 +37,8 @@ router.post('/api/login', async (req, res) => {
 				id:user._id, 
 				perm:[
 					user.permissions.page, 
-					user.permissions.service
+					user.permissions.service,
+					user.permissions.system,
 				]
 			}
 			
@@ -47,7 +48,7 @@ router.post('/api/login', async (req, res) => {
 			let token = generate(tokenObj, expiry)
 
 			user = user._doc
-			console.log("SAVING", String(user._id), String(token), String(true))
+			// console.log("SAVING", String(user._id), String(token), String(true))
 			await client.hSet(String(user._id), String(token), String(true))
 
 			delete user.password
@@ -55,6 +56,8 @@ router.post('/api/login', async (req, res) => {
 			delete user.updateTime
 
 			let permissions = decodeAuth(user.permissions)
+
+			console.log(permissions)
 
 			user.permissions = permissions
 			res.send({user, token})
