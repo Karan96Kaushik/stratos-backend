@@ -142,6 +142,9 @@ router.get("/api/dashboard/sales", async (req, res) => {
             ]})
 		}
 
+		if (req.query._memberId)
+			query['$and'].push({_membersAssigned: req.query._memberId})
+
 		let results = await Sales.aggregate([
 			{ $match: query },
 			{ $facet: {
@@ -212,6 +215,9 @@ router.get("/api/dashboard/followups", async (req, res) => {
             ]})
 		}
 
+		if (req.query._memberId)
+			query['$and'].push({_membersAssigned: req.query._memberId})
+
 		let results = await Sales.aggregate([
 			{ $match: query },
 			{ $facet: {
@@ -271,7 +277,6 @@ router.get("/api/dashboard/followups", async (req, res) => {
 router.get("/api/dashboard/meetings", async (req, res) => {
 	try{
 
-		console.debug(req.query)
         let query = {}
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R")) {
@@ -281,6 +286,9 @@ router.get("/api/dashboard/meetings", async (req, res) => {
                 {_membersAssigned: req.user.id}
             ]})
 		}
+
+		if (req.query._memberId)
+			query['$and'].push({_membersAssigned: req.query._memberId})
 
 		let results = await Sales.aggregate([
 			{ $match: query },
