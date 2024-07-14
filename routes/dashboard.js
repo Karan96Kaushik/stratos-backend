@@ -71,6 +71,9 @@ router.get("/api/dashboard/calendar/followups", async (req, res) => {
 			{ followUpDate: { $gt: startdate } },
 		]}
 
+		if (req.query._memberId)
+			followupsQuery['$and'].push({_membersAssigned: req.query._memberId})
+
 		let followups = await Sales.find(followupsQuery)
 			.sort({"createdTime": 1})
 			.limit(250)
@@ -103,6 +106,9 @@ router.get("/api/dashboard/calendar/meetings", async (req, res) => {
 			{ meetingDate: { $lt: tomorrow } },
 			{ meetingDate: { $gt: startdate } },
 		]}
+
+		if (req.query._memberId)
+			meetingsQuery['$and'].push({_membersAssigned: req.query._memberId})
 
 		let meetings = await Sales.find(meetingsQuery)
 			.sort({"createdTime": 1})
@@ -157,6 +163,9 @@ router.get("/api/dashboard/sales", async (req, res) => {
 
 		query['$and'].push({callingDate: { $gt: new Date(req.query.startDate) }})
 		query['$and'].push({callingDate: { $lt: new Date(req.query.endDate) }})
+
+		if (req.query._memberId)
+			query['$and'].push({_membersAssigned: req.query._memberId})
 
 		// console.log(query)
 
@@ -225,6 +234,9 @@ router.get("/api/dashboard/followups", async (req, res) => {
 		query['$and'].push({followUpDate: { $gt: new Date(req.query.startDate) }})
 		query['$and'].push({followUpDate: { $lt: new Date(req.query.endDate) }})
 
+		if (req.query._memberId)
+			query['$and'].push({_membersAssigned: req.query._memberId})
+
 		// console.log(query)
 
 		results = await Sales.aggregate([
@@ -291,6 +303,9 @@ router.get("/api/dashboard/meetings", async (req, res) => {
 
 		query['$and'].push({meetingDate: { $gt: new Date(req.query.startDate) }})
 		query['$and'].push({meetingDate: { $lt: new Date(req.query.endDate) }})
+
+		if (req.query._memberId)
+			query['$and'].push({_membersAssigned: req.query._memberId})
 
 		// console.log(query)
 
