@@ -61,7 +61,7 @@ router.get("/api/dashboard/calendar/followups", async (req, res) => {
 		let tomorrow = new Date(+new Date() + 1*24*60*60*1000)
 		let startdate = new Date(+new Date() - 1*24*60*60*1000)
 
-		console.debug(startdate, tomorrow)
+		// console.debug(startdate, tomorrow)
 
 		let followupsQuery = {"$and" : [
 			// {...req.query}
@@ -99,7 +99,7 @@ router.get("/api/dashboard/calendar/meetings", async (req, res) => {
 		let tomorrow = new Date(+new Date() + 1*24*60*60*1000)
 		let startdate = new Date(+new Date() - 1*24*60*60*1000)
 
-		console.debug(startdate, tomorrow)
+		// console.debug(startdate, tomorrow)
 
 		let meetingsQuery = {"$and" : [
 			{ _membersAssigned: req.user.id },
@@ -131,7 +131,7 @@ router.get("/api/dashboard/calendar/meetings", async (req, res) => {
 router.get("/api/dashboard/sales", async (req, res) => {
 	try{
 
-		console.debug(req.query)
+		// console.debug(req.query)
         let query = {}
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R")) {
@@ -142,8 +142,10 @@ router.get("/api/dashboard/sales", async (req, res) => {
             ]})
 		}
 
-		if (req.query._memberId)
+		if (req.query._memberId) {
+            query['$and'] = query['$and'] || []
 			query['$and'].push({_membersAssigned: req.query._memberId})
+		}
 
 		let results = await Sales.aggregate([
 			{ $match: query },
@@ -166,9 +168,6 @@ router.get("/api/dashboard/sales", async (req, res) => {
 
 		query['$and'].push({callingDate: { $gt: new Date(req.query.startDate) }})
 		query['$and'].push({callingDate: { $lt: new Date(req.query.endDate) }})
-
-		if (req.query._memberId)
-			query['$and'].push({_membersAssigned: req.query._memberId})
 
 		// console.log(query)
 
@@ -204,7 +203,7 @@ router.get("/api/dashboard/sales", async (req, res) => {
 router.get("/api/dashboard/followups", async (req, res) => {
 	try{
 
-		console.debug(req.query)
+		// console.debug(req.query)
         let query = {}
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R")) {
@@ -215,8 +214,10 @@ router.get("/api/dashboard/followups", async (req, res) => {
             ]})
 		}
 
-		if (req.query._memberId)
+		if (req.query._memberId) {
+            query['$and'] = query['$and'] || []
 			query['$and'].push({_membersAssigned: req.query._memberId})
+		}
 
 		let results = await Sales.aggregate([
 			{ $match: query },
@@ -240,8 +241,8 @@ router.get("/api/dashboard/followups", async (req, res) => {
 		query['$and'].push({followUpDate: { $gt: new Date(req.query.startDate) }})
 		query['$and'].push({followUpDate: { $lt: new Date(req.query.endDate) }})
 
-		if (req.query._memberId)
-			query['$and'].push({_membersAssigned: req.query._memberId})
+		// if (req.query._memberId)
+		// 	query['$and'].push({_membersAssigned: req.query._memberId})
 
 		// console.log(query)
 
@@ -287,8 +288,10 @@ router.get("/api/dashboard/meetings", async (req, res) => {
             ]})
 		}
 
-		if (req.query._memberId)
+		if (req.query._memberId) {
+            query['$and'] = query['$and'] || []
 			query['$and'].push({_membersAssigned: req.query._memberId})
+		}
 
 		let results = await Sales.aggregate([
 			{ $match: query },
@@ -312,8 +315,8 @@ router.get("/api/dashboard/meetings", async (req, res) => {
 		query['$and'].push({meetingDate: { $gt: new Date(req.query.startDate) }})
 		query['$and'].push({meetingDate: { $lt: new Date(req.query.endDate) }})
 
-		if (req.query._memberId)
-			query['$and'].push({_membersAssigned: req.query._memberId})
+		// if (req.query._memberId)
+		// 	query['$and'].push({_membersAssigned: req.query._memberId})
 
 		// console.log(query)
 
