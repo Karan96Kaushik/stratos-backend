@@ -228,7 +228,7 @@ router.get("/api/sales/", async (req, res) => {
 		sales = sales._doc
 		
 		sales.callingDate = sales.callingDate ? moment(sales.callingDate).format("YYYY-MM-DD") : undefined
-		sales.followUpDate = sales.followUpDate ? moment(sales.followUpDate).format("YYYY-MM-DD") : undefined
+		// sales.followUpDate = sales.followUpDate ? moment(sales.followUpDate).format("YYYY-MM-DD") : undefined
 		sales.meetingDate = sales.meetingDate ? moment(sales.meetingDate).format("YYYY-MM-DD") : undefined
 		sales.completionDate = sales.completionDate ? moment(sales.completionDate).format("YYYY-MM-DD") : undefined
 		sales.certificateDate = sales.certificateDate ? moment(sales.certificateDate).format("YYYY-MM-DD") : undefined
