@@ -2,7 +2,7 @@
 const salesFields = {
     "all": {
         texts:[
-            // {label:"Sales ID", id:"salesID", isRequired:true},
+            {label:"Sales ID", id:"salesID", isRequired:true},
             {label:"Project Name", id:"projectName", isRequired:true},
             {label:"Promoter Name", id:"promoterName", isRequired:true},
             {label:"Members Assigned", id:"membersAssigned", isRequired:true},
