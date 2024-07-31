@@ -323,10 +323,12 @@ router.post("/api/sales/update", async (req, res) => {
 		if (Array.isArray(existingRemarks)) {
 			delete req.body.remarks
 		}
-		else {
+		else if (req.body.remarks) {
 			req.body.remarks = [remarks]
 		}
 		delete req.body.existingRemarks
+
+		console.log(remarks, existingRemarks)
 
 		let _ = await Sales.updateOne(
 			{
