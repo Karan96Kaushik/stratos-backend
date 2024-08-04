@@ -14,7 +14,8 @@ const calculateTotal = (val) => (
 
 const calculateSalesTotal = (val) => (
 	Number(val.confirmedAmount ?? 0) +
-	Number(val.gst ?? 0)
+	Number(val.gst ?? 0) +
+	Number(val.govtFees ?? 0)
 )
 
 
@@ -124,6 +125,7 @@ const handleSalesPayment = async (body, originalPaymentId) => {
 	_ = await Sales.updateOne(
 		{_id: body._salesID}, 
 		{
+			totalAmount: totalAmount,
 			receivedAmount: paymentAmount,
 			balanceAmount: totalAmount - paymentAmount
 		})
@@ -169,4 +171,4 @@ const updateClient = async (clientID) => {
 	})
 }
 
-module.exports = {handlePayment, calculateTotal, updateClient, handleSalesPayment}
+module.exports = {handlePayment, calculateTotal, updateClient, handleSalesPayment, calculateSalesTotal}

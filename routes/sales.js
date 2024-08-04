@@ -19,7 +19,7 @@ const {
 } = require("../modules/useS3");
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager");
 const {SalesPayments} = require('../models/SalesPayments');
-const { handleSalesPayment } = require('../modules/paymentHelpers');
+const { handleSalesPayment, calculateSalesTotal } = require('../modules/paymentHelpers');
 
 const tmpdir = "/tmp/"
 
@@ -35,9 +35,13 @@ router.post("/api/sales/add", async (req, res) => {
 
 		if (req.body.items?.length) {
 			req.body.confirmedAmount = req.body.items.reduce((p,c) => p + (Number(c.confirmedAmount) || 0), 0)
+			if (req.body.addGst)
+				req.body.gst = Number((req.body.confirmedAmount * 0.18).toFixed(2))
 		}
 
-		req.body.balanceAmount = req.body.confirmedAmount
+		req.body.totalAmount = calculateSalesTotal(req.body)
+
+		req.body.balanceAmount = req.body.totalAmount
 
 		const salesIdPrefix = "SL"
 		let salesID = "SL" + await getID(salesIdPrefix, padding=100000)
@@ -149,7 +153,7 @@ router.post("/api/sales/payments/update", async (req, res) => {
 
 		if(req.body.docs?.length) {
 			let files = await saveFilesToLocal(req.body.docs)
-			await uploadFiles(files, 'SL/'+invoiceID)
+			await uploadFiles(files, 'SL/'+req.body.invoiceID)
 		}
 
 		res.send("OK")
@@ -469,7 +473,13 @@ router.post("/api/sales/update", async (req, res) => {
 
 		if (req.body.items?.length) {
 			req.body.confirmedAmount = req.body.items.reduce((p,c) => p + (Number(c.confirmedAmount) || 0), 0)
+			if (req.body.addGst)
+				req.body.gst = Number((req.body.confirmedAmount * 0.18).toFixed(2))
 		}
+
+		req.body.totalAmount = calculateSalesTotal(req.body)
+
+		req.body.balanceAmount = req.body.totalAmount - req.body.receivedAmount
 
 		let remarks = ''
 		if (req.body.remarks?.length > 0) 
