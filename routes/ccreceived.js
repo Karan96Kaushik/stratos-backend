@@ -58,16 +58,20 @@ router.post("/api/ccreceived/add", async (req, res) => {
 
 const generateQuery = (req) => {
 
+	const replacementChar = '.*?'
+
+	const text = req.query.text.replace(/\s+/g, replacementChar);
+
 	let query = {
 		$and:[
 			{
 				$or:[
-					{ dataID: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ promoterName: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ memberInformation: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ certNo: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ district: { $regex: new RegExp(req.query.text) , $options:"i" }},
-					{ village: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ dataID: { $regex: new RegExp(text) , $options:"i" }},
+					{ promoterName: { $regex: new RegExp(text) , $options:"i" }},
+					{ memberInformation: { $regex: new RegExp(text) , $options:"i" }},
+					{ certNo: { $regex: new RegExp(text) , $options:"i" }},
+					{ district: { $regex: new RegExp(text) , $options:"i" }},
+					{ village: { $regex: new RegExp(text) , $options:"i" }},
 				]
 			},
 		],
