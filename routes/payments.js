@@ -232,12 +232,12 @@ router.get("/api/payments/search/all", async (req, res) => {
 	res.json(payments)
 })
 
-const calculateTotal = (val) => (
-	Number(val.billAmount ?? 0) +
-	Number(val.gst ?? 0) +
-	Number(val.govtFees ?? 0) +
-	Number(val.sroFees ?? 0)
-)
+// const calculateTotal = (val) => (
+// 	Number(val.billAmount ?? 0) +
+// 	Number(val.gst ?? 0) +
+// 	Number(val.govtFees ?? 0) +
+// 	Number(val.sroFees ?? 0)
+// )
 
 router.post("/api/payments/update", async (req, res) => {
 	try {

@@ -2,6 +2,8 @@ const {Payments} = require("../models/Payments");
 const {Tasks} = require("../models/Tasks");
 const {Clients} = require("../models/Clients");
 const {Packages} = require("../models/Packages");
+const {Sales} = require("../models/Sales");
+const {SalesPayments} = require("../models/SalesPayments");
 
 const calculateTotal = (val) => (
 	Number(val.billAmount ?? 0) +
@@ -9,6 +11,12 @@ const calculateTotal = (val) => (
 	Number(val.govtFees ?? 0) +
 	Number(val.sroFees ?? 0)
 )
+
+const calculateSalesTotal = (val) => (
+	Number(val.confirmedAmount ?? 0) +
+	Number(val.gst ?? 0)
+)
+
 
 // manages denormalised balance/received amount in Clients/Tasks
 const handlePayment = async (body, originalPaymentId) => {
@@ -77,6 +85,51 @@ const handlePayment = async (body, originalPaymentId) => {
 
 }
 
+const handleSalesPayment = async (body, originalPaymentId) => {
+	let originalPayment, 
+		_, 
+		paymentAmount = 0
+		
+	if(originalPaymentId) {
+		originalPayment = await SalesPayments.findOne({_id: originalPaymentId});
+		originalPayment = originalPayment._doc
+
+		body.packageID = originalPayment.packageID
+		body._packageID = originalPayment._packageID
+		body._taskID = originalPayment._taskID
+		body._clientID = originalPayment._clientID
+	}
+
+	// PAYMENTS
+	let paymentQuery = {salesID: body.salesID}
+
+	let payments = await SalesPayments.find(paymentQuery)
+
+	if (payments.length)
+		paymentAmount = payments.map(v => v._doc).reduce((prev,curr) => Number(curr.receivedAmount)+prev,0)
+
+	// SALES
+	sales = await Sales.findOne({_id: body._salesID ?? body._id})
+	if(!sales)
+		throw new Error("Linked task not found - contact admin")
+
+	sales = sales?._doc
+	let totalAmount = calculateSalesTotal(sales)
+
+	console.debug('------', body._salesID, {
+		receivedAmount: paymentAmount,
+		balanceAmount: totalAmount - paymentAmount
+	})
+
+	_ = await Sales.updateOne(
+		{_id: body._salesID}, 
+		{
+			receivedAmount: paymentAmount,
+			balanceAmount: totalAmount - paymentAmount
+		})
+
+}
+
 const updateClient = async (clientID) => {
 
 	// CLIENT AMOUNTS
@@ -116,4 +169,4 @@ const updateClient = async (clientID) => {
 	})
 }
 
-module.exports = {handlePayment, calculateTotal, updateClient}
+module.exports = {handlePayment, calculateTotal, updateClient, handleSalesPayment}

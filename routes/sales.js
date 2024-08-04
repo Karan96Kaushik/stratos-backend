@@ -17,7 +17,9 @@ const {
 	uploadToS3,
 	getFilePath
 } = require("../modules/useS3");
-const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
+const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager");
+const {SalesPayments} = require('../models/SalesPayments');
+const { handleSalesPayment } = require('../modules/paymentHelpers');
 
 const tmpdir = "/tmp/"
 
@@ -30,6 +32,12 @@ router.post("/api/sales/add", async (req, res) => {
 			req.body.remarks = [moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks]
 		else
 			delete req.body.remarks
+
+		if (req.body.items?.length) {
+			req.body.confirmedAmount = req.body.items.reduce((p,c) => p + (Number(c.confirmedAmount) || 0), 0)
+		}
+
+		req.body.balanceAmount = req.body.confirmedAmount
 
 		const salesIdPrefix = "SL"
 		let salesID = "SL" + await getID(salesIdPrefix, padding=100000)
@@ -55,6 +63,102 @@ router.post("/api/sales/add", async (req, res) => {
 	}
 
 })
+
+router.post("/api/sales/payments/add", async (req, res) => {
+	try {
+
+		const memberInfo = await Members.findOne({_id: req.user.id})
+
+		if (req.body.remarks?.length > 0)
+			req.body.remarks = [moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks]
+		else
+			delete req.body.remarks
+
+
+		const salesIdPrefix = "PS"
+		let paymentID = salesIdPrefix + await getID(salesIdPrefix, padding=100000)
+		let _ = await SalesPayments.create({
+			...req.body,
+			memberID:memberInfo.memberID,
+			memberName:memberInfo.userName,
+			meetingStatus:0,
+			addedBy: req.user.id,
+			paymentID
+		});
+		_ = await updateID(salesIdPrefix)
+
+		await handleSalesPayment(req.body, null)
+
+		if(req.body.docs?.length) {
+			let files = await saveFilesToLocal(req.body.docs)
+			await uploadFiles(files, salesID)
+		}
+
+		res.send("OK")
+		
+	} catch (err) {
+		res.status(500).send(err.message)
+	}
+
+})
+
+router.get("/api/sales/payments/", async (req, res) => {
+	try {
+
+		const _id = req.query._id
+		delete req.query._id
+		let payments = await SalesPayments.findOne({_id});
+		payments = payments._doc
+
+		// let files = await getAllFiles('SL/'+payments.invoiceID + "/")
+		// files = files.map(({Key}) => (Key))
+
+		// payments.files = files
+
+		res.json(payments)
+
+	} catch (err) {
+		res.status(500).send(err.message)
+	}
+
+})
+
+router.post("/api/sales/payments/update", async (req, res) => {
+	try {
+
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Payments W")) {
+			res.status(401).send("Unauthorized")
+			return
+		}
+
+		let _id = req.body._id
+
+		delete req.body._id
+		delete req.body.memberID
+		delete req.body.addedBy
+
+		_ = await SalesPayments.updateOne(
+			{
+				_id
+			},
+			{
+				...req.body
+			});
+		
+		await handleSalesPayment(req.body, _id)
+
+		if(req.body.docs?.length) {
+			let files = await saveFilesToLocal(req.body.docs)
+			await uploadFiles(files, 'SL/'+invoiceID)
+		}
+
+		res.send("OK")
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
 
 const generateQuery = (req) => {
 
@@ -100,7 +204,7 @@ const generateQuery = (req) => {
 	})
 
 	// non sales-read user can only view their own added sales or assigned ones
-	if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R")) {
+	if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R") && !req.query.ignorePermissions) {
 		query['$and'].push({ $or: [
 			{addedBy: req.user.id},
 			{_membersAssigned: req.user.id},
@@ -116,6 +220,10 @@ const generateQuery = (req) => {
 				}
 			}
 		})
+	}
+
+	if (req.query.ignorePermissions) {
+		query['$and'].push({status: 'Converted'})
 	}
 
 	return query
@@ -158,20 +266,65 @@ router.post("/api/sales/search", async (req, res) => {
 
 		results = results.map(val => val._doc)
 
-		// followup duration color coding
+		results = commonProcessor(results)
 
-		// results = results.map(val => {
-		// 	let callingDateColor = +new Date(val.callingDate) - +new Date()
+		res.json({sales: results})
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
 
-		// 	if(callingDateColor < 0)						// follow up date passed
-		// 		callingDateColor = 2
-		// 	else if(callingDateColor < 1000*60*60*24*3) 	// 3 days pending
-		// 		callingDateColor = 1
-		// 	else 											// more than 3 days
-		// 		callingDateColor = 0
+router.post("/api/sales/payments/search", async (req, res) => {
+	try{
 
-		// 	return ({...val, callingDateColor})
-		// })
+		req.query = req.body
+
+		const rowsPerPage = parseInt(req.query.rowsPerPage)
+		const sortID = req.query.sortID
+		const sortDir = parseInt(req.query.sortDir)
+		const page = parseInt(req.query.page)-1
+
+		let query = generateQuery(req)
+
+		let results = await SalesPayments.find(query)
+			.collation({locale: "en" })
+			.limit(rowsPerPage)
+			.skip(rowsPerPage * page)
+			.sort({[sortID || "createdTime"]: sortDir || -1});
+
+		results = results.map(val => val._doc)
+
+		results = commonProcessor(results)
+
+		res.json({payments: results})
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.post("/api/sales/accounts/search", async (req, res) => {
+	try{
+
+		req.query = req.body
+
+		const rowsPerPage = parseInt(req.query.rowsPerPage)
+		const sortID = req.query.sortID
+		const sortDir = parseInt(req.query.sortDir)
+		const page = parseInt(req.query.page)-1
+
+		let query = generateQuery(req)
+
+		query['$and'].push({status: 'Converted'})
+
+		let results = await Sales.find(query)
+			.collation({locale: "en" })
+			.limit(rowsPerPage)
+			.skip(rowsPerPage * page)
+			.sort({[sortID || "createdTime"]: sortDir || -1});
+
+		results = results.map(val => val._doc)
 
 		results = commonProcessor(results)
 
@@ -312,6 +465,10 @@ router.post("/api/sales/update", async (req, res) => {
 			})))
 			// console.log(files)
 
+		}
+
+		if (req.body.items?.length) {
+			req.body.confirmedAmount = req.body.items.reduce((p,c) => p + (Number(c.confirmedAmount) || 0), 0)
 		}
 
 		let remarks = ''
