@@ -34,6 +34,7 @@ router.post("/api/sales/add", async (req, res) => {
 			delete req.body.remarks
 
 		if (req.body.items?.length) {
+			req.body.services = req.body.items.map(i => i.service)
 			req.body.confirmedAmount = req.body.items.reduce((p,c) => p + (Number(c.confirmedAmount) || 0), 0)
 			if (req.body.addGst)
 				req.body.gst = Number((req.body.confirmedAmount * 0.18).toFixed(2))
@@ -250,6 +251,52 @@ const commonProcessor = (results) => {
 	return results
 }
 
+const commonPaymentsProcessor = (results) => {
+	// created & followup timestamp
+	results = results.map(val => ({
+		...val, 
+		// serviceType: val.serviceType.join(', '),
+		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		completionDate: !val.completionDate ? "" : moment(new Date(val.completionDate)).format("DD-MM-YYYY"),
+		certificateDate: !val.certificateDate ? "" : moment(new Date(val.certificateDate)).format("DD-MM-YYYY"),
+		paymentDate: !val.paymentDate ? "" : moment(new Date(val.paymentDate)).format("DD-MM-YYYY"),
+		remarks: Array.isArray(val.remarks) ? val.remarks : [val.remarks]
+	}))
+
+	return results
+}
+
+const commonAccountsProcessor = async (results) => {
+	let salesIDs = results.map(val => (val.salesID))
+	salesIDs = await SalesPayments.find({
+		salesID: {$in:salesIDs}
+	})
+
+	results = results.map(val => ({
+		...val, 
+		// serviceType: val.serviceType.join(', '),
+		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		completionDate: !val.completionDate ? "" : moment(new Date(val.completionDate)).format("DD-MM-YYYY"),
+		certificateDate: !val.certificateDate ? "" : moment(new Date(val.certificateDate)).format("DD-MM-YYYY"),
+		paymentDate: !val.paymentDate ? "" : moment(new Date(val.paymentDate)).format("DD-MM-YYYY"),
+		remarks: Array.isArray(val.remarks) ? val.remarks : [val.remarks]
+	}))
+
+	results = results.map(val => ({
+		...val,
+		payments: salesIDs
+			.filter((v) => (val.salesID == v._doc.salesID))
+			.map(v => (
+				(v._doc.paymentDate ? moment(new Date(v._doc.paymentDate)).format("DD-MM-YYYY") + " - " : v._doc.createdTime ? (moment(new Date(v._doc.createdTime)).format("DD-MM-YYYY") + " - ") : " - ") +
+				"₹" + v._doc.receivedAmount + " - " +
+				v._doc.mode
+			))
+	}))
+
+	return results
+}
+
+
 router.post("/api/sales/search", async (req, res) => {
 	try{
 
@@ -299,7 +346,7 @@ router.post("/api/sales/payments/search", async (req, res) => {
 
 		results = results.map(val => val._doc)
 
-		results = commonProcessor(results)
+		results = commonPaymentsProcessor(results)
 
 		res.json({payments: results})
 	} catch (err) {
@@ -330,7 +377,7 @@ router.post("/api/sales/accounts/search", async (req, res) => {
 
 		results = results.map(val => val._doc)
 
-		results = commonProcessor(results)
+		results = await commonAccountsProcessor(results)
 
 		res.json({sales: results})
 	} catch (err) {
@@ -472,6 +519,7 @@ router.post("/api/sales/update", async (req, res) => {
 		}
 
 		if (req.body.items?.length) {
+			req.body.services = req.body.items.map(i => i.service)
 			req.body.confirmedAmount = req.body.items.reduce((p,c) => p + (Number(c.confirmedAmount) || 0), 0)
 			if (req.body.addGst)
 				req.body.gst = Number((req.body.confirmedAmount * 0.18).toFixed(2))
