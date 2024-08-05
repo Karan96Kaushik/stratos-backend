@@ -60,7 +60,7 @@ const generateQuery = (req) => {
 
 	const replacementChar = '.*?'
 
-	const text = req.query.text.replace(/\s+/g, replacementChar);
+	const text = req.query?.text?.replace(/\s+/g, replacementChar) || '';
 
 	let query = {
 		$and:[
