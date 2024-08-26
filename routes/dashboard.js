@@ -154,7 +154,8 @@ router.get("/api/dashboard/sales", async (req, res) => {
 		const filterDate = new Date()
 		filterDate.setDate(filterDate.getDate() - 1)
 
-		callsMadeQuery['$and'].push({updateTime: { $gt: filterDate }})
+		callsMadeQuery['$and'].push({updateTime: { $gt: new Date(req.query.startDate) }})
+		callsMadeQuery['$and'].push({updateTime: { $lt: new Date(req.query.endDate) }})
 
 		let results = await Sales.aggregate([
 			{ $match: callsMadeQuery },
@@ -191,7 +192,43 @@ router.get("/api/dashboard/sales", async (req, res) => {
 		console.log(results[0], moment(new Date).format('YYYY-MM-DD'))
 
 		let countToday = results?.[0]?.dateCounts?.find(d => d.date == moment(new Date).format('YYYY-MM-DD'))?.count || 0
+		let countTotalMade = results?.[0]?.totalCount || 0
+
 		let countAfterToday = 0
+
+		results = await Sales.aggregate([
+			{ $match: callsMadeQuery },
+			{ $unwind: "$connectedDatesRecord" },
+			{ $group: {
+				_id: {
+					$dateToString: { 
+						format: "%Y-%m-%d", 
+						date: "$connectedDatesRecord" 
+					}
+				},
+				count: { $sum: 1 }
+			}},
+			{ $sort: { _id: 1 } },
+			{ $group: {
+				_id: null,
+				dateCounts: { 
+					$push: { 
+						date: "$_id", 
+						count: "$count" 
+					} 
+				},
+				totalCount: { $sum: "$count" }
+			}},
+			{ 
+				$project: {
+					_id: 0,
+					dateCounts: 1,
+					totalCount: 1
+				}
+			}
+		])
+
+		let countConnected = results?.[0]?.totalCount || 0
 
 		query['$and'] = query['$and'] || []
 
@@ -207,7 +244,7 @@ router.get("/api/dashboard/sales", async (req, res) => {
 					{ $count: "count" }
 				],
 				"countPending": [
-					// Filter documents where updatedAt is less than callingDate
+					// Filter documents where updateTime is less than callingDate
 					{ $match: { $expr: { $lt: ["$updateTime", "$callingDate"] } } },
 					{ $count: "count" }
 				]
@@ -219,9 +256,11 @@ router.get("/api/dashboard/sales", async (req, res) => {
 
 		res.json({
 			'Total Scheduled': totalCount,
+			'Calls Made': countTotalMade,
 			'Future': countAfterToday,
-			'Today': countToday,
+			'Calls Made Today': countToday,
 			'Pending': countPending,
+			'Calls Connected': countConnected,
 		})
 	} catch (err) {
 		console.log(err)

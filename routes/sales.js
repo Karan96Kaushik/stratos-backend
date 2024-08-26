@@ -488,6 +488,7 @@ router.post("/api/sales/update", async (req, res) => {
 		let member = {...req.body.member}
 
 		let callMade
+		let callConnected
 
 		if (!body || !original)
 			throw new Error('There was an issue in the update, please refresh the page and try again')
@@ -555,11 +556,19 @@ router.post("/api/sales/update", async (req, res) => {
 
 		if (body.status && (body.status !== original.status)) {
 			callMade = true
-			console.log(body.status , original.status)
+			
 			let updateRemark = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Status updated to ' + body.status
 			if (member?.userName)
 				updateRemark = updateRemark + ' - ' + member.userName
 			newRemarks.push(updateRemark)
+
+			if (!["Not Connected",
+				"Invalid", 
+				"Not Answered", 
+				"Wrong Number", 
+				"Switched Off",].includes(body.status)) {
+				callConnected = true
+			}
 		}
 
 		if (Array.isArray(existingRemarks)) {
@@ -574,10 +583,14 @@ router.post("/api/sales/update", async (req, res) => {
 		let callingDate
 		if (callMade) {
 			callingDate = new Date()
-			console.log(callingDate)
 			callingDate.setUTCHours(0,0,0,1)
-			console.log(callingDate)
 		}
+
+		let addToSetData = {}
+		if (callMade)
+			addToSetData.callingDatesRecord = callingDate 
+		if (callConnected)
+			addToSetData.connectedDatesRecord = callingDate 
 
 		let _ = await Sales.updateOne(
 			{
@@ -585,7 +598,7 @@ router.post("/api/sales/update", async (req, res) => {
 			},
 			{
 				$set: { ...body },
-				$addToSet: callMade ? { callingDatesRecord: callingDate } : {},
+				$addToSet: addToSetData,
 				$push: (newRemarks.length > 0 && Array.isArray(existingRemarks)) 
 					? { remarks: { $each: newRemarks } } 
 					: {}
