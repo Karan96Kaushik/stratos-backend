@@ -7,6 +7,7 @@ const {Clients} = require("../models/Clients");
 const {getID, updateID} = require("../models/Utils");
 const fs = require('fs');
 const {Sales} = require('../models/Sales');
+const _ = require('lodash')
 
 router.get("/api/dashboard/", async (req, res) => {
 	try{
@@ -147,22 +148,50 @@ router.get("/api/dashboard/sales", async (req, res) => {
 			query['$and'].push({_membersAssigned: req.query._memberId})
 		}
 
+		const callsMadeQuery = _.merge({}, query)
+		callsMadeQuery['$and'] = callsMadeQuery['$and'] || []
+
+		const filterDate = new Date()
+		filterDate.setDate(filterDate.getDate() - 1)
+
+		callsMadeQuery['$and'].push({updateTime: { $gt: filterDate }})
+
 		let results = await Sales.aggregate([
-			{ $match: query },
-			{ $facet: {
-				"countAfterToday": [
-					{ $match: { callingDate: { $gt: new Date() } } },
-					{ $count: "count" }
-				],
-				"countToday": [
-					{ $match: { callingDate: { $gt: new Date(+new Date() - 1*24*3600*1000) } } },
-					{ $count: "count" }
-				],
-			}}
+			{ $match: callsMadeQuery },
+			{ $unwind: "$callingDatesRecord" },
+			{ $group: {
+				_id: {
+					$dateToString: { 
+						format: "%Y-%m-%d", 
+						date: "$callingDatesRecord" 
+					}
+				},
+				count: { $sum: 1 }
+			}},
+			{ $sort: { _id: 1 } },
+			{ $group: {
+				_id: null,
+				dateCounts: { 
+					$push: { 
+						date: "$_id", 
+						count: "$count" 
+					} 
+				},
+				totalCount: { $sum: "$count" }
+			}},
+			{ 
+				$project: {
+					_id: 0,
+					dateCounts: 1,
+					totalCount: 1
+				}
+			}
 		])
 
-		let countToday = results.length > 0 ? results[0].countToday[0]?.count : 0;
-		let countAfterToday = results.length > 0 ? results[0].countAfterToday[0]?.count : 0;
+		console.log(results[0], moment(new Date).format('YYYY-MM-DD'))
+
+		let countToday = results?.[0]?.dateCounts?.find(d => d.date == moment(new Date).format('YYYY-MM-DD'))?.count || 0
+		let countAfterToday = 0
 
 		query['$and'] = query['$and'] || []
 
@@ -189,7 +218,7 @@ router.get("/api/dashboard/sales", async (req, res) => {
 		let countPending = results[0]?.countPending[0]?.count || 0;
 
 		res.json({
-			'Total': totalCount,
+			'Total Scheduled': totalCount,
 			'Future': countAfterToday,
 			'Today': countToday,
 			'Pending': countPending,
