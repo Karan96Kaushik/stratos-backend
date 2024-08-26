@@ -245,7 +245,8 @@ const commonProcessor = (results) => {
 		callingDate: !val.callingDate ? "" : moment(new Date(val.callingDate)).format("DD-MM-YYYY"),
 		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY"),
 		meetingDate: !val.meetingDate ? "" : moment(new Date(val.meetingDate)).format("DD-MM-YYYY"),
-		remarks: Array.isArray(val.remarks) ? val.remarks : [val.remarks]
+		remarks: Array.isArray(val.remarks) ? val.remarks : [val.remarks],
+		existingRemarks: Array.isArray(val.remarks) ? val.remarks : [val.remarks]
 	}))
 
 	return results
@@ -482,13 +483,20 @@ router.delete("/api/sales/", async (req, res) => {
 
 router.post("/api/sales/update", async (req, res) => {
 	try {
-		let _id = req.body._id
+		let body = {...req.body.updateData}
+		let original = {...req.body.originalData}
+		let member = {...req.body.member}
 
-		let salesID = req.body.salesID
-		delete req.body._id
-		delete req.body.salesID
-		delete req.body.memberID
-		delete req.body.addedBy
+		if (!body || !original)
+			throw new Error('There was an issue in the update, please refresh the page and try again')
+
+		let _id = body._id
+
+		let salesID = body.salesID
+		delete body._id
+		delete body.salesID
+		delete body.memberID
+		delete body.addedBy
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R")) {
 			let result = await Sales.findOne({_id})
@@ -500,8 +508,8 @@ router.post("/api/sales/update", async (req, res) => {
 		}
 
 		let files
-		if(req.body.docs?.length) {
-			files = await Promise.all(req.body.docs.map(async (file) => new Promise((resolve, reject) => {
+		if(body.docs?.length) {
+			files = await Promise.all(body.docs.map(async (file) => new Promise((resolve, reject) => {
 				file.name = file.name.replace(/(?!\.)[^\w\s]/gi, '_')
 				file.name = parseInt(Math.random()*1000) + "_" + file.name
 
@@ -518,44 +526,65 @@ router.post("/api/sales/update", async (req, res) => {
 
 		}
 
-		if (req.body.items?.length) {
-			req.body.services = req.body.items.map(i => i.service)
-			req.body.confirmedAmount = req.body.items.reduce((p,c) => p + (Number(c.confirmedAmount) || 0), 0)
-			if (req.body.addGst)
-				req.body.gst = Number((req.body.confirmedAmount * 0.18).toFixed(2))
+		if (body.items?.length) {
+			body.services = body.items.map(i => i.service)
+			body.confirmedAmount = body.items.reduce((p,c) => p + (Number(c.confirmedAmount) || 0), 0)
+			if (body.addGst)
+				body.gst = Number((body.confirmedAmount * 0.18).toFixed(2))
+
+			body.totalAmount = calculateSalesTotal(body)
+			body.balanceAmount = body.totalAmount - body.receivedAmount
 		}
 
-		req.body.totalAmount = calculateSalesTotal(req.body)
 
-		req.body.balanceAmount = req.body.totalAmount - req.body.receivedAmount
+		let newRemarks = []
 
+		// Process new remark
 		let remarks = ''
-		if (req.body.remarks?.length > 0) 
-			remarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks
+		if (body.remarks?.length > 0) {
+			remarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + body.remarks
+			if (member?.userName)
+				remarks = remarks + ' - ' + member.userName
+			newRemarks.push(remarks)
+		}
 
-		let existingRemarks = req.body.existingRemarks
+		let existingRemarks = body.existingRemarks || original.existingRemarks
+
+		if (body.status && (body.status !== original.status)) {
+			console.log(body.status , original.status)
+			let updateRemark = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Status updated to ' + body.status
+			if (member?.userName)
+				updateRemark = updateRemark + ' - ' + member.userName
+			newRemarks.push(updateRemark)
+		}
 
 		if (Array.isArray(existingRemarks)) {
-			delete req.body.remarks
+			delete body.remarks
 		}
-		else if (req.body.remarks) {
-			req.body.remarks = [remarks]
+		else if (newRemarks.length) {
+			body.remarks = newRemarks
 		}
-		delete req.body.existingRemarks
 
-		console.log(remarks, existingRemarks)
+		delete body.existingRemarks
+
+		console.log('original',original)
+		console.log('body', body)
+
+		console.log('Remarks', newRemarks, existingRemarks, body.remarks)
 
 		let _ = await Sales.updateOne(
 			{
 				_id
 			},
 			{
-				$set: { ...req.body },
-				$push: (remarks.length > 0 && Array.isArray(existingRemarks)) ? { remarks: remarks } : {}
+				$set: { ...body },
+				$push: (newRemarks.length > 0 && Array.isArray(existingRemarks)) 
+					? { remarks: { $each: newRemarks } } 
+					: {}
 			});
 
-		if(req.body.docs?.length) {
-			let files = await saveFilesToLocal(req.body.docs)
+		if(body.docs?.length) {
+			let files = await saveFilesToLocal(body.docs)
 			await uploadFiles(files, salesID)
 		}
 
