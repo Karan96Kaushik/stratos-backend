@@ -49,7 +49,7 @@ router.get("/api/dashboard/", async (req, res) => {
 		})
 
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err.message)
 	}
 })
@@ -132,9 +132,8 @@ router.get("/api/dashboard/calendar/meetings", async (req, res) => {
 router.get("/api/dashboard/sales", async (req, res) => {
 	try{
 
-		// console.debug(req.query)
         let query = {}
-		console.log(!req.query.adminDash)
+
 		if(!req.query.adminDash) {
             query['$and'] = query['$and'] || []
 			query['$and'].push(
@@ -263,7 +262,7 @@ router.get("/api/dashboard/sales", async (req, res) => {
 			'Calls Connected': countConnected,
 		})
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err.message)
 	}
 })
@@ -338,7 +337,7 @@ router.get("/api/dashboard/followups", async (req, res) => {
 			'Pending': countPending,
 		})
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err.message)
 	}
 })
@@ -412,7 +411,7 @@ router.get("/api/dashboard/meetings", async (req, res) => {
 			'Pending': countPending,
 		})
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err.message)
 	}
 })
