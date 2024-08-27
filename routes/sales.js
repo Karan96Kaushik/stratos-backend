@@ -587,10 +587,14 @@ router.post("/api/sales/update", async (req, res) => {
 		}
 
 		let addToSetData = {}
+		
 		if (callMade)
 			addToSetData.callingDatesRecord = callingDateRec 
 		if (callConnected)
 			addToSetData.connectedDatesRecord = callingDateRec 
+
+		delete body.callingDatesRecord
+		delete body.connectedDatesRecord
 
 		let _ = await Sales.updateOne(
 			{
