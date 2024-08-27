@@ -134,13 +134,15 @@ router.get("/api/dashboard/sales", async (req, res) => {
 
 		// console.debug(req.query)
         let query = {}
-
-		if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R")) {
+		console.log(!req.query.adminDash)
+		if(!req.query.adminDash) {
             query['$and'] = query['$and'] || []
-			query['$and'].push({ $or: [
-                {addedBy: req.user.id},
-                {_membersAssigned: req.user.id}
-            ]})
+			query['$and'].push(
+				// { $or: [
+					// {addedBy: req.user.id},
+					{_membersAssigned: req.user.id}
+				// ]}
+			)
 		}
 
 		if (req.query._memberId) {
