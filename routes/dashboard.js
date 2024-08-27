@@ -189,8 +189,6 @@ router.get("/api/dashboard/sales", async (req, res) => {
 			}
 		])
 
-		console.log(results[0], moment(new Date).format('YYYY-MM-DD'))
-
 		let countToday = results?.[0]?.dateCounts?.find(d => d.date == moment(new Date).format('YYYY-MM-DD'))?.count || 0
 		let countTotalMade = results?.[0]?.totalCount || 0
 

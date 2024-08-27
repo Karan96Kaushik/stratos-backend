@@ -9,6 +9,9 @@ let Sales = new Schema(
     followUpDate: Date,
     callingDate: Date,
 
+    callingDatesRecord: [Date],  // New field: array of dates
+    connectedDatesRecord: [Date],  // New field: array of dates
+
     addedBy: {
       required:true,
       type:mongoose.Schema.Types.ObjectId

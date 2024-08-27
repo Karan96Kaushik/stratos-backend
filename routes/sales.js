@@ -580,17 +580,17 @@ router.post("/api/sales/update", async (req, res) => {
 
 		delete body.existingRemarks
 
-		let callingDate
+		let callingDateRec
 		if (callMade) {
-			callingDate = new Date()
-			callingDate.setUTCHours(0,0,0,1)
+			callingDateRec = new Date()
+			callingDateRec.setUTCHours(0,0,0,1)
 		}
 
 		let addToSetData = {}
 		if (callMade)
-			addToSetData.callingDatesRecord = callingDate 
+			addToSetData.callingDatesRecord = callingDateRec 
 		if (callConnected)
-			addToSetData.connectedDatesRecord = callingDate 
+			addToSetData.connectedDatesRecord = callingDateRec 
 
 		let _ = await Sales.updateOne(
 			{
