@@ -8,6 +8,7 @@ const {parse} = require('csv-parse/sync');
 const {Sales} = require("../models/Sales");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
+const {Meetings} = require('../models/Meetings');
 
 const {generateExcel} = require("../modules/excelProcessor");
 const salesFields = require("../statics/salesFields");
@@ -46,7 +47,27 @@ router.post("/api/sales/add", async (req, res) => {
 
 		const salesIdPrefix = "SL"
 		let salesID = "SL" + await getID(salesIdPrefix, padding=100000)
-		let _ = await Sales.create({
+
+		let meetingData
+
+		if (req.body.meetingDate) {
+			meetingData = {
+				title: salesID + ' - ' +  req.body.promoterName  + " - Meeting",
+				// title: `Meeting for SalesID ${original.salesID}`,
+				meetingDate: req.body.meetingDate,
+				meetingStatus: 0, // You may want to set a default status
+				remarks: '', // Initialize with an empty string
+				addedBy: req.user.id,
+				_membersAssigned: req.body._membersAssigned,
+				membersAssigned: req.body.membersAssigned,
+				// _salesID: _id,
+				salesID: salesID
+			}
+		}
+
+		delete req.body.meetingDate
+
+		let sale = await Sales.create({
 			...req.body,
 			memberID:memberInfo.memberID,
 			memberName:memberInfo.userName,
@@ -54,7 +75,13 @@ router.post("/api/sales/add", async (req, res) => {
 			addedBy: req.user.id,
 			salesID
 		});
-		_ = await updateID(salesIdPrefix)
+		let _ = await updateID(salesIdPrefix)
+
+		if (meetingData) {
+			meetingData._salesID = sale._id
+			await Meetings.create(meetingData)
+		}
+
 
 		if(req.body.docs?.length) {
 			let files = await saveFilesToLocal(req.body.docs)
@@ -440,6 +467,7 @@ router.get("/api/sales/", async (req, res) => {
 		sales.existingRemarks = sales.remarks
 
 		delete sales.remarks
+		delete sales.meetingDate
 
 		let files = await getAllFiles(sales.salesID + "/")
 		files = files.map(f => f.Key)
@@ -596,6 +624,25 @@ router.post("/api/sales/update", async (req, res) => {
 		delete body.callingDatesRecord
 		delete body.connectedDatesRecord
 
+		let meetingData
+
+		if (body.meetingDate) {
+			meetingData = {
+				title: original.salesID + ' - ' +  original.promoterName  + " - Meeting",
+				// title: `Meeting for SalesID ${original.salesID}`,
+				meetingDate: original.meetingDate,
+				meetingStatus: 0, // You may want to set a default status
+				_membersAssigned: body._membersAssigned,
+				membersAssigned: body.membersAssigned,
+				remarks: '', // Initialize with an empty string
+				addedBy: req.user.id,
+				_salesID: _id,
+				salesID: salesID
+			}
+		}
+
+		delete body.meetingDate
+
 		let _ = await Sales.updateOne(
 			{
 				_id
@@ -607,6 +654,9 @@ router.post("/api/sales/update", async (req, res) => {
 					? { remarks: { $each: newRemarks } } 
 					: {}
 			});
+
+		if (meetingData)
+			await Meetings.create(meetingData)
 
 		if(body.docs?.length) {
 			let files = await saveFilesToLocal(body.docs)

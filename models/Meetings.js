@@ -18,6 +18,7 @@ let Meetings = new Schema(
   {
     timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },
     collection: "Meetings",
+    strict:false,
   }
 );
 

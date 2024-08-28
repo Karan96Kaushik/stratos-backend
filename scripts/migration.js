@@ -14,6 +14,7 @@ const {Packages} = require("../models/Packages");
 const {HearingDates} = require('../models/HearingDates');
 const {handlePayment} = require("../modules/paymentHelpers");
 const {Sales} = require('../models/Sales');
+const {Meetings} = require('../models/Meetings');
 
 const migrateTaskPromoter = async () => {
 
@@ -724,6 +725,52 @@ const migrateRemarksToArray = async () => {
 	  console.error('Error during migration:', error);
 	}
   };
+
+  const migrateSalesToMeetings = async () => {
+	try {
+	  // Find all Sales documents with a meetingDate
+	  const salesWithMeetings = await Sales.find({ meetingDate: { $exists: true, $ne: null } });
+  
+	  console.log(`Found ${salesWithMeetings.length} Sales documents with meetings.`);
+  
+	  let createdCount = 0;
+	  let errorCount = 0;
+  
+	  for (let sale of salesWithMeetings) {
+		try {
+		  // Create a new Meeting document
+		  sale = sale._doc
+		  const newMeeting = new Meetings({
+			title: sale.salesID + ' - ' +  sale.promoterName  + " - Meeting",
+			meetingDate: sale.meetingDate,
+			remarks: '', // Initialize with an empty string
+			addedBy: sale.addedBy,
+			_membersAssigned: sale._membersAssigned,
+			membersAssigned: sale.membersAssigned,
+			meetingStatus: sale.meetingStatus,
+			_salesID: sale._id,
+			salesID: sale.salesID
+		  });
+  
+		  // Save the new Meeting document
+		  await newMeeting.save();
+  
+		  createdCount++;
+		} catch (error) {
+		  console.error(`Error creating meeting for Sale ${sale._id}:`, error);
+		  errorCount++;
+		}
+	  }
+  
+	  console.log(`Migration completed.`);
+	  console.log(`Created ${createdCount} new Meeting documents.`);
+	  console.log(`Encountered errors for ${errorCount} documents.`);
+	} catch (error) {
+	  console.error('Error during migration:', error);
+	}
+  };
+
+migrateSalesToMeetings()
 
 // migrateRemarksToArray()
 

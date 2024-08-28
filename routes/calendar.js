@@ -7,19 +7,19 @@ router.get("/api/calendar", async (req, res) => {
 
 	try {
 
-		let salesQuery = {"$and" : [
-			// {...req.query}
-			{meetingDate: {$exists:true}}
-		]}
+		// let salesQuery = {"$and" : [
+		// 	---- // {...req.query}
+		// 	{meetingDate: {$exists:true}}
+		// ]}
 
 		let meetingsQuery = {}
 
-		if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R") && !req.permissions.page.includes("Approve Meetings")) {
-            salesQuery['$and'].push({ $or: [
-                {addedBy: req.user.id},
-                {_membersAssigned: req.user.id}
-            ]})
-		}
+		// if(!req.permissions.isAdmin && !req.permissions.page.includes("Sales R") && !req.permissions.page.includes("Approve Meetings")) {
+        //     salesQuery['$and'].push({ $or: [
+        //         {addedBy: req.user.id},
+        //         {_membersAssigned: req.user.id}
+        //     ]})
+		// }
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Approve Meetings")) {
 			let meetingsQuery = {"$and" : [
@@ -30,7 +30,7 @@ router.get("/api/calendar", async (req, res) => {
             ]})
 		}
 
-		{_membersAssigned: req.user.id}
+		// {_membersAssigned: req.user.id}
 
 
 		let results = await Meetings.find(meetingsQuery)
@@ -42,24 +42,25 @@ router.get("/api/calendar", async (req, res) => {
 			.sort({"createdTime": -1})
 			.limit(250)
 
-		let sales = await Sales.find(salesQuery)
-			.sort({"createdTime": -1})
-			.limit(250)
+		// let sales = await Sales.find(salesQuery)
+		// 	.sort({"createdTime": -1})
+		// 	.limit(250)
 
-		sales = sales.map(r => ({
-			_id: r._doc._id,
-			salesID: r._doc.salesID,
-			meetingDate: moment(new Date(r._doc.meetingDate)).format("YYYY-MM-DD"),
-			title: r._doc.salesID + ' - ' + r._doc.promoterName  + " - Meeting",
-			exClientID: r._doc.exClientID,
-			meetingStatus: r._doc.meetingStatus,
-			remarks: r._doc.remarks,
-			openlink: '/app/sales/edit/' + r._doc._id,
-			isSales: true
-		}))
+		// sales = sales.map(r => ({
+		// 	_id: r._doc._id,
+		// 	salesID: r._doc.salesID,
+		// 	meetingDate: moment(new Date(r._doc.meetingDate)).format("YYYY-MM-DD"),
+		// 	title: r._doc.salesID + ' - ' + r._doc.promoterName  + " - Meeting",
+		// 	exClientID: r._doc.exClientID,
+		// 	meetingStatus: r._doc.meetingStatus,
+		// 	remarks: r._doc.remarks,
+		// 	openlink: '/app/sales/edit/' + r._doc._id,
+		// 	isSales: true
+		// }))
 
 		results = results.map(r => ({
 			...r._doc,
+			openlink: r._doc._salesID ? '/app/sales/edit/' + r._doc._salesID : null,
 			meetingDate: moment(new Date(r._doc.meetingDate)).format("YYYY-MM-DD")
 		}))
 
@@ -71,7 +72,10 @@ router.get("/api/calendar", async (req, res) => {
 			meetingDate: moment(new Date(r._doc.followUpDate)).format("YYYY-MM-DD")
 		}))
 
-		res.json([...results, ...sales, ...followups])
+		res.json([
+			...results, 
+			// ...sales, 
+			...followups])
 	}
 	catch (err) {
 		console.error(err)
@@ -135,7 +139,7 @@ router.patch("/api/calendar/approve", async (req, res) => {
 		if (!req.body._id)
 			return res.status(400).send("No event found")
 
-		if (req.body.isSales)
+		// if (req.body.isSales)
 			await Meetings.updateOne(
 				{
 					_id: req.body._id
@@ -144,14 +148,14 @@ router.patch("/api/calendar/approve", async (req, res) => {
 					meetingStatus: 1
 				})
 		
-		else
-			await Sales.updateOne(
-				{
-					_id: req.body._id
-				},
-				{
-					meetingStatus: 1
-				})
+		// else
+		// 	await Sales.updateOne(
+		// 		{
+		// 			_id: req.body._id
+		// 		},
+		// 		{
+		// 			meetingStatus: 1
+		// 		})
 
 		res.json(req.body)
 	}
