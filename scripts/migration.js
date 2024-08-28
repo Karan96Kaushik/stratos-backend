@@ -698,7 +698,36 @@ const migrateTasksAddedBy = async () => {
 	console.log("Done")
 }
 
-migrateTasksAddedBy()
+const migrateRemarksToArray = async () => {
+	try {
+	  const result = await Tasks.updateMany(
+		{ remarks: { $type: "string" } }, // Filter to find all documents where remarks is a string
+		[
+		  {
+			$set: {
+			  remarks: {
+				$cond: {
+				  if: { $eq: [{ $type: "$remarks" }, "string"] },
+				  then: [{ $ifNull: ["$remarks", ""] }], // Convert string to array with the string as its only element
+				  else: "$remarks" // Keep as is if it's already an array or another type
+				}
+			  }
+			}
+		  }
+		]
+	  );
+  
+	  console.log('Migration completed.', result);
+	  console.log(`Matched ${result.matchedCount} documents.`);
+	  console.log(`Modified ${result.modifiedCount} documents.`);
+	} catch (error) {
+	  console.error('Error during migration:', error);
+	}
+  };
+
+// migrateRemarksToArray()
+
+// migrateTasksAddedBy()
 
 // migrateCallingDateType()
 

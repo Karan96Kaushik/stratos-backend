@@ -14,7 +14,7 @@ let Tasks = new Schema(
     clientName:String,
 
     serviceType:String,
-    remarks:String,
+    // remarks:String,
 
     priority:String,
 
@@ -26,7 +26,7 @@ let Tasks = new Schema(
     titleCertificate:Boolean,
     agreementDraft:Boolean,
     
-    remarks:String,
+    // remarks:String,
     status:String,
     action:String,
     notes:String,

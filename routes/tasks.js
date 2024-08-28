@@ -160,11 +160,16 @@ router.get("/api/tasks/", async (req, res) => {
 		})
 	}
 
-	const tasks = await Tasks.findOne(query);
+	let tasks = await Tasks.findOne(query);
 	let files = await getAllFiles(tasks.taskID + "/")
 
+	tasks = tasks._doc
+	tasks.existingRemarks = tasks.remarks
+
+	delete tasks.remarks
+
 	files = files.map(f => f.Key)
-	res.json({...tasks._doc, files})
+	res.json({...tasks, files})
 })
 
 router.delete("/api/tasks/", checkW, async (req, res) => {
@@ -683,20 +688,25 @@ router.get("/api/clients/payments/search/add", async (req, res) => {
 
 router.post("/api/tasks/update", async (req, res) => {
 	try {
-		let _id = req.body._id
-		let taskID = req.body.taskID
 
-		delete req.body._id
-		delete req.body.taskID
-		delete req.body.serviceType
-		delete req.body.clientID
-		delete req.body._clientID
-		delete req.body.clientName
+		let body = {...req.body.updateData}
+		let original = {...req.body.originalData}
+		let member = {...req.body.member}
+
+		let _id = body._id
+		let taskID = body.taskID
+
+		delete body._id
+		delete body.taskID
+		delete body.serviceType
+		delete body.clientID
+		delete body._clientID
+		delete body.clientName
 
 		let task = await Tasks.findOne({_id})
 		task = task._doc
 
-		req.body.totalAmount = calculateTotal(req.body)
+		body.totalAmount = calculateTotal(body)
 
 		if(
 			!req.permissions.isAdmin && 
@@ -709,27 +719,61 @@ router.post("/api/tasks/update", async (req, res) => {
 			return
 		}
 
+		let newRemarks = []
+
+		// Process new remark
+		let remarks = ''
+		if (body.remarks?.length > 0) {
+			remarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + body.remarks
+			if (member?.userName)
+				remarks = remarks + ' - ' + member.userName
+			newRemarks.push(remarks)
+		}
+
+		let existingRemarks = body.existingRemarks || original.existingRemarks
+
+		if (body.status && (body.status !== original.status)) {
+			let updateRemark = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Status updated to ' + body.status
+			if (member?.userName)
+				updateRemark = updateRemark + ' - ' + member.userName
+			newRemarks.push(updateRemark)
+		}
+
+		if (Array.isArray(existingRemarks)) {
+			delete body.remarks
+		}
+		else if (newRemarks.length) {
+			body.remarks = newRemarks
+		}
+
+		delete body.existingRemarks
+
 		let _ = await Tasks.updateOne(
 			{
 				_id
 			},
 			{
-				...req.body,
-				docs:null,
-				files:null,
+				$set: { 
+					...body,
+					docs:null,
+					files:null,
+				},
+				$push: (newRemarks.length > 0 && Array.isArray(existingRemarks)) 
+				? { remarks: { $each: newRemarks } } 
+				: {}
 			});
 
-		if(req.body.docs?.length) {
-			let files = await saveFilesToLocal(req.body.docs)
+		if(body.docs?.length) {
+			let files = await saveFilesToLocal(body.docs)
 			await uploadFiles(files, taskID)
 		}
 
 		res.send("OK")
 
 		try {
-			if(req.body._membersAssigned?.length || task._membersAllocated?.length)
+			if(body._membersAssigned?.length || task._membersAllocated?.length)
 				await assignedTaskNotification({
-					...req.body,
+					...body,
 					docs:null,
 					files:null,
 				}, task)
