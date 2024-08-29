@@ -2,6 +2,9 @@ const router     = new (require('express')).Router()
 const moment     = require('moment')
 const {Meetings} = require("../models/Meetings");
 const {Sales} = require("../models/Sales");
+const meetingsFields = require('../statics/meetingsFields');
+const { generateExcel } = require('../modules/excelProcessor');
+const fs = require("fs");
 
 router.get("/api/calendar", async (req, res) => {
 
@@ -128,6 +131,71 @@ router.patch("/api/calendar", async (req, res) => {
 	}
 	catch (err) {
 		console.error(err)
+		res.status(500).send(err.message)
+	}
+})
+
+const commonProcessor = async (meetings) => {
+	let salesIDs = meetings.map(m => m._salesID)
+	let sales = await Sales.find({ _id: { $in: salesIDs } })
+	sales = sales.map(s => s._doc)
+
+	meetings = meetings.map(m => {
+		let sale = sales.find(s => String(s._id) == String(m._salesID))
+
+		return {
+			...m, 
+			membersAssigned: Array.isArray(m.membersAssigned) ? m.membersAssigned.join(', ') : m.membersAssigned,
+			status: sale.status,
+			projectName: sale.projectName,
+			promoterName: sale.promoterName,
+			exClientID: sale.exClientID,
+			callingDate: sale.callingDate ? moment(sale.callingDate).format("DD/MM/YYYY") : undefined,
+			meetingDate: sale.meetingDate ? moment(sale.meetingDate).format("DD/MM/YYYY") : undefined,
+			totalAmount: sale.totalAmount,
+		}
+	})
+
+	return meetings
+}
+
+
+router.post("/api/calendar/export", async (req, res) => {
+	try{
+		req.query = req.body
+
+		if(!(req.query.password == (process.env.ExportPassword ?? "exp"))) {
+			res.status(401).send("Incorrect password")
+			return
+		}
+		delete req.query.password
+
+		let meetingsQuery = {}
+
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Approve Meetings")) {
+			let meetingsQuery = {"$and" : [
+			]}
+			meetingsQuery['$and'].push({ $or: [
+                {addedBy: req.user.id},
+                {_membersAssigned: req.user.id}
+            ]})
+		}
+
+		let results = await Meetings.find(meetingsQuery)
+			.collation({locale: "en" })
+
+		results = results.map(val => val._doc)
+
+		results = await commonProcessor(results)
+
+		let file = await generateExcel(results, meetingsFields['all'], "meetingsExport" + (+new Date))
+
+		res.download("/tmp/" + file,(err) => {
+			fs.unlink("/tmp/" + file, () => {})
+		})
+
+	} catch (err) {
+		console.log(err)
 		res.status(500).send(err.message)
 	}
 })

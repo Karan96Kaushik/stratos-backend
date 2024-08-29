@@ -599,6 +599,13 @@ router.post("/api/sales/update", async (req, res) => {
 			}
 		}
 
+		if (body.meetingDate) {
+			updateRemark = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Meeting Created for' + moment(body.meetingDate).format('DD/MM/YYYY')
+			if (member?.userName)
+				updateRemark = updateRemark + ' - ' + member.userName
+			newRemarks.push(updateRemark)
+		}
+
 		if (Array.isArray(existingRemarks)) {
 			delete body.remarks
 		}
@@ -625,12 +632,13 @@ router.post("/api/sales/update", async (req, res) => {
 		delete body.connectedDatesRecord
 
 		let meetingData
+		console.log(body.meetingDate)
 
 		if (body.meetingDate) {
 			meetingData = {
 				title: original.salesID + ' - ' +  original.promoterName  + " - Meeting",
 				// title: `Meeting for SalesID ${original.salesID}`,
-				meetingDate: original.meetingDate,
+				meetingDate: body.meetingDate,
 				meetingStatus: 0, // You may want to set a default status
 				_membersAssigned: body._membersAssigned,
 				membersAssigned: body.membersAssigned,
@@ -655,8 +663,11 @@ router.post("/api/sales/update", async (req, res) => {
 					: {}
 			});
 
-		if (meetingData)
+		if (meetingData) {
+			console.log(meetingData)
+
 			await Meetings.create(meetingData)
+		}
 
 		if(body.docs?.length) {
 			let files = await saveFilesToLocal(body.docs)
