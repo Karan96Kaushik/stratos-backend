@@ -335,7 +335,7 @@ const commonProcessor = (results) => {
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		followupDate: val.followupDate ? moment(new Date(val.followupDate)).format("DD-MM-YYYY") : '-',
 		paymentDate: val.paymentDate ? moment(new Date(val.paymentDate)).format("DD-MM-YYYY") : '-',
-		remarks: typeof(val._doc.remarks) == 'string' ? Array(val._doc.remarks) : val._doc.remarks,
+		// remarks: typeof(val._doc.remarks) == 'string' ? Array(val._doc.remarks) : val._doc.remarks,
 		billAmount: undefined,
 		gst: undefined,
 		govtFees: undefined,
