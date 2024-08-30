@@ -111,6 +111,17 @@ router.post("/api/tasks/add", checkW, async (req, res) => {
 
 		const member = await Members.findOne({_id: req.user.id})
 
+		let newRemarks = []
+		let remarks = ''
+		if (req.body.remarks?.length > 0) {
+			remarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks
+			if (member?.userName)
+				remarks = remarks + ' - ' + member.userName
+			newRemarks.push(remarks)
+		}
+
+		req.body.remarks = newRemarks
+
 		let taskID = serviceCode + await getID(serviceCode)
 		_ = await Tasks.create({
 			...req.body,
