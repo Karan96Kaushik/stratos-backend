@@ -705,6 +705,9 @@ router.post("/api/tasks/update", async (req, res) => {
 		let original = {...req.body.originalData}
 		let member = {...req.body.member}
 
+		if (!body || !original)
+			throw new Error('There was an issue in the update, please refresh the page and try again')
+
 		let _id = body._id
 		let taskID = body.taskID
 
