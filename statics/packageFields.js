@@ -22,6 +22,7 @@ packageFields = {
             {label:'Promoter', id:"promoter", required: true},
             {label:'Start Date', id:"startDate", type: 'date', required: true},
             {label:'Description', id:"description", required: true},
+            {label:'RERA Number', id:"reraNumber"},
             {label:'Cersai Undertaking', id:"cersai"},
             {label:'Other Services', id:"other"},
             {label:'Notes', id:"notes"},

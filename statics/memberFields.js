@@ -9,6 +9,7 @@ const memberFields = {
             {label:"Mobile", id:"phone", isRequired:true},
             {label:"Designation", id:"designation", isRequired:true},
             {label:"Department", id:"department", isRequired:true},
+            {label:"Branch", id:"branch", isRequired:true},
             {label:"Address", id:"address", isRequired:true},
             {label:"Emergency Contact", id:"emergencyContact", isRequired:true},
             {label:"Blood Group", id:"bloodGroup", isRequired:true},
