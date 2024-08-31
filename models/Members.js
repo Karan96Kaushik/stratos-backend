@@ -36,7 +36,8 @@ let Members = new Schema(
   },
   {
     timestamps: { createdAt: "createdTime", updatedAt: "updateTime" },
-    collection: "Members"
+    collection: "Members",
+    strict:false
   }
 );
 

@@ -99,6 +99,40 @@ const generateQuery = (req) => {
 		],
 	}
 
+	let filters = {}
+	try {
+		filters = JSON.parse(req.query.filters)
+	}
+	catch (err) {
+		console.error(err)
+	}
+
+	Object.keys(filters ?? []).forEach(filter => {
+
+		// filter is range - date/number
+		if(typeof filters[filter] == "object") {
+			filters[filter].forEach((val,i) => {
+				if(val == null)
+					return
+
+				let operator = i == 0 ? "$lte" : "$gte"
+				query['$and'].push({
+					[filter]: {
+						[operator]: val
+					}
+				})	
+			})
+		} 
+		// filter is normal value
+		else {
+			query['$and'].push({
+				[filter]: filters[filter]
+			})	
+		}
+	})
+
+	console.log(query)
+
 	return query
 }
 
@@ -123,7 +157,7 @@ router.get("/api/members/search", checkR, async (req, res) => {
 		res.json(members)
 
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err)
 	}
 	
@@ -144,7 +178,7 @@ router.get("/api/members/list", async (req, res) => {
 		res.json(members)
 
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err)
 	}
 	
@@ -178,7 +212,7 @@ router.get("/api/members/export", checkR, async (req, res) => {
 		})
 
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err)
 	}
 	
@@ -190,8 +224,8 @@ router.get("/api/members/", async (req, res) => {
 		members = members._doc
 		
 		members.password = undefined
-		const perms = Object.assign({}, decodeAuth(members.permissions))
-		console.log(perms, members.permissions)
+		// const perms = Object.assign({}, decodeAuth(members.permissions))
+		// console.log(perms, members.permissions)
 
 		members.permissions = decodeAuth(members.permissions)
 		if (members.endDate)
@@ -206,7 +240,7 @@ router.get("/api/members/", async (req, res) => {
 		res.json(members)
 
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err)
 	}
 	
@@ -225,7 +259,7 @@ router.delete("/api/members/", async (req, res) => {
 		res.send("OK")
 
 	} catch (err) {
-		console.log(err)
+		console.error(err)
 		res.status(500).send(err)
 	}
 	
@@ -279,7 +313,7 @@ router.post("/api/members/update", checkW, async (req, res) => {
 
 		res.send("OK")
 	} catch (err) {
-		// console.log(err)
+		// console.error(err)
 		res.status(500).send(err.message)
 	}
 })
