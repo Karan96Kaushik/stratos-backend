@@ -182,6 +182,7 @@ const taskFields = {
         name:"Project Registration",
         texts:[
             ...commonTextFields,
+            {label:"Team", id:"team"},
             {label:"Status", id:"status", options:[...statuses, ...statusSet1]},
             {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
             {label:"SRO Fees", id:"sroFees", type:"number", isHidden:true},
