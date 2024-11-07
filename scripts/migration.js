@@ -770,7 +770,28 @@ const migrateRemarksToArray = async () => {
 	}
   };
 
-migrateSalesToMeetings()
+const migrateRegistrationTeams = async () => {
+  try {
+    const result = await Tasks.updateMany(
+      { 
+        serviceType: "Project Registration",
+        team: { $exists: false }
+      },
+      { 
+        $set: { team: "Registration 1" }
+      }
+    );
+
+    console.log(`Modified ${result.nModified} documents.`);
+  } catch (error) {
+    console.error('Error during migration:', error);
+  }
+};
+
+migrateRegistrationTeams()
+
+
+// migrateSalesToMeetings()
 
 // migrateRemarksToArray()
 
