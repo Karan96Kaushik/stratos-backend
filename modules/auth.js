@@ -26,7 +26,7 @@ const auth = (req, res, next) => {
 				})
 				req.permissions.isAdmin = Boolean(decoded.admin)
 
-				const clientIP = req.ip || req.connection.remoteAddress
+				const clientIP = req.headers['x-forwarded-for']?.split(',')[0] || req.connection?.remoteAddress
 				
 				console.log('Client IP', clientIP)
 
