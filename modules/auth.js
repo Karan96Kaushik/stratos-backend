@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken')
 const {encodeAuth, decodeAuth} = require("./authCodec")
 const client = require('../scripts/redisClient')
 
+const ipList = ["127.0.0.1", "::1"]
+
 const auth = (req, res, next) => {
 	const token = req.headers["x-authentication"]
 	if(token) {
@@ -23,6 +25,17 @@ const auth = (req, res, next) => {
 					system: decoded.perm[2],
 				})
 				req.permissions.isAdmin = Boolean(decoded.admin)
+
+				const clientIP = req.ip || req.connection.remoteAddress
+				
+				console.log('Client IP', clientIP)
+
+				// if (!req.permissions.isAdmin && !req.permissions.system.includes('Remote Access')) {
+				// 	if (!ipList.includes(clientIP)) {
+				// 		return res.status(401).json({message:"Unauthorized IP. Please contact Admin"})
+				// 	}
+				// }
+
 				next()
 			} else {
 				res.status(401).json({message:"Invalid Auth"})
