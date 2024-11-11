@@ -57,6 +57,7 @@ const auth = (req, res, next) => {
 
 				if (!req.permissions.isAdmin && !req.permissions.system.includes('Remote Access')) {
 					if (!ipManager.hasIP(clientIP)) {
+						console.log('Unauthorized IP', clientIP, ipManager.ipAddresses, ipManager.isEnabled)
 						return res.status(401).json({message:"Unauthorized IP. Please contact Admin"})
 					}
 				}
