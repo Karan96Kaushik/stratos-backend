@@ -80,4 +80,4 @@ const decode = (token) => {
 	return jwt.verify(token, process.env.authSecretTms || 'authSecretTms');
 }
 
-module.exports = {auth, generate, decode}
+module.exports = {auth, generate, decode, ipManager}
