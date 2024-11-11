@@ -1,8 +1,33 @@
 const jwt = require('jsonwebtoken')
 const {encodeAuth, decodeAuth} = require("./authCodec")
 const client = require('../scripts/redisClient')
+const { IPSettings } = require('../models/IPSettings')
 
-const ipList = ["127.0.0.1", "::1"]
+class IPManager {
+	constructor() {
+		this.ipAddresses = new Set(["127.0.0.1", "::1"]) // Default IPs
+		this.isEnabled = false
+		this.loadIPAddresses()
+	}
+
+	async loadIPAddresses() {
+		try {
+			const settings = await IPSettings.findOne({})
+			if (settings) {
+				this.ipAddresses = new Set([...settings.ipAddresses, "127.0.0.1", "::1"])
+				this.isEnabled = settings.isEnabled
+			}
+		} catch (error) {
+			console.error('Error loading IP addresses:', error)
+		}
+	}
+
+	hasIP(ip) {
+		return !this.isEnabled || this.ipAddresses.has(ip)
+	}
+}
+
+const ipManager = new IPManager()
 
 const auth = (req, res, next) => {
 	const token = req.headers["x-authentication"]
@@ -30,11 +55,11 @@ const auth = (req, res, next) => {
 				
 				console.log('Client IP', clientIP)
 
-				// if (!req.permissions.isAdmin && !req.permissions.system.includes('Remote Access')) {
-				// 	if (!ipList.includes(clientIP)) {
-				// 		return res.status(401).json({message:"Unauthorized IP. Please contact Admin"})
-				// 	}
-				// }
+				if (!req.permissions.isAdmin && !req.permissions.system.includes('Remote Access')) {
+					if (!ipManager.hasIP(clientIP)) {
+						return res.status(401).json({message:"Unauthorized IP. Please contact Admin"})
+					}
+				}
 
 				next()
 			} else {

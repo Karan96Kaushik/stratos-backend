@@ -1,5 +1,6 @@
 const router = new (require('express')).Router();
 const { IPSettings } = require('../models/IPSettings');
+const { ipManager } = require('../modules/auth');
 
 const checkAdmin = (req, res, next) => {
     console.log(req.permissions.system)
@@ -49,6 +50,10 @@ router.post('/api/admin/ip-settings', checkAdmin, async (req, res) => {
         { new: true }
       );
     }
+    
+    // Reload IP addresses after update
+    await ipManager.loadIPAddresses()
+    
     res.json(settings);
   } catch (err) {
     console.error(err);
