@@ -53,7 +53,8 @@ const auth = (req, res, next) => {
 
 				const clientIP = req.headers['x-forwarded-for']?.split(',')[0] || req.connection?.remoteAddress
 				
-				console.log('Client IP', clientIP)
+				console.log('Client IP', clientIP, ipManager.ipAddresses, ipManager.isEnabled)
+				console.log('Permissions', req.permissions.isAdmin, req.permissions.system.includes('Remote Access'))
 
 				if (!req.permissions.isAdmin && !req.permissions.system.includes('Remote Access')) {
 					if (!ipManager.hasIP(clientIP)) {
