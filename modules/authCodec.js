@@ -64,6 +64,8 @@ let servicePermissions = [
  const systemPermissions = [
 	'-',
     "View RERA Passwords",
+	"Update Admin Settings",
+	"Remote Access",
 ]
 
 /**

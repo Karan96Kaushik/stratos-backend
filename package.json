@@ -6,8 +6,8 @@
   "scripts": {
     "start": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "ssh Pandora -t \"cd TMSBackend && git pull && pm2 restart tms\"",
-    "deployprod": "ssh tms -t \"cd TMSBackend && git pull && pm2 restart tms\""
+    "deploy": "ssh Pandora -t \"cd TMSBackend && git pull && pm2 restart tms && pm2 log\"",
+    "deployprod": "ssh tms -t \"cd TMSBackend && git pull && pm2 restart tms && pm2 log\""
   },
   "keywords": [],
   "author": "",

@@ -58,6 +58,7 @@ app.use(routes.notifications)
 app.use(routes.calendar)
 app.use(routes.ccreceived)
 app.use(routes.dashboard)
+app.use(routes.adminSettings)
 
 /*****************  ***********************/
 
