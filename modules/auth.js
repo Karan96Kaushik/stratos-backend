@@ -53,12 +53,8 @@ const auth = (req, res, next) => {
 
 				const clientIP = req.headers['x-forwarded-for']?.split(',')[0] || req.connection?.remoteAddress
 				
-				console.log('Client IP', clientIP, ipManager.ipAddresses, ipManager.isEnabled)
-				console.log('Permissions', req.permissions.isAdmin, req.permissions.system.includes('Remote Access'))
-
 				if (!req.permissions.isAdmin && !req.permissions.system.includes('Remote Access')) {
 					if (!ipManager.hasIP(clientIP)) {
-						console.log('Unauthorized IP', clientIP, ipManager.ipAddresses, ipManager.isEnabled)
 						return res.status(401).json({message:"Unauthorized IP. Please contact Admin"})
 					}
 				}
