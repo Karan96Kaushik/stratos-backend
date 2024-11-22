@@ -31,6 +31,7 @@ const invoiceCodes = {
 	"SDC Legal Services": "RERA", 
 	"RERA Easy Services": "RES",
     "Envision Next LLP": "RERA",
+	"RERA Easy Legal Advisors": "RELA001101",
 	"KC & PARTNERS": "KC24-251",
 }
 
