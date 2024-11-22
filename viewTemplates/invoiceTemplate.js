@@ -48,6 +48,13 @@ const modeAccountInfo = {
 		ifsc: 'HDFC0001102',
 		bank: 'HDFC Bank',
 		branch: 'Kharghar'
+	},
+	"RERA Easy Legal Advisors": {
+		accountNumber: '50200103660276',
+		accountName: 'RERA EASY LEGAL ADVISORS',
+		ifsc: 'HDFC0001102',
+		bank: 'HDFC Bank',
+		branch: 'Kharghar'
 	}, 
 	"Envision Next LLP": {
 		accountNumber: '50200085489111',
