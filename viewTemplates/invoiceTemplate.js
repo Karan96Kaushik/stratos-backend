@@ -70,6 +70,13 @@ const modeAccountInfo = {
 		bank: 'HDFC Bank',
 		branch: 'Kharghar'
 	}, 
+	"RERA Easy Agents Services": {
+		accountNumber: '50200103588097',
+		accountName: 'RERA EASY AGENTS SERVICES',
+		ifsc: 'HDFC0001102',
+		bank: 'HDFC Bank',
+		branch: 'Kharghar'
+	}
 }
 
 const renderParticularsRows = (data) => {

@@ -8,7 +8,8 @@ const froms = [
     "SDC Legal Services", 
     "Envision Next LLP",
     "KC & PARTNERS",
-    "RERA Easy Legal Advisors"
+    "RERA Easy Legal Advisors",
+    "RERA Easy Agents Services"
 ] 
 
 const invoiceFields = {
@@ -19,7 +20,7 @@ const invoiceFields = {
             {label:"Invoice Date", id:"date", type:"date"},
             {label:"GST Num", id:"gstNum", options:["", "None", "27AAFFO8457Q1ZB"]},
             {label:"Project Name", id:"projectName", isRequired:true},
-            {label:"PAN Card No", id:"panNum", options:["", "None", "AAFFO8457Q", "CPAPK0273E"]},
+            {label:"PAN Card No", id:"panNum", options:["", "None", "AAFFO8457Q", "CPAPK0273E", "ABJFR9779F", "ABJFR9235N"]},
             {label:"Particulars", id:"particulars"},
             {label:"Bill To", id:"billTo"},
             {label:"Client Addr", id:"clientAddress"},
