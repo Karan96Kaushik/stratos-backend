@@ -3,7 +3,7 @@ const froms = [
     "",
     "Osha Technologies",
     "RERA Easy",
-    "RERA Easy Consultancy",
+    "REC - Not to Use",
     "Shantanu Kuchya" ,
     "SDC Legal Services", 
     "Envision Next LLP",

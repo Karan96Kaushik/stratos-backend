@@ -788,7 +788,20 @@ const migrateRegistrationTeams = async () => {
   }
 };
 
-migrateRegistrationTeams()
+const updateInvoiceFroms = async () => {
+	let allInvoices = await Invoices.find({from: "RERA Easy Consultancy"})
+	for (invoice of allInvoices) {
+		invoice = invoice._doc
+		invoice.from = invoice.from = "REC - Not to Use"
+		console.log(invoice.invoiceID)
+		await Invoices.updateOne({_id: String(invoice._id)}, invoice)
+	}
+	console.log('Done', allInvoices.length)
+}
+
+updateInvoiceFroms()
+
+// migrateRegistrationTeams()
 
 
 // migrateSalesToMeetings()
