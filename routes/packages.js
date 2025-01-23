@@ -186,7 +186,7 @@ const commonProcessor = async (results) => {
 	results = results.map(v => ({
 			...v,
 			editFeesApplicable: v.editFeesApplicable ? v.editFeesApplicable : 'NA',
-			editFeesApplicableColor: v.editFeesApplicable ? null : 2,
+			editFeesApplicableColor: v.editFeesApplicable == 'No' ? null : 2,
 			completionDate: clients.find(c => c.clientID == v.clientID)?.completionDate ? moment(new Date(clients.find(c => c.clientID == v.clientID)?.completionDate)).format("DD-MM-YYYY") : ""
 		}))
 		.map(formatDates)
