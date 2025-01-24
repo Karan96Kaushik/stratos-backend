@@ -18,6 +18,7 @@ packageFields = {
         texts: [
             {label:'Date', id:"createdTime", type: 'number', required: true},
             {label:'Package ID', id:"packageID", type: 'number', required: true},
+            {label:"Client ID", id: "clientID"},
             {label:'Client Name', id:"clientName", required: true},
             {label:'Promoter', id:"promoter", required: true},
             {label:'Start Date', id:"startDate", type: 'date', required: true},
