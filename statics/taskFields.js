@@ -188,6 +188,8 @@ const taskFields = {
             ...commonTextFields,
             {label:"Team", id:"team", options:teamOptions},
             {label:"Status", id:"status", options:[...statuses, ...statusSet1]},
+            {label:"Certificate Num", id:"certNum", isRequired: true},
+            {label:"Registration Date", id:"registrationDate", type: 'date', isRequired: true},
             {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
             {label:"SRO Fees", id:"sroFees", type:"number", isHidden:true},
             ...commonTextFieldsEnd,
