@@ -15,6 +15,7 @@ const salesFields = {
             {label:"OC", id:"oc"},
             {label:"District", id:"district"},
             {label:"Completion Date", id:"completionDate"},
+            {label:"Purpose", id:"purpose"},
             {label:"Form 4", id:"form4"},
             {label:"Certificate No", id:"certificateNo"},
             {label:"Certificate Date", id:"certificateDate"},
