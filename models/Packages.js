@@ -17,8 +17,8 @@ let Packages = new Schema(
     amount:Number,
     startDate:Date,
 
-    remarks:String,
-
+    // remarks:String,
+    remarks:Array,
     addedBy: {
       required:true,
       type:mongoose.Schema.Types.ObjectId

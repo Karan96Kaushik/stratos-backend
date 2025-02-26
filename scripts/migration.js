@@ -799,7 +799,29 @@ const updateInvoiceFroms = async () => {
 	console.log('Done', allInvoices.length)
 }
 
-updateInvoiceFroms()
+const migratePackageAccountsRemarks = async () => {
+
+	await Packages.updateMany(
+		{ remarks: { $type: "string" } }, // Filter to find the specific user where remarks is a string
+		[
+		{
+			$set: {
+			remarks: {
+				$cond: {
+				if: { $eq: [{ $type: "$remarks" }, "string"] },
+				then: ["$remarks"], // Convert string to array with the string inside it
+				else: "$remarks"
+				}
+			}
+			}
+		}
+		])
+	console.log('done')
+}
+
+migratePackageAccountsRemarks()
+
+// updateInvoiceFroms()
 
 // migrateRegistrationTeams()
 

@@ -187,7 +187,9 @@ const commonProcessor = async (results) => {
 			...v,
 			editFeesApplicable: v.editFeesApplicable ? v.editFeesApplicable : 'NA',
 			editFeesApplicableColor: v.editFeesApplicable == 'No' ? null : 2,
-			completionDate: clients.find(c => c.clientID == v.clientID)?.completionDate ? moment(new Date(clients.find(c => c.clientID == v.clientID)?.completionDate)).format("DD-MM-YYYY") : ""
+			completionDate: clients.find(c => c.clientID == v.clientID)?.completionDate ? moment(new Date(clients.find(c => c.clientID == v.clientID)?.completionDate)).format("DD-MM-YYYY") : "",
+			remarks: Array.isArray(v.remarks) ? v.remarks : [v.remarks],
+			existingRemarks: Array.isArray(v.remarks) ? v.remarks : [v.remarks]
 		}))
 		.map(formatDates)
 
@@ -325,6 +327,10 @@ router.get("/api/packages/", async (req, res) => {
 		package = package._doc
 		package = {...package, ...serviceMapping(package)}
 
+		package.existingRemarks = package.remarks
+
+		delete package.remarks
+
 		if(new Date(package.startDate) + "" != "Invalid Date")
 			package.startDate = new Date(package.startDate).toISOString().split("T")[0]
 
@@ -382,37 +388,74 @@ router.post("/api/packages/update", async (req, res) => {
 			return
 		}
 
-		let _id = req.body._id
+		let body = {...req.body.updateData}
+		let original = {...req.body.originalData}
+		let member = {...req.body.member}
 
-		delete req.body._id
-		delete req.body.memberID
-		delete req.body.addedBy
+
+		if (!body || !original)
+			throw new Error('There was an issue in the update, please refresh the page and try again')
+
+		let _id = body._id
+
+		delete body._id
+		delete body.memberID
+		delete body.addedBy
 
 		let package = await Packages.findOne({_id});
 		let oldPackage = _.merge({}, package._doc)
+
+
+		let newRemarks = []
+
+		// Process new remark
+		let remarks = ''
+		if (body.remarks?.length > 0) {
+			callMade = true
+			remarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + body.remarks
+			if (member?.userName)
+				remarks = remarks + ' - ' + member.userName
+			newRemarks.push(remarks)
+		}
+
+		let existingRemarks = body.existingRemarks || original.existingRemarks
+
+
+		if (Array.isArray(existingRemarks)) {
+			delete body.remarks
+		}
+		else if (newRemarks.length) {
+			body.remarks = newRemarks
+		}
+
+		delete body.existingRemarks
 
 		await Packages.updateOne(
 			{
 				_id
 			},
 			{
-				...req.body
+				$set: { ...body },
+				// $addToSet: addToSetData,
+				$push: (newRemarks.length > 0 && Array.isArray(existingRemarks)) 
+					? { remarks: { $each: newRemarks } } 
+					: {}
 			});
 
 		res.send("OK")
 
 		try {
-			if(req.body.docs?.length) {
-				let files = await saveFilesToLocal(req.body.docs)
+			if(body.docs?.length) {
+				let files = await saveFilesToLocal(body.docs)
 				await uploadFiles(files, invoiceID)
 			}
 
-			package = {...package._doc, ...req.body}
+			package = {...package._doc, ...body}
 			let newPackage = _.merge({}, package)
 			
 			await updatePackage(package)
 	
-			if(req.body._rmAssigned?.length || oldPackage._rmAssigned?.length)
+			if(body._rmAssigned?.length || oldPackage._rmAssigned?.length)
 				await assignedPackageNotification(newPackage, oldPackage)
 		}
 		catch (err) {
