@@ -25,6 +25,7 @@ packageFields = {
             {label:'Description', id:"description", required: true},
             {label:'Edit Fees Applicable', id:"editFeesApplicable", options: ['', 'Yes', 'No'], isRequired: true},
             {label:'RERA Number', id:"reraNumber"},
+            {label:"Client Source", id:"clientSource", isRequired:true},
             {label:'Cersai Undertaking', id:"cersai"},
             {label:'Other Services', id:"other"},
             {label:'Notes', id:"notes"},
