@@ -176,8 +176,10 @@ router.get("/api/tasks/", async (req, res) => {
 
 	tasks = tasks._doc
 	tasks.existingRemarks = tasks.remarks
+	tasks.existingPaymentRemarks = tasks.paymentRemarks
 
 	delete tasks.remarks
+	delete tasks.paymentRemarks
 
 	files = files.map(f => f.Key)
 	res.json({...tasks, files})
@@ -734,6 +736,7 @@ router.post("/api/tasks/update", async (req, res) => {
 			return
 		}
 
+
 		let newRemarks = []
 
 		// Process new remark
@@ -745,7 +748,19 @@ router.post("/api/tasks/update", async (req, res) => {
 			newRemarks.push(remarks)
 		}
 
+		let newPaymentRemarks = []
+
+		// Process new remark
+		let paymentRemarks = ''
+		if (body.paymentRemarks?.length > 0) {
+			paymentRemarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + body.paymentRemarks
+			if (member?.userName)
+				paymentRemarks = paymentRemarks + ' - ' + member.userName
+			newPaymentRemarks.push(paymentRemarks)
+		}
+
 		let existingRemarks = body.existingRemarks || original.existingRemarks
+		let existingPaymentRemarks = body.existingPaymentRemarks || original.existingPaymentRemarks
 
 		if (body.status && (body.status !== original.status)) {
 			let updateRemark = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Status updated to ' + body.status
@@ -759,6 +774,14 @@ router.post("/api/tasks/update", async (req, res) => {
 		}
 		else if (newRemarks.length) {
 			body.remarks = newRemarks
+		}
+
+
+		if (Array.isArray(existingPaymentRemarks)) {
+			delete body.paymentRemarks
+		}
+		else if (newPaymentRemarks.length) {
+			body.paymentRemarks = newPaymentRemarks
 		}
 
 		delete body.existingRemarks
@@ -775,6 +798,9 @@ router.post("/api/tasks/update", async (req, res) => {
 				},
 				$push: (newRemarks.length > 0 && Array.isArray(existingRemarks)) 
 				? { remarks: { $each: newRemarks } } 
+				: {},
+				$push: (newPaymentRemarks.length > 0 && Array.isArray(existingPaymentRemarks)) 
+				? { paymentRemarks: { $each: newPaymentRemarks } } 
 				: {}
 			});
 
