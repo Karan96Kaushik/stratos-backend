@@ -785,6 +785,7 @@ router.post("/api/tasks/update", async (req, res) => {
 		}
 
 		delete body.existingRemarks
+		delete body.existingPaymentRemarks
 
 		let _ = await Tasks.updateOne(
 			{
@@ -793,15 +794,17 @@ router.post("/api/tasks/update", async (req, res) => {
 			{
 				$set: { 
 					...body,
-					docs:null,
-					files:null,
+					docs: null,
+					files: null,
 				},
-				$push: (newRemarks.length > 0 && Array.isArray(existingRemarks)) 
-				? { remarks: { $each: newRemarks } } 
-				: {},
-				$push: (newPaymentRemarks.length > 0 && Array.isArray(existingPaymentRemarks)) 
-				? { paymentRemarks: { $each: newPaymentRemarks } } 
-				: {}
+				$push: {
+					...(newRemarks.length > 0 && Array.isArray(existingRemarks) 
+						? { remarks: { $each: newRemarks } }
+						: {}),
+					...(newPaymentRemarks.length > 0 && Array.isArray(existingPaymentRemarks)
+						? { paymentRemarks: { $each: newPaymentRemarks } }
+						: {})
+				}
 			});
 
 		if(body.docs?.length) {
