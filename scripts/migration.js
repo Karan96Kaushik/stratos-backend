@@ -819,7 +819,27 @@ const migratePackageAccountsRemarks = async () => {
 	console.log('done')
 }
 
-migratePackageAccountsRemarks()
+const migrateTasksPaymentRemarks = async () => {
+
+	await Tasks.updateMany(
+		{ paymentRemarks: { $type: "string" } }, // Filter to find the specific user where remarks is a string
+		[
+		{
+			$set: {
+			paymentRemarks: {
+				$cond: {
+				if: { $eq: [{ $type: "$paymentRemarks" }, "string"] },
+				then: ["$paymentRemarks"], // Convert string to array with the string inside it
+				else: "$paymentRemarks"
+				}
+			}
+			}
+		}
+		])
+	console.log('done')
+}
+
+migrateTasksPaymentRemarks()
 
 // updateInvoiceFroms()
 
