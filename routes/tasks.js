@@ -338,8 +338,8 @@ const commonProcessor = (results) => {
 		followupDate: val._doc.followupDate ? moment(new Date(val._doc.followupDate)).format("DD-MM-YYYY") : '-',
 		paymentDate: val._doc.paymentDate ? moment(new Date(val._doc.paymentDate)).format("DD-MM-YYYY") : '-',
 		remarks: val._doc.remarks || [],
-		paymentRemarks: val._doc.paymentRemarks || [],
-		// remarks: typeof(val._doc.remarks) == 'string' ? Array(val._doc.remarks) : val._doc.remarks,
+		// paymentRemarks: val._doc.paymentRemarks || [],
+		paymentRemarks: typeof(val._doc.paymentRemarks) == 'string' ? Array(val._doc.paymentRemarks) : val._doc.paymentRemarks,
 		billAmount: undefined,
 		gst: undefined,
 		govtFees: undefined,
@@ -568,6 +568,7 @@ const commonProcessorPayments = async (results) => {
 	results = results.map(val => ({...val, balance: val.total - val.received}))
 	results = results.map(val => ({
 		...val,
+		paymentRemarks: typeof(val.paymentRemarks) == 'string' ? Array(val.paymentRemarks) : val.paymentRemarks,
 		payments: taskIDs
 			.filter((v) => (val.taskID == v._doc.taskID))
 			.map(v => (
