@@ -178,6 +178,14 @@ router.get("/api/tasks/", async (req, res) => {
 	tasks.existingRemarks = tasks.remarks
 	tasks.existingPaymentRemarks = tasks.paymentRemarks
 
+	if (!Array.isArray(tasks.existingRemarks)) {
+		tasks.existingRemarks = [tasks.existingRemarks]
+	}
+
+	if (!Array.isArray(tasks.existingPaymentRemarks)) {
+		tasks.existingPaymentRemarks = [tasks.existingPaymentRemarks]
+	}
+
 	delete tasks.remarks
 	delete tasks.paymentRemarks
 
