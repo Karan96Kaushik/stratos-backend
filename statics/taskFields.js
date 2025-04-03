@@ -460,6 +460,22 @@ const taskFields = {
             ...commonCheckboxFields
         ]
     },
+    "Removal from Abeyance": {
+        name:"Removal from Abeyance",
+        texts:[
+            {label:"Date of Submission", id:"dateOfSubmission", type:"date"},
+            {label: "Abeyance Type", id:"abeyanceType", options:["", "Lapsed Project", "Duplicate Bank Account", "QPR Abeyance"]},
+            {label:"Priority", id:"priority", options:["", "High", "Medium", "Low"]},
+            {label:"Status", id:"status", options:[]},
+            {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
+            ...commonTextFieldsEnd,
+        ],
+        checkboxes:[
+            {label:"With Consents", id:"withConsents"},
+            {label:"Without Consents", id:"withoutConsents"},
+            ...commonCheckboxFields
+        ]
+    },
     "Drafting of Documents": {
         name:"Drafting of Documents",
         texts:[

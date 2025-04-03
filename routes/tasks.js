@@ -42,6 +42,7 @@ const serviceCodes = {
     "Project Closure": "PC",
     "De-Registration": "DR",
     "Order No 40": "ON",
+    "Removal from Abeyance": "RA",
 }
 
 const checkR = (req, res, next) => {

@@ -59,6 +59,7 @@ let servicePermissions = [
     "Project Closure",
     "De-Registration",
     "Order No 40",
+    "Removal from Abeyance",
  ]
 
  const systemPermissions = [
