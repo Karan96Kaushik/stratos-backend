@@ -32,6 +32,8 @@ const pagePermissions = [
 	"Approve Meetings",
 	"CC Received R",
 	"CC Received W",
+	"Procurements R",
+	"Procurements W",
 ]
 
 let servicePermissions = [
@@ -67,6 +69,8 @@ let servicePermissions = [
     "View RERA Passwords",
 	"Update Admin Settings",
 	"Remote Access",
+	"Approve Procurements",
+	"Manage Procurements",
 ]
 
 /**

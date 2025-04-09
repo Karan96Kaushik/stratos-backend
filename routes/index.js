@@ -18,5 +18,6 @@ module.exports = {
 	notifications: require('./notifications'),
 	calendar: require('./calendar'),
 	ccreceived: require('./ccreceived'),
-	adminSettings: require('./adminSettings')
+	adminSettings: require('./adminSettings'),
+	procurements: require('./procurements')
 }
