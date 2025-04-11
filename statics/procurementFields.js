@@ -1,7 +1,8 @@
 module.exports = {
     all: {
         texts: [
-            
+            {label:'Date', id:"createdTime", type:"date"},
+            {label:'Procurement ID', id:"procurementID"},
             {label:'Sr No.', id:"srNo"},
             // {label:'Date', id:"date", type:"date"},
             {label:'Reference No.', id:"referenceNo"},
@@ -22,6 +23,8 @@ module.exports = {
             {label:'Payment Type', id:"paymentType"},
             {label:'Remarks', id:"remarks"},
             // {label:'Payment Month', id:"paymentMonth", },
+            {label:'Paid Amount', id:"paidAmount", type: 'number'},
+            {label:'Payment Reference', id:"paymentReference"},
             {label:'Payment Date', id:"paymentDate", type:"date"},
             {label:'Asset Tagging Code', id:"assetTaggingCode"},
             {label:'Tat', id:"tat"},

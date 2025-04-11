@@ -186,7 +186,7 @@ router.post("/api/procurements/export", async (req, res) => {
 	try{
 		req.query = req.body
 
-		if(!(req.query.password == (process.env.ExportPassword ?? "export45678"))) {
+		if(!(req.query.password == (process.env.ExportPassword ?? "exp"))) {
 			res.status(401).send("Incorrect password")
 			return
 		}
