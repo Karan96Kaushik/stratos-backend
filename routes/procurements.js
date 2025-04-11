@@ -155,7 +155,7 @@ router.post("/api/procurements/search", async (req, res) => {
 
 		results = results.map(val => val._doc)
 
-        if (req.query.isAccounts && !req.permissions.page.includes("Procurements Accounts")) {
+        if (req.query.isAccounts && (!req.permissions.page.includes("Procurements Accounts") || !req.permissions.isAdmin)) {
             throw new Error("Unauthorized access to procurements accounts!")
         }
 
