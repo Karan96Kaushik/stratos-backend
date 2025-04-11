@@ -284,6 +284,53 @@ const setLastNotificationTime = async (memberID) => {
 const STR_LEN = 35
 const trimString = (st) => st.length > STR_LEN ? st.substring(0,STR_LEN) + '...' : st
 
+const approvalNeededNotification = async (data) => {
+    try {
+        await Promise.all(data._approvers.map(async mID => {
+            try {
+                await Notifications.create({
+                    type: 'procurementapproval',
+                    text: trimString('Approval Needed' + (data.vendorName ? ' - ' + data.vendorName : '')),
+                    id: data.procurementID,
+                    _memberID: mID
+                })
+                await setLastNotificationTime(mID)
+            }
+            catch (err) {
+                console.error('Error creating notification', err)
+            }
+        }))
+    }
+    catch (err) {
+        console.error(err)
+    }
+}
+
+const procurementUpdatedNotification = async (data) => {
+    try {
+        // Notify all approvers and the creator
+        const membersToNotify = [...new Set([data.addedBy])]
+        
+        await Promise.all(membersToNotify.map(async mID => {
+            try {
+                await Notifications.create({
+                    type: 'procurement',
+                    text: trimString('Procurement Updated - ' + data.procurementID),
+                    id: data.procurementID,
+                    _memberID: mID
+                })
+                await setLastNotificationTime(mID)
+            }
+            catch (err) {
+                console.error('Error creating notification', err)
+            }
+        }))
+    }
+    catch (err) {
+        console.error(err)
+    }
+}
+
 module.exports = { 
 	assignedPackageNotification, 
 	newPackageAssignedNotification, 
@@ -291,5 +338,7 @@ module.exports = {
 	newTaskAssignedNotification, 
 	addedPaymentNotification,
 	newTicketAssignedNotification,
-	newTicketMessageNotification
+	newTicketMessageNotification,
+	approvalNeededNotification,
+	procurementUpdatedNotification
 }

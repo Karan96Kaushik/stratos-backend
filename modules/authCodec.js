@@ -34,6 +34,7 @@ const pagePermissions = [
 	"CC Received W",
 	"Procurements R",
 	"Procurements W",
+	"Procurements Accounts",
 ]
 
 let servicePermissions = [

@@ -9,6 +9,7 @@ const {getID, updateID} = require("../models/Utils");
 
 const {generateExcel} = require("../modules/excelProcessor");
 const procurementFields = require("../statics/procurementFields");
+const { approvalNeededNotification, procurementUpdatedNotification } = require("../modules/notificationHelpers");
 
 const {
 	getAllFiles,
@@ -21,17 +22,20 @@ const tmpdir = "/tmp/"
 
 router.post("/api/procurements/add", async (req, res) => {
 	try {
-
 		const memberInfo = await Members.findOne({_id: req.user.id})
 
 		let procurementIdPrefix = "PREQ"
 
-        req.body.total = Number(req.body.amount) + (Number(req.body.gstamount) ?? 0) + (Number(req.body.tdsamount) ?? 0)
+        req.body.total = Number(req.body.amount ?? 0) + (Number(req.body.gstamount ?? 0)) + (Number(req.body.tdsamount ?? 0))
 
         memberInfo.userName = memberInfo.userName.trim()
 
+		if (req.body.remarks) {
+			req.body.remarks = [moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks + ' - ' + memberInfo.userName]
+		}
+
 		let procurementID = procurementIdPrefix + await getID(procurementIdPrefix)
-		let _ = await Procurements.create({
+		let procurement = await Procurements.create({
 			...req.body,
 			memberID:memberInfo.memberID,
 			memberName:memberInfo.userName,
@@ -51,7 +55,6 @@ router.post("/api/procurements/add", async (req, res) => {
 	} catch (err) {
 		res.status(500).send(err.message)
 	}
-
 })
 
 const generateQuery = (req) => {
@@ -105,6 +108,9 @@ const generateQuery = (req) => {
         query['$and'].push({status: "Pending Approval"})
         // query['$and'].push({approvedBy: {$ne: req.user.id}})
     }
+    else if (req.query.isAccounts) {
+        query['$and'].push({$or: [{status: "Approved"}, {status: "Completed"}]})
+    }
 	// non procurements-read user can only view their own added procurements or assigned ones
 	else if(!req.permissions.isAdmin && !req.permissions.page.includes("Procurements R") && !req.permissions.page.includes("Procurements R Servicewise")) {
 		query['$and'].push({ $or: [
@@ -112,14 +118,6 @@ const generateQuery = (req) => {
 			{_membersAssigned: req.user.id}
 		]})
 	}
-
-    console.log(req.user.id)
-
-
-
-    console.log(JSON.stringify(query, null, 2))
-
-
 
 	return query
 }
@@ -156,6 +154,10 @@ router.post("/api/procurements/search", async (req, res) => {
 			.sort({[sortID || "createdTime"]: sortDir || -1});
 
 		results = results.map(val => val._doc)
+
+        if (req.query.isAccounts && !req.permissions.page.includes("Procurements Accounts")) {
+            throw new Error("Unauthorized access to procurements accounts!")
+        }
 
 		// followup duration color coding
 		// results = results.map(val => {
@@ -215,11 +217,14 @@ router.get("/api/procurements/", async (req, res) => {
 	try{
 		const query = req.query
 
-		if(!req.permissions.isAdmin && !req.permissions.page.includes("Procurements R")) {
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Procurements R") && !req.permissions.page.includes("Procurements Accounts")) {
 			query.addedBy = req.user.id
 		}
 
 		let procurements = await Procurements.findOne({...query});
+        if (!procurements) {
+            throw new Error("Procurement not found")
+        }
 		procurements = procurements._doc
 
 		let files = await getAllFiles(procurements.procurementID + "/")
@@ -281,7 +286,7 @@ router.post("/api/procurements/approve", async (req, res) => {
             remarks = remarks + ' - ' + memberInfo.userName
         newRemarks.push(remarks)
 
-		let procurement = await Procurements.updateOne({_id, _approvers: req.user.id, }, {
+		let procurement = await Procurements.findOneAndUpdate({_id, _approvers: req.user.id, }, {
 			$push: {
 				approvedBy: req.user.id,
 				approvedByName: memberInfo.userName,
@@ -295,6 +300,24 @@ router.post("/api/procurements/approve", async (req, res) => {
 			res.status(404).send("Procurement not found")
 			return
 		}
+
+        try {
+            await procurementUpdatedNotification(procurement?._doc)
+        } catch (err) {
+            console.error('Error sending procurement updated notification:', err)
+        }
+
+        // Check if all approvers have approved
+        let proc = await Procurements.findOne({_id})
+		proc = proc._doc
+		console.log('proc', proc._approvers, proc.approvedBy, proc._approvers.length === proc.approvedBy.length)
+        if (proc._approvers && proc.approvedBy && proc._approvers.length === proc.approvedBy.length) {
+            await Procurements.updateOne({_id}, {
+                $set: {
+                    status: "Approved"
+                }
+            })
+        }
 
 		// await procurement.save()
 		res.send("OK")
@@ -321,10 +344,13 @@ router.post("/api/procurements/update", async (req, res) => {
 		delete body.memberID
 		delete body.addedBy
 
-        body.total = Number(body.amount) + (Number(body.gstamount) ?? 0) + (Number(body.tdsamount) ?? 0)
+        body.total = Number(body.amount ?? 0) + (Number(body.gstamount ?? 0)) + (Number(body.tdsamount ?? 0))
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Procurements R")) {
 			let result = await Procurements.findOne({_id})
+            if (!result) {
+                throw new Error("Procurement not found")
+            }
 			if (String(result.addedBy) != req.user.id) {
 				res.status(401).send("Unauthorized to update this task")
 				return
@@ -357,9 +383,9 @@ router.post("/api/procurements/update", async (req, res) => {
 		}
 
         if (original.status != body.status) {
-            let status = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + body.status
+            let status = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Status updated to ' + body.status
             if (member?.userName)
-                status = 'Status updated to ' + status + ' - ' + member.userName
+                status = status + ' - ' + member.userName
             newRemarks.push(status)
         }
 
@@ -374,7 +400,13 @@ router.post("/api/procurements/update", async (req, res) => {
 
 		delete body.existingRemarks
 
-		let _ = await Procurements.updateOne(
+        if (body.status == 'Completed' && body.paidAmount && body.paymentReference && original.status != 'Completed') {
+            body.paymentDate = new Date()
+            body.tat = parseInt((new Date() - new Date(original.createdTime)) / (1000 * 60 * 60 * 24))
+			body.isLocked = true
+        }
+
+		let updatedProcurement = await Procurements.findOneAndUpdate(
 			{
 				_id
 			},
@@ -383,12 +415,41 @@ router.post("/api/procurements/update", async (req, res) => {
 				$push: (newRemarks.length > 0 && Array.isArray(existingRemarks)) 
 					? { remarks: { $each: newRemarks } } 
 					: {}
-			});
+			},
+            { new: true }
+        );
+
+
+        // Send approval needed notification if there are approvers
+        if (body._approvers?.length && body.status == 'Pending Approval') {
+            try {
+                // Get new approvers that weren't in original
+                const newApprovers = body._approvers.filter(approver => 
+                    !original._approvers?.includes(approver)
+                );
+
+                console.log('updatedProcurement', updatedProcurement)
+				const isStatusChanged = (body.status == 'Pending Approval' && original.status != 'Pending Approval')
+                if (newApprovers?.length || isStatusChanged) {
+                    await approvalNeededNotification({...updatedProcurement._doc, _approvers: (isStatusChanged ? body._approvers : newApprovers)})
+                }
+            } catch (err) {
+                console.error('Error sending approval needed notification:', err)
+            }
+        }
 
 		if(body.docs?.length) {
 			let files = await saveFilesToLocal(body.docs)
 			await uploadFiles(files, procurementID)
 		}
+
+        // Send procurement updated notification
+        try {
+            console.log('updatedProcurement', updatedProcurement?._doc)
+            await procurementUpdatedNotification(updatedProcurement?._doc)
+        } catch (err) {
+            console.error('Error sending procurement updated notification:', err)
+        }
 
 		res.send("OK")
 	} catch (err) {
