@@ -130,6 +130,7 @@ const commonProcessor = (results) => {
 	results = results.map(val => ({
 		...val, 
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
+		billDate:moment(new Date(val.billDate)).format("DD-MM-YYYY"),
 		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY"),
         existingRemarks: Array.isArray(val.remarks) ? val.remarks : [val.remarks],
         remarks: ''
