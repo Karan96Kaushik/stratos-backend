@@ -34,6 +34,9 @@ router.post("/api/procurements/add", async (req, res) => {
 			req.body.remarks = [moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks + ' - ' + memberInfo.userName]
 		}
 
+		const docs = req.body.docs
+		delete req.body.docs
+
 		let procurementID = procurementIdPrefix + await getID(procurementIdPrefix)
 		let procurement = await Procurements.create({
 			...req.body,
@@ -45,8 +48,8 @@ router.post("/api/procurements/add", async (req, res) => {
 		});
 		_ = await updateID(procurementIdPrefix)
 
-		if(req.body.docs?.length) {
-			let files = await saveFilesToLocal(req.body.docs)
+		if(docs?.length) {
+			let files = await saveFilesToLocal(docs)
 			await uploadFiles(files, procurementID)
 		}
 
@@ -155,7 +158,7 @@ router.post("/api/procurements/search", async (req, res) => {
 
 		results = results.map(val => val._doc)
 
-        if (req.query.isAccounts && (!req.permissions.page.includes("Procurements Accounts") || !req.permissions.isAdmin)) {
+        if (req.query.isAccounts && !req.permissions.page.includes("Procurements Accounts") && !req.permissions.isAdmin) {
             throw new Error("Unauthorized access to procurements accounts!")
         }
 
@@ -339,10 +342,14 @@ router.post("/api/procurements/update", async (req, res) => {
 
 		let _id = body._id
 		let procurementID = body.procurementID
+
+		const docs = body.docs
+
 		delete body._id
 		delete body.procurementID
 		delete body.memberID
 		delete body.addedBy
+		delete body.docs
 
         body.total = Number(body.amount ?? 0) + (Number(body.gstamount ?? 0)) + (Number(body.tdsamount ?? 0))
 
@@ -358,8 +365,8 @@ router.post("/api/procurements/update", async (req, res) => {
 		}
 
 		let files
-		if(body.docs?.length) {
-			files = await Promise.all(body.docs.map(async (file) => new Promise((resolve, reject) => {
+		if(docs?.length) {
+			files = await Promise.all(docs.map(async (file) => new Promise((resolve, reject) => {
 				file.name = file.name.replace(/(?!\.)[^\w\s]/gi, '_')
 				file.name = parseInt(Math.random()*1000) + "_" + file.name
 
@@ -438,8 +445,8 @@ router.post("/api/procurements/update", async (req, res) => {
             }
         }
 
-		if(body.docs?.length) {
-			let files = await saveFilesToLocal(body.docs)
+		if(docs?.length) {
+			let files = await saveFilesToLocal(docs)
 			await uploadFiles(files, procurementID)
 		}
 

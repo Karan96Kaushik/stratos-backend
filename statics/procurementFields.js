@@ -2,8 +2,9 @@ module.exports = {
     all: {
         texts: [
             {label:'Date', id:"createdTime", type:"date"},
+            {label:'Bill Date', id:"billDate", type:"date"},
             {label:'Procurement ID', id:"procurementID"},
-            {label:'Sr No.', id:"srNo"},
+            // {label:'Sr No.', id:"srNo"},
             // {label:'Date', id:"date", type:"date"},
             {label:'Reference No.', id:"referenceNo"},
             {label:'Department', id:"department"},
