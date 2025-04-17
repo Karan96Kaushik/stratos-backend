@@ -725,6 +725,8 @@ router.post("/api/tasks/update", async (req, res) => {
 		let _id = body._id
 		let taskID = body.taskID
 
+		const serviceType = body.serviceType
+
 		delete body._id
 		delete body.taskID
 		delete body.serviceType
@@ -799,6 +801,8 @@ router.post("/api/tasks/update", async (req, res) => {
 		delete body.existingRemarks
 		delete body.existingPaymentRemarks
 
+		let readyForSubmission = checkReadyForSubmission(serviceType, body) ? "Yes" : "No"
+
 		let _ = await Tasks.updateOne(
 			{
 				_id
@@ -808,6 +812,7 @@ router.post("/api/tasks/update", async (req, res) => {
 					...body,
 					docs: null,
 					files: null,
+					readyForSubmission
 				},
 				$push: {
 					...(newRemarks.length > 0 && Array.isArray(existingRemarks) 
@@ -846,5 +851,27 @@ router.post("/api/tasks/update", async (req, res) => {
 		res.status(500).send(err.message)
 	}
 })
+
+const requiredConsentLetters = [
+	"letterConsent",
+	"letterFormB",
+	"letterDisclosureOfInventory",
+	"letterForm1",
+	"letterForm2",
+	"letterForm3",
+	"letterForm2A",
+	"letterForm5",
+]
+
+const checkReadyForSubmission = (serviceType, task) => {
+	if (serviceType !== "Extension" && serviceType !== "Order No 40")
+		return false
+	for (let letter of requiredConsentLetters) {
+		if (task[letter] !== "Received" && task[letter] !== "Promoter Sign Pending") {
+			return false
+		}
+	}
+	return true
+}
 
 module.exports = router
