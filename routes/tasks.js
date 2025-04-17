@@ -801,8 +801,8 @@ router.post("/api/tasks/update", async (req, res) => {
 		delete body.existingRemarks
 		delete body.existingPaymentRemarks
 
-		let readyForSubmission = checkReadyForSubmission(serviceType, body) ? "Yes" : "No"
-
+		let readyForSubmission = checkReadyForSubmission(serviceType, body)
+		
 		let _ = await Tasks.updateOne(
 			{
 				_id
@@ -864,14 +864,23 @@ const requiredConsentLetters = [
 ]
 
 const checkReadyForSubmission = (serviceType, task) => {
+	let foundPromoterSignPending = false
 	if (serviceType !== "Extension" && serviceType !== "Order No 40")
-		return false
+		return "No"
+	if (["Desk 1", "Awaiting Client Confirmation", "Hold"].includes(task.status))
+		return "No"
 	for (let letter of requiredConsentLetters) {
+		// console.log(letter, task[letter])
 		if (task[letter] !== "Received" && task[letter] !== "Promoter Sign Pending") {
-			return false
+			return "No"
+		}
+		if (task[letter] === "Promoter Sign Pending") {
+			foundPromoterSignPending = true
 		}
 	}
-	return true
+	if (foundPromoterSignPending)
+		return "Promoter Sign Pending"
+	return "Yes"
 }
 
 module.exports = router
