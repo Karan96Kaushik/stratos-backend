@@ -22,6 +22,7 @@ module.exports = {
             // {label:'Total', id:"total", type: 'number'},
             {label:'Status', id:"status"},
             {label:'Payment Type', id:"paymentType"},
+            {label:'Approved Amount', id:"approvedAmount", type: 'number', disableIn: ['request', 'manage']},
             {label:'Remarks', id:"remarks"},
             // {label:'Payment Month', id:"paymentMonth", },
             {label:'Paid Amount', id:"paidAmount", type: 'number'},
