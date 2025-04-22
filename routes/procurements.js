@@ -26,6 +26,7 @@ const managerId = process.env.NODE_ENV == "production" ? "654b18691086bbd3636a74
 
 router.post("/api/procurements/add", async (req, res) => {
 	try {
+
 		const memberInfo = await Members.findOne({_id: req.user.id})
 
 		let procurementIdPrefix = "PREQ"
@@ -40,6 +41,8 @@ router.post("/api/procurements/add", async (req, res) => {
 
 		const docs = req.body.docs
 		delete req.body.docs
+
+		req.body._approvers = [...new Set([...(req.body._approvers || []), managerId])]
 
 		let procurementID = procurementIdPrefix + await getID(procurementIdPrefix)
 		let procurement = await Procurements.create({
@@ -301,8 +304,6 @@ router.post("/api/procurements/approve", async (req, res) => {
 
         let newRemarks = []
         let approvalRemark = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Approved'
-        if (memberInfo?.userName)
-            approvalRemark = approvalRemark + ' - ' + memberInfo.userName
         
         // Add payment information to remarks if provided
         if (paymentType === 'part' && approvedAmount) {
@@ -310,7 +311,10 @@ router.post("/api/procurements/approve", async (req, res) => {
         } else if (paymentType === 'full') {
             approvalRemark += ' - Full Payment'
         }
-
+		
+		if (memberInfo?.userName)
+            approvalRemark = approvalRemark + ' - ' + memberInfo.userName
+        
         newRemarks.push(approvalRemark)
         
         // Add custom remarks if provided

@@ -197,7 +197,7 @@ const startVendor = async () => {
                 vendorGroup: Object.keys(vendorTypes).find(key => vendorTypes[key].includes(vendor.VendorName)),
                 vendorID: 'VND' + vendorID,
             }
-            console.log(v)
+            // console.log(v)
             await Vendors.create(v);
             await updateID('VND');
         }
