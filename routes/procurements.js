@@ -71,6 +71,8 @@ const generateQuery = (req) => {
 			{
 				$or:[
 					{ procurementID: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ vendorName: { $regex: new RegExp(req.query.text) , $options:"i" }},
+					{ vendorCode: { $regex: new RegExp(req.query.text) , $options:"i" }},
 					{ billNo: { $regex: new RegExp(req.query.text) , $options:"i" }},
                     { referenceNo: { $regex: new RegExp(req.query.text) , $options:"i" }},
 
@@ -535,8 +537,8 @@ router.post("/api/procurements/vendor/add", async (req, res) => {
 router.get("/api/procurements/vendor/list", async (req, res) => {
 	try {
 		const vendors = await Vendors.find({})
-		console.log(vendors)
-		res.json([...vendors, {vendorID: "other", vendorName: "Other"}])
+		// console.log(vendors)
+		res.json([{vendorID: "other", vendorName: "Other"}, ...vendors])
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(err.message)
