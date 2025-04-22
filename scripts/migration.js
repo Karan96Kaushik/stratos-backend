@@ -878,10 +878,9 @@ const migrateProcurementPaymentDates = async () => {
 	console.log(allProcurements.length)
 
 	for (procurement of allProcurements) {
-
-		if (procurement.paymentDate && procurement.paymentDate.includes('T')) {
-
-			procurement = procurement._doc
+		// console.log(procurement.procurementID, procurement._doc?.paymentDate)
+		procurement = procurement._doc
+		if (procurement.paymentDate && String(procurement.paymentDate).includes('T')) {
 
 			await Procurements.updateOne(
 				{ _id: String(procurement._id) },
@@ -893,6 +892,7 @@ const migrateProcurementPaymentDates = async () => {
 					}
 				]
 			)
+
 			console.log(procurement.procurementID)
 		}
     }
