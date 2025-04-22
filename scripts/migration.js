@@ -870,7 +870,36 @@ const migrateProcurementBillDates = async () => {
     console.log('Updated procurement payment dates')
 }
 
-migrateProcurementBillDates()
+
+const migrateProcurementPaymentDates = async () => {
+
+	let allProcurements = await Procurements.find()
+
+	console.log(allProcurements.length)
+
+	for (procurement of allProcurements) {
+
+		if (procurement.paymentDate && procurement.paymentDate.includes('T')) {
+
+			procurement = procurement._doc
+
+			await Procurements.updateOne(
+				{ _id: String(procurement._id) },
+				[
+					{
+						$set: {
+							paymentDate: moment(procurement.paymentDate).format('YYYY-MM-DD')
+						}
+					}
+				]
+			)
+			console.log(procurement.procurementID)
+		}
+    }
+    console.log('Updated procurement payment dates')
+}
+
+migrateProcurementPaymentDates()
 
 // migrateTasksPaymentRemarks()
 
