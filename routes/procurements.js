@@ -6,6 +6,7 @@ const fs = require("fs");
 const {Procurements} = require("../models/Procurements");
 const {Members} = require("../models/Members");
 const {getID, updateID} = require("../models/Utils");
+const {Vendors} = require("../models/Vendors");
 
 const {generateExcel} = require("../modules/excelProcessor");
 const procurementFields = require("../statics/procurementFields");
@@ -19,6 +20,9 @@ const {
 const {uploadFiles, saveFilesToLocal} = require("../modules/fileManager")
 
 const tmpdir = "/tmp/"
+
+														//    Shivanshu                          k3
+const managerId = process.env.NODE_ENV == "production" ? "654b18691086bbd3636a74f8" : "68022a356d2b420a840200de"
 
 router.post("/api/procurements/add", async (req, res) => {
 	try {
@@ -102,14 +106,18 @@ const generateQuery = (req) => {
 		else {
 			query['$and'].push({
 				[filter]: req.query.filters[filter]
-			})	
+			})
 		}
 	})
 
     if (req.query.isPendingApprovals) {
         query['$and'].push({_approvers: req.user.id})
-        query['$and'].push({status: "Pending Approval"})
-        // query['$and'].push({approvedBy: {$ne: req.user.id}})
+        query['$and'].push({$or: [{status: "Pending Approval"}, {status: "Approved"}]})
+
+		// if user is not manager, then only show procurements that are approved by manager
+		if (req.user.id != managerId) {
+			query['$and'].push({approvedBy: managerId})
+		}
     }
     else if (req.query.isAccounts) {
         query['$and'].push({$or: [{status: "Approved"}, {status: "Completed"}]})
@@ -278,19 +286,37 @@ router.post("/api/procurements/approve", async (req, res) => {
 	try {
 		let _id = req.body._id
 		let procurementID = req.body.procurementID
+		let paymentType = req.body.paymentType
+		let approvedAmount = req.body.approvedAmount
+		let remarks = req.body.remarks
 		delete req.body._id
 		delete req.body.procurementID
+		delete req.body.paymentType
+		delete req.body.approvedAmount
+		delete req.body.remarks
 
 		const memberInfo = await Members.findOne({_id: req.user.id})
 
         let newRemarks = []
-        let remarks = ''
-        remarks = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Approved'
+        let approvalRemark = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Approved'
         if (memberInfo?.userName)
-            remarks = remarks + ' - ' + memberInfo.userName
-        newRemarks.push(remarks)
+            approvalRemark = approvalRemark + ' - ' + memberInfo.userName
+        
+        // Add payment information to remarks if provided
+        if (paymentType === 'part' && approvedAmount) {
+            approvalRemark += ` - Part Payment: ₹${approvedAmount}`
+        } else if (paymentType === 'full') {
+            approvalRemark += ' - Full Payment'
+        }
 
-		let procurement = await Procurements.findOneAndUpdate({_id, _approvers: req.user.id, }, {
+        newRemarks.push(approvalRemark)
+        
+        // Add custom remarks if provided
+        if (remarks) {
+            newRemarks.push(moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + remarks + ' - ' + memberInfo.userName)
+        }
+
+		let updateData = {
 			$push: {
 				approvedBy: req.user.id,
 				approvedByName: memberInfo.userName,
@@ -299,7 +325,22 @@ router.post("/api/procurements/approve", async (req, res) => {
 			$set: {
 				lastApproverDate: new Date()
 			}
-		})
+		}
+
+		// Add payment information to update if provided
+		if (paymentType) {
+			updateData.$set.paymentType = paymentType
+			if (approvedAmount) {
+				updateData.$set.approvedAmount = approvedAmount
+			}
+		}
+
+		let procurement = await Procurements.findOneAndUpdate(
+			{_id, _approvers: req.user.id}, 
+			updateData,
+			{ new: true }
+		)
+
 		if(!procurement) {
 			res.status(404).send("Procurement not found")
 			return
@@ -323,7 +364,6 @@ router.post("/api/procurements/approve", async (req, res) => {
             })
         }
 
-		// await procurement.save()
 		res.send("OK")
 
 	} catch (err) {
@@ -414,6 +454,8 @@ router.post("/api/procurements/update", async (req, res) => {
 			body.isLocked = true
         }
 
+		body._approvers = [...new Set([...(body._approvers || []), managerId])]
+
 		let updatedProcurement = await Procurements.findOneAndUpdate(
 			{
 				_id
@@ -427,6 +469,8 @@ router.post("/api/procurements/update", async (req, res) => {
             { new: true }
         );
 
+		console.log('updatedProcurement', updatedProcurement)
+
 
         // Send approval needed notification if there are approvers
         if (body._approvers?.length && body.status == 'Pending Approval') {
@@ -436,7 +480,7 @@ router.post("/api/procurements/update", async (req, res) => {
                     !original._approvers?.includes(approver)
                 );
 
-                console.log('updatedProcurement', updatedProcurement)
+                // console.log('updatedProcurement', updatedProcurement)
 				const isStatusChanged = (body.status == 'Pending Approval' && original.status != 'Pending Approval')
                 if (newApprovers?.length || isStatusChanged) {
                     await approvalNeededNotification({...updatedProcurement._doc, _approvers: (isStatusChanged ? body._approvers : newApprovers)})
@@ -453,7 +497,7 @@ router.post("/api/procurements/update", async (req, res) => {
 
         // Send procurement updated notification
         try {
-            console.log('updatedProcurement', updatedProcurement?._doc)
+            // console.log('updatedProcurement', updatedProcurement?._doc)
             await procurementUpdatedNotification(updatedProcurement?._doc)
         } catch (err) {
             console.error('Error sending procurement updated notification:', err)
@@ -465,6 +509,40 @@ router.post("/api/procurements/update", async (req, res) => {
 		res.status(500).send(err.message)
 	}
 })
+
+const vendorIdPrefix = "VND"
+
+router.post("/api/procurements/vendor/add", async (req, res) => {
+	try {
+		const memberInfo = await Members.findOne({_id: req.user.id})
+
+		let vendorID = vendorIdPrefix + await getID(vendorIdPrefix)
+		let vendor = await Vendors.create({
+			...req.body,
+			vendorID,
+			addedBy: req.user.id,
+			addedByName: memberInfo.userName
+		})
+		_ = await updateID(vendorIdPrefix)
+
+		res.send("OK")
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.get("/api/procurements/vendor/list", async (req, res) => {
+	try {
+		const vendors = await Vendors.find({})
+		res.json([...vendors, {vendorID: "other", vendorName: "Other"}])
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+
 
 
 module.exports = router
