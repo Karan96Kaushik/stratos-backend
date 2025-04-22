@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const { Procurements } = require('../models/Procurements');
 const { getID, updateID } = require('../models/Utils');
 const { Members } = require('../models/Members');
+const { Vendors } = require('../models/Vendors');
+
 // Errors
 // 1. Hrishikesh Mindhe spelling mistake
 // 1. Rutuja Narsingh spelling mistake
@@ -18,7 +20,7 @@ const findMemberID = (name) => {
 const start = async () => {
     try {
 
-        await mongoose.connect(process.env.dbCredsProd || 'mongodb://localhost:27017/stratos');
+        await mongoose.connect(process.env.dbCreds || 'mongodb://localhost:27017/stratos');
 
         let members = await Members.find({}).lean().exec();
         members.forEach(member => {
@@ -98,7 +100,7 @@ const start = async () => {
     }
 };
 
-start();
+// start();
 
 
 function addSpaceOnLowerToUpper(str) {
@@ -125,3 +127,89 @@ function addSpaceOnLowerToUpper(str) {
     }
     return result;
 }
+
+const vendorTypes = {
+    "Office Stationeries" : 
+        ["Ambika Stationery & Xerox",
+        "Shivam Computer Stationery",
+        "Shreya Enterprises & Laxmi Stationery"],
+    "Office Keeping" : 
+        ["Aadya Enterprises",
+        "Raj AC & Refrigeration",
+        "Track On- SR International",
+        "Asha Enterprises",
+        "Riddhi Enterprises",
+        "Option Print",
+        "Track On- SR International"],
+    "Fees": [
+        "Ankit Choudhary",
+        "PB Associates",
+        "Sahil Mahale",
+        "Sandeep Gaikwad",
+        "Unique Publicity",
+        "Vikas Abhang & Associates",
+        "M/s Pranav Bhaskaran & Associates",
+        "Adv Sahil Parandawal"
+    ],
+    "IT": [
+        "Computer Express",
+        "Computer Plus",
+        "Croma",
+        "Ligionest Technologies Pvt Ltd."
+    ],
+    "Human Resource": [
+        "HR One",
+        "KEKA",
+        "Info Edge Ltd – Naukri",
+        "Your Dost",
+        "Work India",
+        "Serve HR Pvt Ltd",
+        "LinkedIn"
+    ]
+}
+
+const startVendor = async () => {
+    try {
+        await mongoose.connect(process.env.dbCreds || 'mongodb://localhost:27017/stratos');
+
+        // console.log(process.env.dbCreds)
+        // return 
+
+        // console.log(await Vendors.find({}).lean().exec())
+
+        // return
+
+        let vendors = fs.readFileSync('scripts/vendors.csv', 'utf8');
+        vendors = csv.parse(vendors, {
+            columns: true,
+            skip_empty_lines: true
+        });
+
+        
+
+        for (const vendor of vendors) {
+            // console.log(vendor.VendorName, vendor.VendorCode)
+            const vendorID = await getID('VND');
+            const v = {
+                addedBy: process.env.NODE_ENV == 'production' ? '667266726672667266726672' : '667266726672667266726672',
+                vendorName: vendor.VendorName,
+                vendorCode: vendor.VendorCode,
+                vendorGroup: Object.keys(vendorTypes).find(key => vendorTypes[key].includes(vendor.VendorName)),
+                vendorID: 'VND' + vendorID,
+            }
+            console.log(v)
+            await Vendors.create(v);
+            await updateID('VND');
+        }
+        
+
+        process.exit(0);
+
+        // console.log(vendors)
+    } catch (error) {
+        console.error('Error:', error);
+        process.exit(1);
+    }
+}
+
+startVendor();

@@ -535,6 +535,7 @@ router.post("/api/procurements/vendor/add", async (req, res) => {
 router.get("/api/procurements/vendor/list", async (req, res) => {
 	try {
 		const vendors = await Vendors.find({})
+		console.log(vendors)
 		res.json([...vendors, {vendorID: "other", vendorName: "Other"}])
 	} catch (err) {
 		console.log(err)
