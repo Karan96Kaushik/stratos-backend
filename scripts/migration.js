@@ -15,6 +15,10 @@ const {HearingDates} = require('../models/HearingDates');
 const {handlePayment} = require("../modules/paymentHelpers");
 const {Sales} = require('../models/Sales');
 const {Meetings} = require('../models/Meetings');
+const {Procurements} = require('../models/Procurements');
+
+const moment = require('moment');
+
 
 const migrateTaskPromoter = async () => {
 
@@ -839,7 +843,36 @@ const migrateTasksPaymentRemarks = async () => {
 	console.log('done')
 }
 
-migrateTasksPaymentRemarks()
+
+const migrateProcurementBillDates = async () => {
+
+	let allProcurements = await Procurements.find()
+
+	console.log(allProcurements.length)
+
+	for (procurement of allProcurements) {
+		procurement = procurement._doc
+		// procurement.paymentDate = procurement.createdTime
+		// console.log(procurement.procurementID)
+
+		await Procurements.updateOne(
+			{ _id: String(procurement._id) },
+			[
+				{
+					$set: {
+						billDate: moment(procurement.createdTime).format('YYYY-MM-DD')
+					}
+				}
+			]
+		)
+		console.log(procurement.procurementID)
+    }
+    console.log('Updated procurement payment dates')
+}
+
+migrateProcurementBillDates()
+
+// migrateTasksPaymentRemarks()
 
 // updateInvoiceFroms()
 
