@@ -526,19 +526,41 @@ router.post("/api/procurements/vendor/add", async (req, res) => {
 	try {
 		const memberInfo = await Members.findOne({_id: req.user.id})
 
-		if (!req.permissions.page.includes("Manage Procurements")) {
+		if (!req.permissions.system.includes("Manage Procurements")) {
 			throw new Error("Unauthorized add vendor - 'Manage Procurements' permission required!")
 		}
 
-		let vendorID = vendorIdPrefix + await getID(vendorIdPrefix)
-		let vendor = await Vendors.create({
-			...req.body,
-			vendorID,
-			addedBy: req.user.id,
-			addedByName: memberInfo.userName
-		})
-		_ = await updateID(vendorIdPrefix)
+		if (req.body._id) {
+			let vendor = await Vendors.findOneAndUpdate({_id: req.body._id}, {
+				$set: {
+					...req.body
+				}
+			})
+		}
+		else {
+			let vendorID = vendorIdPrefix + await getID(vendorIdPrefix)
+			let vendor = await Vendors.create({
+				...req.body,
+				vendorID,
+				addedBy: req.user.id,
+				addedByName: memberInfo.userName
+			})
+			_ = await updateID(vendorIdPrefix)
+		}
 
+		res.send("OK")
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+router.delete("/api/procurements/vendor/delete", async (req, res) => {
+	try {
+		if (!req.permissions.system.includes("Manage Procurements")) {
+			throw new Error("Unauthorized delete vendor - 'Manage Procurements' permission required!")
+		}
+		await Vendors.deleteOne({_id: req.body._id})
 		res.send("OK")
 	} catch (err) {
 		console.log(err)
