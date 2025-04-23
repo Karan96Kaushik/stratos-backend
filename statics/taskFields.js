@@ -263,7 +263,7 @@ const taskFields = {
     "Extension": {
         name:"Extension",
         texts:[
-            {label:"Under Section", id:"section", options:["", "Section 6", "Section 7(3)"]},
+            {label:"Under Section", id:"section", options:["", "Section 6", "Section 7(3)", "Post-Facto"]},
             {label:"Curr Completion Date", id:"currCompletionDate", type:"date"},
             {label:"To Be Extended Date", id:"extenstionDate", type:"date"},
             ...commonTextFields,
@@ -549,6 +549,7 @@ const taskFields = {
             {label:"OC Date", id:"ocDate", type:'date'},
             {label:"Priority", id:"priority", options:["", "High", "Medium", "Low"]},
             {label:"Status", id:"status", options:[...statuses, ...statusSet8]},
+            {label:"Government Fees", id:"govtFees", type:"number", isHidden:true},
             ...commonTextFieldsEnd,
         ],
         checkboxes:[
