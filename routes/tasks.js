@@ -17,6 +17,7 @@ const {
 } = require("../modules/useS3");
 const crypto = require('crypto');
 const {Members} = require("../models/Members");
+const { checkReadyForSubmission } = require("../modules/taskHelpers");
 
 const serviceCodes = {
 	"Agent Registration": "AR",
@@ -851,36 +852,5 @@ router.post("/api/tasks/update", async (req, res) => {
 		res.status(500).send(err.message)
 	}
 })
-
-const requiredConsentLetters = [
-	"letterConsent",
-	"letterFormB",
-	"letterDisclosureOfInventory",
-	"letterForm1",
-	"letterForm2",
-	"letterForm3",
-	"letterForm2A",
-	"letterForm5",
-]
-
-const checkReadyForSubmission = (serviceType, task) => {
-	let foundPromoterSignPending = false
-	if (serviceType !== "Extension" && serviceType !== "Order No 40")
-		return "No"
-	if (["Desk 1", "Awaiting Client Confirmation", "Hold"].includes(task.status))
-		return "No"
-	for (let letter of requiredConsentLetters) {
-		// console.log(letter, task[letter])
-		if (task[letter] !== "Received" && task[letter] !== "Promoter Sign Pending") {
-			return "No"
-		}
-		if (task[letter] === "Promoter Sign Pending") {
-			foundPromoterSignPending = true
-		}
-	}
-	if (foundPromoterSignPending)
-		return "Promoter Sign Pending"
-	return "Yes"
-}
 
 module.exports = router

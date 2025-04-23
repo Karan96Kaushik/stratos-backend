@@ -17,6 +17,8 @@ const {Sales} = require('../models/Sales');
 const {Meetings} = require('../models/Meetings');
 const {Procurements} = require('../models/Procurements');
 
+const { checkReadyForSubmission } = require("../modules/taskHelpers");
+
 const moment = require('moment');
 
 
@@ -899,7 +901,20 @@ const migrateProcurementPaymentDates = async () => {
     console.log('Updated procurement payment dates')
 }
 
-migrateProcurementPaymentDates()
+const migrateTasksReadyForSubmission = async () => {
+	let allTasks = await Tasks.find({readyForSubmission: 'Yes'})
+	for (task of allTasks) {
+		task = task._doc
+		readyForSubmission = checkReadyForSubmission(task.serviceType, task)
+		console.log(task.taskID, readyForSubmission)
+		// await Tasks.updateOne({_id: String(task._id)}, {readyForSubmission: readyForSubmission})
+	}
+	console.log('Done')
+}
+
+migrateTasksReadyForSubmission()
+
+// migrateProcurementPaymentDates()
 
 // migrateTasksPaymentRemarks()
 
