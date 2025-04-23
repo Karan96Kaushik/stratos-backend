@@ -462,6 +462,10 @@ router.post("/api/procurements/update", async (req, res) => {
 
 		body._approvers = [...new Set([...(body._approvers || []), managerId])]
 
+		if (body._approvers.length < 3) {
+			throw new Error("At least 2 additional approvers (3 in total) are required!")
+		}
+
 		let updatedProcurement = await Procurements.findOneAndUpdate(
 			{
 				_id
@@ -521,6 +525,10 @@ const vendorIdPrefix = "VND"
 router.post("/api/procurements/vendor/add", async (req, res) => {
 	try {
 		const memberInfo = await Members.findOne({_id: req.user.id})
+
+		if (!req.permissions.page.includes("Manage Procurements")) {
+			throw new Error("Unauthorized add vendor - 'Manage Procurements' permission required!")
+		}
 
 		let vendorID = vendorIdPrefix + await getID(vendorIdPrefix)
 		let vendor = await Vendors.create({
