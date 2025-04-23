@@ -907,7 +907,7 @@ const migrateTasksReadyForSubmission = async () => {
 		task = task._doc
 		readyForSubmission = checkReadyForSubmission(task.serviceType, task)
 		console.log(task.taskID, readyForSubmission)
-		// await Tasks.updateOne({_id: String(task._id)}, {readyForSubmission: readyForSubmission})
+		await Tasks.updateOne({_id: String(task._id)}, {readyForSubmission: readyForSubmission})
 	}
 	console.log('Done')
 }
