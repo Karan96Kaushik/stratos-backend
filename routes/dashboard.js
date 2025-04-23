@@ -416,4 +416,50 @@ router.get("/api/dashboard/meetings", async (req, res) => {
 	}
 })
 
+router.get("/api/dashboard/ready-for-submission", async (req, res) => {
+	try{
+
+		let query = {}
+
+		query['$and'] = query['$and'] || []
+
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Tasks R")) {
+			query['$and'].push({ $or: [
+				{addedBy: req.user.id},
+				{_membersAssigned: req.user.id}
+			]})
+		}
+
+		if (req.query._memberId) {
+			query['$and'].push({_membersAssigned: req.query._memberId})
+		}
+
+		// console.log(req.query)
+
+		if (req.query.pending) {
+			query['$and'].push({ readyForSubmission: "Promoter Sign Pending" })
+		} else {
+			query['$and'].push({ readyForSubmission: "Yes" })
+		}
+
+		let results = await Tasks.find(query)
+
+		// console.log(results)
+
+		results = results.map(val => ({
+			...val._doc,
+			taskID: val._doc.taskID,
+			clientName: val._doc.clientName,
+			membersAllocated: val._doc.membersAllocated,
+			// type: val._doc.taskType,
+			// promoter: val._doc.promoter,
+		}))
+		
+		res.json(results)
+	} catch (err) {
+		console.error(err)
+		res.status(500).send(err.message)
+	}
+})
+
 module.exports = router
