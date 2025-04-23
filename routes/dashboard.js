@@ -426,7 +426,8 @@ router.get("/api/dashboard/ready-for-submission", async (req, res) => {
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Tasks R")) {
 			query['$and'].push({ $or: [
 				{addedBy: req.user.id},
-				{_membersAssigned: req.user.id}
+				{_membersAssigned: req.user.id},
+				{_membersAssociated: req.user.id}
 			]})
 		}
 
