@@ -172,6 +172,17 @@ router.post("/api/procurements/search", async (req, res) => {
 
 		results = results.map(val => val._doc)
 
+		// Get all attached files
+		if (req.query.isPendingApprovals) {
+			results = results.map(async val => {
+				let files = await getAllFiles(val.procurementID + "/")
+				files = files.map(f => f.Key)
+				val.files = files
+				return val
+			})
+			results = await Promise.all(results)
+		}
+
         if (req.query.isAccounts && !req.permissions.page.includes("Procurements Accounts") && !req.permissions.isAdmin) {
             throw new Error("Unauthorized access to procurements accounts!")
         }
