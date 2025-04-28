@@ -117,7 +117,7 @@ const generateQuery = (req) => {
 
     if (req.query.isPendingApprovals) {
         query['$and'].push({_approvers: req.user.id})
-        query['$and'].push({$or: [{status: "Pending Approval"}, {status: "Approved"}]})
+        query['$and'].push({$or: [{status: "Pending Approval"}, {status: "Approved"}, {status: "Rejected"}]})
 
 		// if user is not manager, then only show procurements that are approved by manager
 		if (req.user.id != managerId) {
@@ -379,6 +379,73 @@ router.post("/api/procurements/approve", async (req, res) => {
                     status: "Approved"
                 }
             })
+        }
+
+		res.send("OK")
+
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(err.message)
+	}
+})
+
+
+router.post("/api/procurements/reject", async (req, res) => {
+	try {
+		let _id = req.body._id
+		let remarks = req.body.remarks
+		console.log('remarks', remarks)
+		console.log('req.body', req.body)
+		delete req.body._id
+		delete req.body.procurementID
+		delete req.body.paymentType
+		delete req.body.approvedAmount
+		delete req.body.remarks
+
+		const memberInfo = await Members.findOne({_id: req.user.id})
+
+        let newRemarks = []
+        let rejectionRemark = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Rejected'
+
+		if (memberInfo?.userName)
+            rejectionRemark = rejectionRemark + ' - ' + memberInfo.userName
+        
+        newRemarks.push(rejectionRemark)
+        
+        // Add custom remarks if provided
+        if (remarks) {
+            newRemarks.push(moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + remarks + ' - ' + memberInfo.userName)
+        }
+
+		let updateData = {
+			$push: {
+				rejectedBy: req.user.id,
+				rejectedByName: memberInfo.userName,
+				remarks: { $each: newRemarks }
+			},
+			$set: {
+				lastApproverDate: new Date(),
+				status: "Rejected"
+			}
+		}
+
+		let procurement = await Procurements.findOneAndUpdate(
+			{_id, _approvers: req.user.id}, 
+			updateData,
+			{ new: true }
+		)
+
+		console.log('procurement', procurement)
+
+		if(!procurement) {
+			res.status(404).send("Procurement not found")
+			return
+		}
+
+        try {
+            await procurementUpdatedNotification(procurement?._doc)
+        } catch (err) {
+            console.error('Error sending procurement updated notification:', err)
         }
 
 		res.send("OK")
