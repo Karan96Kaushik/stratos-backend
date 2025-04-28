@@ -2,3 +2,7 @@ node_modules/
 test.pdf
 yarn.lock
 *.rdb
+.DS_Store
+package-lock.json
+.env
+output.pdf
