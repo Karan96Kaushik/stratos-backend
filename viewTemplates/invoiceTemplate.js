@@ -335,7 +335,7 @@ module.exports = (data) => {
 	<p>&nbsp;</p>
 	<table style="border-collapse: collapse; height: 108px; width: 100%;" border="0" cellspacing="0">
 		<tbody>
-			${['SDC Legal Services', 'RERA Easy Consultancy'].includes(data.from) ? `<tr>
+			${['SDC Legal Services', 'RERA Easy Consultancy', 'RERA Easy Legal Advisors'].includes(data.from) ? `<tr>
 				<td style="height: 18px; width: 91.6633%;"><span style="font-family: Leelawadee UI,sans-serif;"><u
 							style="text-decoration: none; border-bottom: 1px solid; border-color: #747474;"><strong>Notes
 								</strong></u></span></td>
