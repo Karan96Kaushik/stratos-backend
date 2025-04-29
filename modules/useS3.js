@@ -96,6 +96,46 @@ const getFilePath = (filePath, minutes = 5) => {
     })
 }
 
+// List all files in PREQ*
+const listAllFiles = (prefix) => {
+    return new Promise((resolve, reject) => {
+        sstorage.listObjectsV2({
+            Bucket: myBucket,
+            Prefix: prefix
+        }, (err, result) => {
+            if (err)
+                return reject(err)
+
+            resolve(result)
+        })
+    })
+}
+
+// delete file from s3
+const deleteFile = (filePath) => {
+    return new Promise((resolve, reject) => {
+        sstorage.deleteObject({
+            Bucket: myBucket,
+            Key: filePath
+        }, (err, result) => {
+            if (err)
+                return reject(err)
+
+            resolve(result)
+        })
+    })
+}
+
+// deleteFile("PREQ0012/211_53047246.pdf")
+// .then(console.log)
+// .then(() => 
+//     listAllFiles("PREQ")
+//         .then(f => console.log(f.Contents.map(c => c.Key)))
+// )
+
+
+// listAllFiles("PREQ").then(console.log)
+
 // uploadToS3("M1000/mad.pdf", process.cwd() + "/ad.pdf").then(() => console.log('done'))
 // getAllFiles().then(console.log)
 // getFilePath("M1000/mad.pdf").then(console.log)

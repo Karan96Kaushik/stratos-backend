@@ -39,8 +39,9 @@ router.post("/api/procurements/add", async (req, res) => {
 			req.body.remarks = [moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks + ' - ' + memberInfo.userName]
 		}
 
-		const docs = req.body.docs
+		const docs = [...req.body.docs, ...req.body.billDocs]
 		delete req.body.docs
+		delete req.body.billDocs
 
 		req.body._approvers = [...new Set([...(req.body._approvers || []), managerId])]
 
@@ -468,14 +469,14 @@ router.post("/api/procurements/update", async (req, res) => {
 		let _id = body._id
 		let procurementID = body.procurementID
 
-		const docs = body.docs
+		const docs = [...(body.docs ?? []), ...(body.billDocs ?? [])]
 
 		delete body._id
 		delete body.procurementID
 		delete body.memberID
 		delete body.addedBy
 		delete body.docs
-
+		delete body.billDocs
         body.total = Number(body.amount ?? 0) + (Number(body.gstamount ?? 0)) + (Number(body.tdsamount ?? 0))
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Procurements R")) {
