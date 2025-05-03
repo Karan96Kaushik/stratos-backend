@@ -31,7 +31,7 @@ router.post("/api/procurements/add", async (req, res) => {
 
 		let procurementIdPrefix = "PREQ"
 
-        req.body.total = Number(req.body.amount ?? 0) + (Number(req.body.gstamount ?? 0)) + (Number(req.body.tdsamount ?? 0))
+        req.body.total = Number(req.body.amount ?? 0) + (Number(req.body.gstamount ?? 0)) - (Number(req.body.tdsamount ?? 0))
 
         memberInfo.userName = memberInfo.userName.trim()
 
@@ -477,7 +477,7 @@ router.post("/api/procurements/update", async (req, res) => {
 		delete body.addedBy
 		delete body.docs
 		delete body.billDocs
-        body.total = Number(body.amount ?? 0) + (Number(body.gstamount ?? 0)) + (Number(body.tdsamount ?? 0))
+        body.total = Number(body.amount ?? 0) + (Number(body.gstamount ?? 0)) - (Number(body.tdsamount ?? 0))
 
 		if(!req.permissions.isAdmin && !req.permissions.page.includes("Procurements R")) {
 			let result = await Procurements.findOne({_id})
