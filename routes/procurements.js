@@ -541,8 +541,8 @@ router.post("/api/procurements/update", async (req, res) => {
 
 		body._approvers = [...new Set([...(body._approvers || []), managerId])]
 
-		if (body._approvers.length < 3) {
-			throw new Error("At least 2 additional approvers (3 in total) are required!")
+		if (body.status == 'Pending Approval' && body._approvers.length < 3) {
+			throw new Error("At least 2 additional approvers (3 in total) are required, if status is 'Pending Approval'!")
 		}
 
 		let updatedProcurement = await Procurements.findOneAndUpdate(
