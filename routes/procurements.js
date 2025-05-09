@@ -479,7 +479,7 @@ router.post("/api/procurements/update", async (req, res) => {
 		delete body.billDocs
         body.total = Number(body.amount ?? 0) + (Number(body.gstamount ?? 0)) - (Number(body.tdsamount ?? 0))
 
-		if(!req.permissions.isAdmin && !req.permissions.page.includes("Procurements R")) {
+		if(!req.permissions.isAdmin && !req.permissions.page.includes("Procurements R") && !req.permissions.page.includes("Procurements Accounts")) {
 			let result = await Procurements.findOne({_id})
             if (!result) {
                 throw new Error("Procurement not found")
