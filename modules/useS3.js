@@ -85,7 +85,9 @@ const getFilePath = (filePath, minutes = 5) => {
         sstorage.getSignedUrl('getObject', {
             Bucket: myBucket,
             Key: filePath,
-            Expires: signedUrlExpireSeconds
+            Expires: signedUrlExpireSeconds,
+            ResponseContentDisposition: `inline; filename="${encodeURIComponent(filePath)}"`,
+            ResponseContentType: filePath.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream'
         }, (err, result) => {
 
             if (err)
