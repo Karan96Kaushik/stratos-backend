@@ -318,9 +318,9 @@ router.post("/api/procurements/approve", async (req, res) => {
         let approvalRemark = moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + 'Approved'
         
         // Add payment information to remarks if provided
-        if (paymentType === 'Part' && approvedAmount) {
+        if (paymentType === 'part' && approvedAmount) {
             approvalRemark += ` - Part Payment: ₹${approvedAmount}`
-        } else if (paymentType === 'Full') {
+        } else if (paymentType === 'full') {
             approvalRemark += ' - Full Payment'
         }
 		
