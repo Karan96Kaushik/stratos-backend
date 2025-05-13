@@ -39,7 +39,7 @@ router.post("/api/procurements/add", async (req, res) => {
 			req.body.remarks = [moment(new Date(+new Date + 5.5*3600*1000)).format('DD/MM/YYYY HH:mm') + ' - ' + req.body.remarks + ' - ' + memberInfo.userName]
 		}
 
-		const docs = [...req.body.docs, ...req.body.billDocs]
+		const docs = [...(req.body.docs ?? []), ...(req.body.billDocs ?? [])]
 		delete req.body.docs
 		delete req.body.billDocs
 
