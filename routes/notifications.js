@@ -33,7 +33,7 @@ router.get("/api/notifications", async (req, res) => {
 			unread: unread?._doc?.unread
 		})
 	} catch (err) {
-		console.error(err)
+		// console.error(err)
 		res.status(500).send(err.message)
 	}
 })
