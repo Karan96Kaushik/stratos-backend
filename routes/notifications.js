@@ -9,6 +9,8 @@ router.get("/api/notifications", async (req, res) => {
 	try {
 		let _;
 
+		throw new Error("Error loading notifications")
+
 		const lastNotif = await getLastNotificationTime(req.query.mid)
 		// console.debug(new Date(lastNotif),new Date,  (!lastNotif || lastNotif < (+new Date - 20000)), 'last notif', (+new Date - lastNotif)/1000, "secs")
 		if ( req.query.useCached == 'true' && (!lastNotif || lastNotif < (+new Date - 20000)) )
