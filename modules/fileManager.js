@@ -8,6 +8,12 @@ const {
 const tmpdir = "/tmp/"
 
 const uploadFiles = async (files, dir) => {
+
+	throw new Error("Files cannot be uploaded to S3 due to AWS issue; please remove file and try again")
+
+	// Disabling this for now due to AWS issue
+	return
+
 	await Promise.all(files.map(async (file) => {
 		await uploadToS3(dir + "/" + file.name, file.path)
 		fs.unlink(file.path, () => {})

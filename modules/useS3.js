@@ -13,7 +13,10 @@ const myBucket = "tms0001"
 
 const getAllFiles = (filePath, finalResult = [], StartAfter = false) => {
     return new Promise((resolve, reject) => {
-        // return resolve([])
+
+        // Diasbling this for now due to AWS issue
+        return resolve([])
+
         let obj = {
             Bucket: myBucket,
             Prefix: filePath
