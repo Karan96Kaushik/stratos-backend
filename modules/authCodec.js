@@ -63,6 +63,7 @@ let servicePermissions = [
     "De-Registration",
     "Order No 40",
     "Removal from Abeyance",
+	"Migration/Withdrawal Update",
  ]
 
  const systemPermissions = [

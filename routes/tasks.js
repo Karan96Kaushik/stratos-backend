@@ -44,6 +44,7 @@ const serviceCodes = {
     "De-Registration": "DR",
     "Order No 40": "ON",
     "Removal from Abeyance": "RA",
+	"Migration/Withdrawal Update": "MW",
 }
 
 const checkR = (req, res, next) => {
