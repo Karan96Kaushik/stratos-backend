@@ -15,7 +15,7 @@ const getAllFiles = (filePath, finalResult = [], StartAfter = false) => {
     return new Promise((resolve, reject) => {
 
         // Diasbling this for now due to AWS issue
-        return resolve([])
+        // return resolve([])
 
         let obj = {
             Bucket: myBucket,
