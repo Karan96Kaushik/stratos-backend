@@ -31,7 +31,8 @@ router.post("/api/procurements/add", async (req, res) => {
 
 		let procurementIdPrefix = "PREQ"
 
-        req.body.total = Number(req.body.amount ?? 0) + (Number(req.body.gstamount ?? 0)) - (Number(req.body.tdsamount ?? 0))
+        req.body.gsttotal = Number(req.body.amount ?? 0) + (Number(req.body.gstamount ?? 0))
+        req.body.total = req.body.gsttotal - (Number(req.body.tdsamount ?? 0))
 
         memberInfo.userName = memberInfo.userName.trim()
 
