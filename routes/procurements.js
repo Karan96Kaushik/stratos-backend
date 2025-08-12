@@ -31,8 +31,7 @@ router.post("/api/procurements/add", async (req, res) => {
 
 		let procurementIdPrefix = "PREQ"
 
-        req.body.gsttotal = Number(req.body.amount ?? 0) + (Number(req.body.gstamount ?? 0))
-        req.body.total = req.body.gsttotal - (Number(req.body.tdsamount ?? 0))
+        req.body.total = Number(req.body.amount ?? 0) + (Number(req.body.gstamount ?? 0)) - (Number(req.body.tdsamount ?? 0))
 
         memberInfo.userName = memberInfo.userName.trim()
 
@@ -144,6 +143,7 @@ const commonProcessor = (results) => {
 	// created & followup timestamp
 	results = results.map(val => ({
 		...val, 
+		gsttotal: Number(val.total + val.tdsamount),
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		billDate: val.billDate ? moment(new Date(val.billDate)).format("DD-MM-YYYY") : "",
 		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY"),
