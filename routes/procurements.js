@@ -143,7 +143,7 @@ const commonProcessor = (results) => {
 	// created & followup timestamp
 	results = results.map(val => ({
 		...val, 
-		gsttotal: Number(val.total) + Number(val.tdsamount),
+		gsttotal: Number(val.amount) + Number(val.gstamount),
 		createdTime:moment(new Date(val.createdTime)).format("DD-MM-YYYY"),
 		billDate: val.billDate ? moment(new Date(val.billDate)).format("DD-MM-YYYY") : "",
 		followUpDate: !val.followUpDate ? "" : moment(new Date(val.followUpDate)).format("DD-MM-YYYY"),
