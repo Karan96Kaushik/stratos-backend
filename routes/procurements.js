@@ -545,10 +545,11 @@ router.post("/api/procurements/update", async (req, res) => {
 			throw new Error("At least 2 additional approvers (3 in total) are required, if status is 'Pending Approval'!")
 		}
 
+		// Always remove remarks from body to avoid type conflicts
+		delete body.remarks;
+
 		let updatedProcurement = await Procurements.findOneAndUpdate(
-			{
-				_id
-			},
+			{ _id },
 			{
 				$set: { ...body },
 				$push: (newRemarks.length > 0 && Array.isArray(existingRemarks)) 

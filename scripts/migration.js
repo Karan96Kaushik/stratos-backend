@@ -912,7 +912,46 @@ const migrateTasksReadyForSubmission = async () => {
 	console.log('Done')
 }
 
-migrateTasksReadyForSubmission()
+const migrateTasksAsOnDate = async () => {
+	let allTasks = await Tasks.find({uploadType: 'Manual', asOnDate: {$exists: true}})
+	for (task of allTasks) {
+		task = task._doc
+		// if (task.asOnDate?.toISOString?.().split('T')[1]) {
+			console.log(task.taskID, task.asOnDate, task.asOnDate?.toISOString?.().split('T')[0])
+			const updatedTask = {asOnDate: '2025-06-30'}
+			if (task.taskID.includes('MW')) {
+				updatedTask.department = 'Package'
+				updatedTask.followupDate = '2025-05-09'
+			}
+			await Tasks.updateOne({_id: String(task._id)}, updatedTask)
+		// }
+		// process.exit(0)
+	}
+	console.log('Done')
+}
+
+const migrateProcurementRemarksToArray = async () => {
+
+	const allProcurements = await Procurements.find({remarks: {$type: 'string'}})
+
+	for (procurement of allProcurements) {
+		procurement = procurement._doc
+
+		console.log(procurement.remarks)
+
+		if (typeof procurement.remarks === 'string') {
+			console.log(procurement.remarks)
+			await Procurements.updateOne({_id: String(procurement._id)}, {remarks: [procurement.remarks]})
+			console.log(procurement.procurementID)
+		}
+
+	}
+
+	console.log('Done')
+
+}
+
+migrateProcurementRemarksToArray()
 
 // migrateProcurementPaymentDates()
 
